@@ -30,7 +30,7 @@ workflow_path: "/home/darko/Code/autopilotreels/bmad/bmm/workflows/workflow-stat
 
 workflow_status:
   # Phase 0: Discovery (Optional)
-  product-brief: product-breif.md
+  product-brief: product-brief.md
 
   # Phase 1: Planning
   prd: /home/darko/Code/autopilotreels/docs/PRD.md

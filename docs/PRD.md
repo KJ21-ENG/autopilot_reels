@@ -224,7 +224,7 @@ Requirements must be decomposed into epics and bite-sized stories (200k context 
 
 ## References
 
-- Product Brief: product-breif.md
+- Product Brief: product-brief.md
 
 ---
 
