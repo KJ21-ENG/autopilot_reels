@@ -1,0 +1,26 @@
+2026-02-02T07:59:56.165949Z  INFO codex_core::auth: Reloading auth
+2026-02-02T07:59:56.183951Z  INFO codex_core::auth: Reloaded auth, changed: true
+2026-02-02T08:00:08.764028Z  INFO session_init: codex_core::codex: new
+2026-02-02T08:00:08.777044Z  INFO session_init: codex_core::codex: close time.busy=12.8ms time.idle=239µs
+2026-02-02T08:00:08.777392Z  INFO session_loop{thread_id=019c1d5d-be41-7111-b4bb-9a9d7f18b776}: codex_core::codex: new
+2026-02-02T08:00:17.627140Z  INFO codex_tui::chatwidget: Selected model: gpt-5.2-codex, Selected effort: medium
+2026-02-02T08:00:18.369072Z  INFO session_loop{thread_id=019c1d5d-be41-7111-b4bb-9a9d7f18b776}: codex_core::codex::handlers: Shutting down Codex instance
+2026-02-02T08:00:18.388552Z  INFO session_loop{thread_id=019c1d5d-be41-7111-b4bb-9a9d7f18b776}: codex_core::codex: close time.busy=41.8ms time.idle=10.6s
+2026-02-02T08:00:25.471758Z  INFO session_init: codex_core::codex: new
+2026-02-02T08:00:25.474514Z  INFO session_init: codex_core::codex: close time.busy=1.21ms time.idle=1.55ms
+2026-02-02T08:00:25.474665Z  INFO session_loop{thread_id=019c1d5d-ff7f-7dd0-916c-6e93402c7247}: codex_core::codex: new
+2026-02-02T08:00:26.157334Z  INFO session_loop{thread_id=019c1d5d-ff7f-7dd0-916c-6e93402c7247}: codex_core::codex::handlers: Shutting down Codex instance
+2026-02-02T08:00:26.157503Z  INFO session_loop{thread_id=019c1d5d-ff7f-7dd0-916c-6e93402c7247}: codex_core::codex: close time.busy=3.00ms time.idle=680ms
+2026-02-02T08:01:53.187309Z  INFO session_init: codex_core::codex: new
+2026-02-02T08:01:53.194727Z  INFO session_init: codex_core::codex: close time.busy=6.90ms time.idle=515µs
+2026-02-02T08:01:53.195127Z  INFO session_loop{thread_id=019c1d5f-5624-7500-92e0-40fe3671010c}: codex_core::codex: new
+2026-02-02T08:01:54.394212Z  INFO session_loop{thread_id=019c1d5f-5624-7500-92e0-40fe3671010c}: codex_core::codex::handlers: Shutting down Codex instance
+2026-02-02T08:01:54.413634Z  INFO session_loop{thread_id=019c1d5f-5624-7500-92e0-40fe3671010c}: codex_core::codex: close time.busy=23.4ms time.idle=1.20s
+2026-02-02T08:08:18.980214Z  INFO session_init: codex_core::codex: new
+2026-02-02T08:08:18.982719Z  INFO session_init: codex_core::codex: close time.busy=1.35ms time.idle=1.16ms
+2026-02-02T08:08:18.982751Z  INFO session_loop{thread_id=019c1d65-3924-7050-902d-278df145f60e}: codex_core::codex: new
+2026-02-02T08:08:22.655923Z  INFO session_loop{thread_id=019c1d65-3924-7050-902d-278df145f60e}: codex_core::codex::handlers: Shutting down Codex instance
+2026-02-02T08:08:22.656103Z  INFO session_loop{thread_id=019c1d65-3924-7050-902d-278df145f60e}: codex_core::codex: close time.busy=2.30ms time.idle=3.67s
+2026-02-02T08:17:19.016951Z  INFO session_init: codex_core::codex: new
+2026-02-02T08:17:19.019244Z  INFO session_init: codex_core::codex: close time.busy=1.53ms time.idle=766µs
+2026-02-02T08:17:19.019280Z  INFO session_loop{thread_id=019c1d6d-76a9-7301-b3e6-d8fd4e922ad2}: codex_core::codex: new
