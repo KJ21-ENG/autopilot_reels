@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function CheckoutCancelPage() {
   return (
     <main className="min-h-screen bg-white flex items-center justify-center px-4">
@@ -6,12 +8,12 @@ export default function CheckoutCancelPage() {
         <p className="text-gray-500 mb-6">
           You can return to pricing and try again anytime.
         </p>
-        <a
+        <Link
           href="/#pricing"
           className="inline-flex w-full items-center justify-center bg-gray-900 hover:bg-black text-white font-semibold py-3 rounded-lg"
         >
           Return to Pricing
-        </a>
+        </Link>
       </div>
     </main>
   );

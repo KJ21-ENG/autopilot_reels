@@ -1,0 +1,81 @@
+# generated: 2026-02-03
+# project: autopilotreels
+# project_key: autopilotreels
+# tracking_system: file-system
+# story_location: {project-root}/docs/stories
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic exists in epic file but not contexted
+#   - contexted: Epic tech context created (required before drafting stories)
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - drafted: Story file created in stories folder
+#   - ready-for-dev: Draft approved and story context created
+#   - in-progress: Developer actively working on implementation
+#   - review: Under SM review (via code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - completed: Retrospective has been done
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epics should be 'contexted' before stories can be 'drafted'
+# - Stories can be worked in parallel if team capacity allows
+# - SM typically drafts next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', SM reviews, then Dev moves to 'done'
+
+generated: 2026-02-03
+project: autopilotreels
+project_key: autopilotreels
+tracking_system: file-system
+story_location: "{project-root}/docs/stories"
+
+development_status:
+  epic-1: contexted
+  1-1-initialize-project-runtime-environment-scaffolding: done
+  1-2-set-up-deployment-baseline-and-preview-pipeline: backlog
+  1-3-add-baseline-route-protection-scaffolds: backlog
+  1-4-establish-baseline-analytics-plumbing: backlog
+  1-5-define-database-schema-and-migrations: backlog
+  epic-1-retrospective: optional
+
+  epic-2: backlog
+  2-1-add-mvp-transparency-disclosures-across-key-surfaces: backlog
+  2-2-perform-accessibility-qa-for-marketing-and-trust-pages: backlog
+  epic-2-retrospective: optional
+
+  epic-3: backlog
+  3-1-configure-stripe-checkout-session-creation: backlog
+  3-2-implement-checkout-success-and-cancel-handling: backlog
+  3-3-store-payment-metadata-for-user-linkage: backlog
+  3-4-validate-payment-first-flow-end-to-end: backlog
+  3-5-harden-stripe-webhook-security-and-verification-testing: backlog
+  epic-3-retrospective: optional
+
+  epic-4: backlog
+  4-1-implement-supabase-auth-email-google: backlog
+  4-2-link-payment-records-to-authenticated-users: backlog
+  4-3-enforce-post-payment-access-control: backlog
+  epic-4-retrospective: optional
+
+  epic-5: backlog
+  5-1-implement-protected-dashboard-shell: backlog
+  5-2-display-high-demand-unavailable-messaging: backlog
+  5-3-show-basic-account-information: backlog
+  5-4-perform-accessibility-qa-for-auth-and-dashboard: backlog
+  epic-5-retrospective: optional
+
+  epic-6: backlog
+  6-1-define-funnel-event-schema: backlog
+  6-2-track-cta-clicks-and-checkout-starts: backlog
+  6-3-track-payments-and-post-payment-auth: backlog
+  6-4-track-dashboard-access: backlog
+  6-5-provide-exportable-paid-users-list: backlog
+  6-6-add-minimal-admin-funnel-overview: backlog
+  6-7-define-analytics-data-retention-and-pii-handling: backlog
+  epic-6-retrospective: optional

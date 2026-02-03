@@ -68,7 +68,7 @@ export default function HowItWorks() {
 
                 {/* Steps */}
                 <div className="space-y-24">
-                    {steps.map((item, index) => (
+                    {steps.map((item) => (
                         <div
                             key={item.step}
                             className={`flex flex-col ${item.imagePosition === "right" ? "md:flex-row" : "md:flex-row-reverse"
