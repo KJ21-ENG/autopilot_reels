@@ -2,292 +2,260 @@
 
 ## Executive Summary
 
-autopilotreels is a Next.js + Supabase + Stripe MVP optimized for a payment‑first validation funnel.
-Architecture prioritizes pixel‑close marketing UI, fast checkout, and tight linkage between Stripe payments and Supabase Auth users.
+Project context confirmed: 6 epics, 20 stories, payment‑first funnel (landing → Stripe checkout → post‑payment auth → protected dashboard). UX is low complexity, responsive, and pixel‑close to the reference, with `frontend/` as the source of truth. Key NFRs: fast LCP/redirects, Stripe‑hosted security, secure Supabase auth/session handling, and baseline WCAG 2.1 AA.
 
 ## Project Initialization
 
-First implementation story should execute via Vercel “Deploy Template” using:
-Stripe & Supabase SaaS Starter Kit (`dzlau/stripe-supabase-saas-template`)
+Starter template: **None**. We will **use the existing `frontend/` app as the foundation** and not re‑initialize with a starter.
+
+Notes:
+
+- `create-next-app@latest` is the standard Next.js initializer, but is not used here because the UI is already implemented.
+- Repo uses Next.js 16.1.6 (see `frontend/package.json`).
+- Node.js LTS is v24.13.0 (Active LTS line) as of 2026‑02‑03. Ensure Vercel runtime is set to Node 24.x.
+
+## Cross-Cutting Decisions
+
+- Error handling: JSON error responses with `{ error: { code, message } }`; user-facing errors are concise and non-technical.
+- Logging approach: Basic logs only via `console` (no structured logging).
+- Date/time handling: UTC only; store and transmit ISO-8601 strings.
+- Authentication pattern: Supabase session cookies; protected routes verify session + paid linkage.
+- API response format: `{ data, error }` envelope for all internal API responses.
+- Testing strategy: Lightweight unit tests for key utilities + integration tests for checkout/auth/webhook flows; no E2E for MVP.
 
 ## Decision Summary
 
-| Category | Decision | Version | Affects Epics | Rationale |
-| -------- | -------- | ------- | ------------- | --------- |
-| Runtime | Node.js | 24.13.0 (LTS) | All | Active LTS baseline |
-| Framework | Next.js App Router | 16.0.10 | All | Latest patched in 16.x line |
-| Styling | Tailwind CSS | 4.1.18 | 1,2 | Latest stable |
-| Data | Supabase Postgres | 15 (managed; verify via `select version()`) | 3,4,5 | Simple MVP persistence |
-| SDK | supabase-js | 2.90.0 | 3,4,5 | Latest stable |
-| Auth | Supabase Auth (GoTrue) | v2.x (managed; verify via `/auth/v1/health`) | 4 | Email + Google OAuth |
-| Payments | Stripe Checkout | API 2025-12-15.clover | 3,4,5 | Payment‑first flow |
-| SDK | stripe-node | 20.1.0 | 3,4,5 | Latest stable |
-| API Pattern | Next.js route handlers | n/a | 3,4,5 | Simple REST-style endpoints |
-| Analytics | Supabase events table | n/a | 1–5 | Minimal deps, MVP funnel |
-| Webhooks | Next.js `/api/stripe/webhook` | n/a | 3–5 | Simple + idempotent |
-| Error format | `{error:{code,message,details}}` | n/a | All | Consistent client parsing |
-| Logging | JSON logs w/ request_id | n/a | All | Debuggability |
-| Tests | Unit only | n/a | 1 | MVP speed |
-| Admin export | CSV only | n/a | 5 | Simplest to implement |
+| Category    | Decision                                | Version                          | Affects Epics | Rationale                           |
+| ----------- | --------------------------------------- | -------------------------------- | ------------- | ----------------------------------- |
+| Framework   | Next.js App Router                      | 16.1.6                           | 1,3,4,5,6     | Existing `frontend/` implementation |
+| Language    | TypeScript                              | 5.x                              | 1–6           | Existing repo standard              |
+| Styling     | Tailwind CSS                            | 4.1.12                           | 1–3           | Existing repo standard              |
+| Payments    | Stripe Checkout + `stripe` SDK          | 20.1.0 / API `2025-12-15.clover` | 3,4,6         | Payment‑first MVP                   |
+| Auth        | Supabase Auth + `@supabase/supabase-js` | 2.94.0                           | 4,5           | Post‑payment auth                   |
+| Data        | Supabase Postgres                       | Managed                          | 3–6           | Minimal ops                         |
+| API Pattern | Next.js Route Handlers                  | 16.1.6                           | 3,4,6         | Same app API                        |
+| Analytics   | Supabase `events` table (DB‑backed)     | N/A                              | 1,6           | MVP speed + queryable funnel counts |
+| Admin       | Embedded admin views in main app        | N/A                              | 6             | Reduce deployment/auth complexity   |
+| Logging     | Basic `console` logs                    | N/A                              | 1,3–6         | MVP scope                           |
 
 ## Project Structure
 
 ```
 autopilotreels/
-├─ app/
-│  ├─ (marketing)/page.tsx
-│  ├─ (marketing)/pricing/page.tsx
-│  ├─ checkout/success/page.tsx
-│  ├─ checkout/cancel/page.tsx
-│  ├─ auth/page.tsx
-│  ├─ dashboard/page.tsx
-│  ├─ admin/page.tsx
-│  ├─ api/stripe/checkout/route.ts
-│  ├─ api/stripe/webhook/route.ts
-│  └─ api/analytics/route.ts
-├─ components/
-│  ├─ marketing/
-│  ├─ ui/
-│  └─ dashboard/
-├─ lib/
-│  ├─ env.ts
-│  ├─ supabase/server.ts
-│  ├─ supabase/client.ts
-│  ├─ stripe.ts
-│  ├─ analytics.ts
-│  ├─ auth.ts
-│  └─ types.ts
-├─ db/schema.sql
-├─ public/assets/
-├─ tests/unit/
-├─ .env.example
-├─ next.config.js
-├─ package.json
-└─ README.md
+  frontend/
+    app/
+      (marketing)/
+        page.tsx
+      checkout/
+        page.tsx
+        success/page.tsx
+        cancel/page.tsx
+      auth/
+        page.tsx
+      dashboard/
+        page.tsx
+      admin/
+        page.tsx
+      api/
+        stripe/checkout/route.ts
+        stripe/webhook/route.ts
+        auth/link-payment/route.ts
+        analytics/event/route.ts
+    components/
+    lib/
+      supabase/
+        client.ts
+        server.ts
+      stripe/
+        client.ts
+        server.ts
+      analytics/
+        events.ts
+        emit.ts
+      auth/
+        guards.ts
+    styles/
+    public/
+    middleware.ts
+  docs/
+  .env.example
+  README.md
 ```
 
 ## Epic to Architecture Mapping
 
-- Epic 1 (Foundation) → `app/`, `lib/`, `.env.example`, `next.config.js`, `components/ui/`, `tests/unit/`
-- Epic 2 (Marketing) → `app/(marketing)/`, `components/marketing/`, `public/assets/`
-- Epic 3 (Checkout) → `app/api/stripe/*`, `app/checkout/*`, `lib/stripe.ts`, `db/schema.sql`
-- Epic 4 (Auth) → `app/auth/`, `app/dashboard/`, `lib/supabase/*`, `lib/auth.ts`
-- Epic 5 (Analytics/Admin) → `lib/analytics.ts`, `app/api/analytics/route.ts`, `app/admin/`
+| Epic                          | Architecture Components                                                   |
+| ----------------------------- | ------------------------------------------------------------------------- |
+| Epic 1: Foundation & Delivery | `frontend/`, `middleware.ts`, `lib/`, `.env.example`, deploy config       |
+| Epic 2: Marketing (Completed) | `frontend/app/(marketing)`, `components/`, `styles/`                      |
+| Epic 3: Stripe Checkout       | `frontend/app/api/stripe/*`, `lib/stripe/*`, `checkout/*`                 |
+| Epic 4: Auth & Linking        | `frontend/app/auth`, `frontend/app/api/auth/*`, `lib/supabase/*`          |
+| Epic 5: Dashboard             | `frontend/app/dashboard`, `lib/auth/guards.ts`                            |
+| Epic 6: Analytics & Admin     | `frontend/app/api/analytics/*`, `lib/analytics/*`, `frontend/app/admin/*` |
 
 ## Technology Stack Details
 
 ### Core Technologies
 
-- Next.js 16.0.10 (App Router)
-- Node.js 24.13.0 LTS
-- Tailwind CSS 4.1.18
-- Supabase (Postgres + Auth) with supabase-js 2.90.0
-- Stripe Checkout + stripe-node 20.1.0 (API 2025-12-15.clover)
-- Vercel hosting
+- Next.js 16.1.6 (App Router)
+- React 19.2.3
+- TypeScript 5.x
+- Tailwind CSS 4.1.12
+- Supabase (Postgres + Auth) + `@supabase/supabase-js` 2.94.0
+- Stripe Checkout + `stripe` SDK 20.1.0 (API `2025-12-15.clover`)
 
 ### Integration Points
 
-- Stripe Checkout → success page → Supabase Auth login → dashboard
-- Stripe webhook → Supabase `payments` table (server-side)
-- Analytics events → Supabase `events` table
+- Stripe webhook handling via Next.js route handler
+- Supabase Auth via `@supabase/supabase-js`
+- Internal analytics via app API route
 
 ## Novel Pattern Designs
 
-None required.
+None required. All patterns in this project have established solutions.
 
 ## Implementation Patterns
 
-Naming Conventions:
-- REST endpoints plural (`/users`), params `:id`
-- DB tables snake_case plural (`users`), columns snake_case (`user_id`)
-- Components + filenames PascalCase (`UserCard.tsx`)
+These patterns ensure consistent implementation across all AI agents:
 
-Code Organization:
-- Components by feature (`components/marketing`, `components/dashboard`, `components/ui`)
-- Tests under `tests/unit/`
+### Naming Patterns
 
-Error Handling:
-- API errors `{error:{code,message,details}}`
+- API routes: `/api/{domain}/{action}` (e.g., `/api/stripe/checkout`)
+- Route parameters: `:id` in server code; `[id]` in Next.js route segments
+- Database tables: `snake_case` plural (e.g., `payments`, `user_profiles`)
+- Database columns: `snake_case` (e.g., `user_id`, `stripe_session_id`)
+- React components: `PascalCase` (e.g., `PricingCard`)
+- File names: `kebab-case` for non-React utilities, `PascalCase.tsx` for components
 
-Logging Strategy:
-- Structured JSON logs with `level` + `request_id`
+### Structure Patterns
+
+- App Router pages live in `frontend/app/**`
+- API route handlers live in `frontend/app/api/**/route.ts`
+- Shared utilities in `frontend/lib/**`
+- UI components in `frontend/components/**`
+- Tests co-located as `*.test.ts` next to source
+
+### Format Patterns
+
+- API responses: `{ data, error }` envelope
+- Errors: `{ error: { code, message } }`
+- Dates: ISO-8601 UTC strings
+
+### Communication Patterns
+
+- Frontend → API: `fetch` with JSON body
+- Webhooks: Stripe → `/api/stripe/webhook` only
+- Auth linkage: POST `/api/auth/link-payment`
+
+### Lifecycle Patterns
+
+- Loading states: render skeleton or inline spinner
+- Error recovery: display inline error + retry button
+- Retries: only for idempotent server actions
+
+### Location Patterns
+
+- Env vars: `.env.local`; documented in `.env.example`
+- Static assets: `frontend/public/**`
+- Docs: `docs/**`
+
+### Consistency Patterns
+
+- User-facing errors are short, actionable, non-technical
+- Logging uses `console.info|warn|error` only
+
+## Consistency Rules
+
+### Naming Conventions
+
+- API routes: `/api/{domain}/{action}`
+- DB tables: `snake_case` plural
+- Components: `PascalCase`
+- Files: `kebab-case` (utils), `PascalCase.tsx` (components)
+
+### Code Organization
+
+- `frontend/app/**` for routes
+- `frontend/app/api/**/route.ts` for API
+- `frontend/lib/**` for shared utilities
+- `frontend/components/**` for UI
+
+### Error Handling
+
+All API errors use `{ error: { code, message } }`. User-facing messages are concise and non-technical.
+
+### Logging Strategy
+
+Basic `console` logs only (info/warn/error).
 
 ## Data Architecture
 
-Core tables (Supabase):
-- `users` (from Supabase Auth)
-- `payments` (Stripe session/intent metadata)
-- `payment_user_link` (payment ↔ user)
-- `events` (analytics funnel events)
+Primary tables:
+
+- `payments`: `id`, `stripe_session_id`, `stripe_customer_id`, `email`, `price_id`, `amount`, `currency`, `status`, `created_at`
+- `users` (Supabase Auth)
+- `user_payment_links`: `id`, `user_id`, `payment_id`, `linked_at`
+- `events`: `id`, `event_name`, `user_id`, `session_id`, `metadata`, `created_at`
 
 ## API Contracts
 
-All API responses use `{data, error, meta}` envelope.
-Dates are ISO 8601 strings.
+`POST /api/stripe/checkout` → `{ data: { checkout_url }, error: null }`  
+`POST /api/stripe/webhook` → `{ data: { received: true }, error: null }`  
+`POST /api/auth/link-payment` → `{ data: { linked: true }, error: null }`  
+`POST /api/analytics/event` → `{ data: { recorded: true }, error: null }`
 
 ## Security Architecture
 
-- Stripe Checkout (hosted) to minimize PCI scope.
-- Supabase Auth for sessions and OAuth.
-- Server-side guards for paid access.
-- Webhook signature verification + idempotency key.
+- Stripe Checkout for PCI scope reduction
+- Supabase Auth sessions with secure cookies
+- Webhook signature verification for Stripe
+- Protected routes require paid linkage
 
 ## Performance Considerations
 
-- Static rendering for landing page where possible.
-- Minimize client bundle; avoid heavy client work before checkout redirect.
-- Optimize LCP (~2.5s target) and prevent layout shifts.
+- Static rendering for marketing routes where possible
+- Minimal client JS on landing
+- Fast CTA → checkout redirect
 
 ## Deployment Architecture
 
-- Vercel for hosting + serverless route handlers.
-- Supabase for database + auth.
-- Stripe for payments.
+- Single Vercel deployment for `frontend/` (includes embedded admin routes)
 
 ## Development Environment
 
 ### Prerequisites
 
-- Node.js 24.13.0
+- Node.js 24.13.0 LTS
 - Supabase project + keys
 - Stripe account + webhook secret
 
 ### Setup Commands
 
 ```bash
-# Vercel “Deploy Template” (recommended)
-# Set env vars in Vercel dashboard after deploy
+cd frontend
+npm install
+npm run dev
 ```
 
 ## Architecture Decision Records (ADRs)
 
-1) Use Supabase Auth + Stripe Checkout for payment-first flow (min PCI + fast MVP).  
-2) Next.js App Router + Vercel for rapid delivery and performance.  
-3) Analytics via Supabase events table to avoid external dependencies.
+- ADR-001: Use existing `frontend/` app; no new starter
+- ADR-002: Stripe Checkout for payment-first flow
+- ADR-003: Supabase Auth + Postgres with direct client (no ORM)
+- ADR-004: Next.js Route Handlers for API + webhooks
+- ADR-005: Analytics stored in Supabase `events` table (no external tool)
 
-## Validation Results (Checkpoint)
+## Validation Results
 
-- Decision completeness: Complete (no placeholders).
-- Version specificity: Mostly verified; Supabase Postgres/Auth are managed and require per-project verification at setup.
-- Pattern clarity: Clear.
-- AI agent readiness: Ready.
+- Architecture Completeness: Complete
+- Version Specificity: All Verified
+- Pattern Clarity: Clear
+- AI Agent Readiness: Ready
 
-Critical issues found: None.
+Critical Issues Found: None
 
 ---
 
 _Generated by BMAD Decision Architecture Workflow v1.0_
-_Date: 2026-02-02_
+_Date: 2026-02-03_
 _For: darko_
-
-## Completion Summary (Checkpoint)
-
-✅ Decision Architecture workflow complete.
-
-Deliverables:
-- architecture.md
-- bmm-architecture-2026-02-02.md
-
-Next required workflow: solutioning-gate-check (agent: architect).
-
-## Executive Summary
-
-{{executive_summary}}
-
-{{project_initialization_section}}
-
-## Decision Summary
-
-| Category | Decision | Version | Affects Epics | Rationale |
-| -------- | -------- | ------- | ------------- | --------- |
-
-{{decision_table_rows}}
-
-## Project Structure
-
-```
-{{project_root}}/
-{{source_tree}}
-```
-
-## Epic to Architecture Mapping
-
-{{epic_mapping_table}}
-
-## Technology Stack Details
-
-### Core Technologies
-
-{{core_stack_details}}
-
-### Integration Points
-
-{{integration_details}}
-
-{{novel_pattern_designs_section}}
-
-## Implementation Patterns
-
-These patterns ensure consistent implementation across all AI agents:
-
-{{implementation_patterns}}
-
-## Consistency Rules
-
-### Naming Conventions
-
-{{naming_conventions}}
-
-### Code Organization
-
-{{code_organization_patterns}}
-
-### Error Handling
-
-{{error_handling_approach}}
-
-### Logging Strategy
-
-{{logging_approach}}
-
-## Data Architecture
-
-{{data_models_and_relationships}}
-
-## API Contracts
-
-{{api_specifications}}
-
-## Security Architecture
-
-{{security_approach}}
-
-## Performance Considerations
-
-{{performance_strategies}}
-
-## Deployment Architecture
-
-{{deployment_approach}}
-
-## Development Environment
-
-### Prerequisites
-
-{{development_prerequisites}}
-
-### Setup Commands
-
-```bash
-{{setup_commands}}
-```
-
-## Architecture Decision Records (ADRs)
-
-{{key_architecture_decisions}}
-
----
-
-_Generated by BMAD Decision Architecture Workflow v1.0_
-_Date: {{date}}_
-_For: {{user_name}}_

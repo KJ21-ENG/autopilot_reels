@@ -1,6 +1,6 @@
-# {{project_name}} UX Design Specification
+# autopilotreels UX Design Specification
 
-_Created on {{date}} by {{user_name}}_
+_Created on 2026-02-03 by darko_
 _Generated using BMad Method - Create UX Design Workflow v1.0_
 
 ---
@@ -16,6 +16,8 @@ _Generated using BMad Method - Create UX Design Workflow v1.0_
 **UX Complexity:** Low (single primary user journey, simple linear funnel, and minimal interaction depth).
 
 **Reference Clone Target:** facelessreels.com (pixel-close structure, hierarchy, and visual rhythm).
+
+**Implementation Source of Truth:** `frontend/` (Next.js + Tailwind). This specification is updated to match the built UI and routes.
 
 **Inspiration Analysis (Reference: facelessreels.com):**
 
@@ -38,13 +40,11 @@ _Generated using BMad Method - Create UX Design Workflow v1.0_
 
 ### 1.1 Design System Choice
 
-**Choice:** shadcn/ui + Radix UI primitives.
+**Choice:** Tailwind CSS + custom React components (as implemented in `frontend/`).
 
-**Rationale:** Best fit for pixel‑close cloning. shadcn provides flexible, composable components with full visual control, while Radix supplies accessible interaction primitives (focus management, ARIA, keyboard behavior) without forcing a visual style.
+**Rationale:** The live UI is built as bespoke components using Tailwind classes rather than a component library.
 
-**Provides:** Buttons, inputs, modals/dialogs, menus, tabs, accordions, tooltips, toasts, and form patterns as unstyled primitives and Tailwind‑friendly components.
-
-**Customization Needs:** Full theming (colors, typography, spacing) to match the reference site, plus marketing‑specific sections (hero, proof, comparison, testimonials) built as custom layout components.
+**Provides:** Utility-first styling, responsive layout control, and custom component composition.
 
 ---
 
@@ -81,50 +81,39 @@ _Generated using BMad Method - Create UX Design Workflow v1.0_
 
 ### 3.1 Color System
 
-**Theme Direction:** Reference clone (approximate palette based on facelessreels.com).
+**Theme Direction:** Built UI palette (from `frontend/app/globals.css`).
 
-**Color Palette (Approx):**
+**Color Palette (Implemented):**
 
-- Primary / CTA: `#111827`
-- Primary Text: `#0B0B0F`
-- Secondary Text: `#6B7280`
-- Background: `#F9FAFB`
-- Surface/Card: `#FFFFFF`
-- Border/Divider: `#E5E7EB`
-- Accent/Link: `#3B82F6`
-- Success: `#22C55E`
-- Warning: `#F59E0B`
-- Error: `#EF4444`
-- Info: `#0EA5E9`
+- Background: `#FFFFFF`
+- Foreground text: `#171717`
+- Primary / CTA: `#7C3AED`
+- Primary hover: `#6D28D9`
+- Neutrals: Tailwind grays (`gray-50/100/200/500/900`) used for sections, borders, and body text
+
+**Typography (Implemented):**
+
+- Primary: Inter (via `body` font-family)
+- Next.js fonts loaded: Geist / Geist Mono (variables defined, not primary)
 
 **Usage Notes:**
 
-- Keep CTA treatment bold and minimal to mirror reference hierarchy.
-- Use neutral surfaces with subtle borders; avoid heavy shadows.
-- Reserve accent color for links and small highlights; keep primary CTA monochrome.
+- CTA styling uses purple primary with hover shade.
+- Sections alternate white / gray-50 backgrounds.
+- Rounded cards and soft shadows for depth.
 
 **Theme Tokens (CSS Variables):**
 
 ```css
 :root {
-  --color-bg: #F9FAFB;
-  --color-surface: #FFFFFF;
-  --color-text: #0B0B0F;
-  --color-text-muted: #6B7280;
-  --color-border: #E5E7EB;
-  --color-primary: #111827;
-  --color-primary-contrast: #FFFFFF;
-  --color-accent: #3B82F6;
-  --color-success: #22C55E;
-  --color-warning: #F59E0B;
-  --color-error: #EF4444;
-  --color-info: #0EA5E9;
+    --background: #ffffff;
+    --foreground: #171717;
+    --primary: #7c3aed;
+    --primary-hover: #6d28d9;
 }
 ```
 
-**Interactive Visualizations:**
-
-- Color Theme Explorer: [ux-color-themes.html](./ux-color-themes.html)
+**Interactive Visualizations:** None (frontend implementation is the source of truth).
 
 ---
 
@@ -132,21 +121,21 @@ _Generated using BMad Method - Create UX Design Workflow v1.0_
 
 ### 4.1 Chosen Design Approach
 
-**Chosen Direction:** Clone + Slight Polish.
+**Chosen Direction:** Built UI (reference-inspired marketing layout).
 
-**Definition:** Preserve the exact section order, hierarchy, and overall layout from facelessreels.com, while applying subtle refinements for spacing consistency, typography rhythm, and alignment precision. No structural changes; only micro‑adjustments that improve visual crispness.
+**Definition:** Preserve the reference-inspired structure and hierarchy, but implemented as a bespoke layout with strong purple brand accents, bold social proof, and animated elements. Section order matches `frontend/app/page.tsx`.
 
 **Rationale:** Maintains the conversion‑proven layout while improving perceived quality and consistency, without altering user expectations or flow.
 
-**Key Polishes:**
-- Standardize vertical spacing between sections.
-- Align CTA sizes and text rhythm across hero/pricing blocks.
-- Ensure consistent card padding and grid gutters.
-- Refine heading scale for clearer hierarchy without changing copy or layout order.
+**Key Implemented Traits:**
 
-**Interactive Mockups:**
+- Fixed header with CTA.
+- Hero with animated niche carousel and platform icons.
+- Social proof carousel with stats.
+- Comparison grid and 3-step “How it works”.
+- Demo video section, testimonials marquee, studio preview, pricing toggle, FAQ accordion, footer.
 
-- Design Direction Showcase: [ux-design-directions.html](./ux-design-directions.html)
+**Interactive Mockups:** None (frontend implementation is the source of truth).
 
 ---
 
@@ -160,19 +149,22 @@ User Goal: Start payment with minimal friction.
 Approach: Linear, single‑direction flow with CTA prominence.
 
 Flow Steps:
+
 1. Landing page
-   - User sees: Hero + proof + pricing sections in familiar order
-   - User does: Click primary CTA
-   - System responds: Redirects to Stripe checkout
+    - User sees: Header → Hero → SocialProof → Comparison → HowItWorks → DemoVideo → Testimonials → StudioPreview → Pricing → FAQ → Footer
+    - User does: Click primary CTA or plan CTA
+    - System responds: Navigates to `/checkout`
 
 Success State:
+
 - Stripe checkout loads quickly with plan pre‑selected.
 
 Mermaid:
+
 ```mermaid
 flowchart TD
   A[Landing Page] --> B[Primary CTA]
-  B --> C[Stripe Checkout]
+  B --> C[/checkout]
 ```
 
 **Journey 2: Checkout Success → Auth → Dashboard**
@@ -181,22 +173,24 @@ User Goal: Complete signup and access purchased experience.
 Approach: Payment‑first, then auth with minimal steps.
 
 Flow Steps:
-1. Checkout Success
-   - User sees: Confirmation + “Continue to set up your account”
-   - User does: Click continue
-   - System responds: Redirects to auth
 
-2. Auth
-   - User sees: Email + Google OAuth options
-   - User does: Sign up or log in
-   - System responds: Links payment → user account
+1. Checkout Success (`/checkout/success`)
+    - User sees: Confirmation + “Continue to sign up”
+    - User does: Click continue
+    - System responds: Navigates to `/auth`
 
-3. Dashboard
-   - User sees: “High demand / limited availability” message + account info
-   - User does: Review status
-   - System responds: Confirms access
+2. Auth (`/auth`)
+    - User sees: Email + Google OAuth options
+    - User does: Sign up or log in
+    - System responds: Links payment → user account
+
+3. Dashboard (`/dashboard`)
+    - User sees: “High demand / limited availability” message + account info
+    - User does: Review status
+    - System responds: Confirms access
 
 Mermaid:
+
 ```mermaid
 flowchart TD
   A[Checkout Success] --> B[Auth: Email/Google]
@@ -209,12 +203,14 @@ User Goal: Recover and try again.
 Approach: Clear messaging + quick path back to CTA.
 
 Flow Steps:
-1. Checkout Cancel/Failure
-   - User sees: Reason + “Return to pricing”
-   - User does: Click return
-   - System responds: Returns to pricing section
+
+1. Checkout Cancel/Failure (`/checkout/cancel`)
+    - User sees: Cancel message + “Return to pricing”
+    - User does: Click return
+    - System responds: Navigates to `/#pricing`
 
 Mermaid:
+
 ```mermaid
 flowchart TD
   A[Checkout Cancel/Failure] --> B[Return to Pricing Section]
@@ -226,12 +222,14 @@ User Goal: Complete auth without drop‑off.
 Approach: Simple error messaging and retry.
 
 Flow Steps:
+
 1. Auth Error
-   - User sees: Clear error + retry option
-   - User does: Retry or switch method
-   - System responds: Auth success and redirect
+    - User sees: Clear error + retry option
+    - User does: Retry or switch method
+    - System responds: Auth success and redirect
 
 Mermaid:
+
 ```mermaid
 flowchart TD
   A[Auth Error] --> B[Retry Auth]
@@ -244,37 +242,24 @@ flowchart TD
 
 ### 6.1 Component Strategy
 
-**Design System Components (shadcn/ui + Radix):**
-- Buttons, inputs, tabs/accordion (FAQ), dialog/modal, toast, card, dropdown/menu
+**Implemented Components (from `frontend/components/*`):**
 
-**Custom Components Needed (for clone fidelity):**
-- **Niche Carousel** (scrolling “Perfect for” niches)
-- **Proof Metrics Strip** (channel performance screenshots + metrics)
-- **Testimonial Grid** (dense trust blocks with repeated short quotes)
+- **Header** (fixed nav + CTA)
+- **Hero** (headline, platform icons, CTA, infinite niche carousel)
+- **SocialProof** (carousel of channel cards + stats)
+- **Comparison** (3‑column comparison grid)
+- **HowItWorks** (3 steps with visuals)
+- **DemoVideo** (hero video placeholder)
+- **Testimonials** (dual marquee rows)
+- **StudioPreview** (dashboard mockup)
+- **Pricing** (plan cards + monthly/yearly toggle)
+- **FAQ** (accordion)
+- **Footer** (product/company/legal links)
 
-**Components Requiring Heavy Customization:**
-- **Hero CTA Block** (exact typography/spacing/CTA alignment)
-- **Comparison Table** (“Why creators choose us” layout)
+**Custom Behaviors:**
 
-**Custom Component Specs (abbrev):**
-
-1) **Niche Carousel**
-   - Purpose: Rapidly communicates breadth of supported niches.
-   - Anatomy: Title, horizontally scrolling tag list, subtle fade mask, pause on hover.
-   - States: Default / hover (pause) / reduced‑motion (static list).
-   - Accessibility: ARIA role=region, keyboard horizontal scroll.
-
-2) **Proof Metrics Strip**
-   - Purpose: Reinforce credibility with real performance proof.
-   - Anatomy: Screenshot image, metrics caption, channel label.
-   - States: Default / responsive collapse (stacked on mobile).
-   - Accessibility: Alt text for screenshots, caption text.
-
-3) **Testimonial Grid**
-   - Purpose: Dense social proof at scale.
-   - Anatomy: Card grid, quote text, name handle (optional).
-   - States: Default / responsive (2‑col → 1‑col).
-   - Accessibility: Semantic blockquote structure.
+- Infinite scroll carousel (Hero + Testimonials) with reduced‑motion fallback
+- Pricing toggle (monthly/yearly)
 
 ---
 
@@ -283,55 +268,73 @@ flowchart TD
 ### 7.1 Consistency Rules
 
 **Button Hierarchy**
-- Primary: Solid dark CTA, used only for conversion actions (hero + pricing).
+
+- Primary: Purple CTA (`#7C3AED`), used only for conversion actions (hero + pricing).
 - Secondary: Ghost/outline for auxiliary actions (demo).
 - Tertiary: Text link for navigation/footers.
 - Destructive: Minimal, used only in auth/account areas (not landing).
 
 **Feedback Patterns**
+
 - Success: Inline confirmation + subtle toast.
 - Error: Inline message near field + optional toast.
 - Warning: Inline alert in checkout/auth states.
 - Loading: Spinner only on checkout redirect or auth.
 
 **Form Patterns**
+
 - Labels above inputs.
-- Required indicator via “*”.
+- Required indicator via “\*”.
 - Validation on blur + on submit.
 - Errors inline under field.
 - Help text as caption below label.
 
 **Modal Patterns**
+
 - Size: Small for confirmation, medium for auth prompts.
 - Dismiss: Escape + close icon, no click‑outside on critical flows.
 - Focus: Auto‑focus first field; return focus to trigger.
 - Stacking: Avoid multiple modals.
 
 **Navigation Patterns**
+
 - Active state: Bold text + subtle underline.
 - Breadcrumbs: Not used in marketing flow.
 - Back behavior: Browser back supported; no custom override.
-- Deep links: Anchor links to sections (pricing, FAQ).
+- Deep links: Anchor links to sections (pricing, FAQ) with `scroll-padding-top: 80px` to account for fixed header.
 
 **Empty States**
+
 - Dashboard: “High demand / limited availability” with support link.
 - No results: Not applicable (marketing flow).
 
 **Confirmation Patterns**
+
 - Delete: Not applicable in MVP.
 - Leave unsaved: Not applicable.
 - Irreversible actions: Stripe handles confirmation.
 
 **Notifications**
+
 - Placement: Top right toast (if used).
 - Duration: Auto‑dismiss after 4–6s.
 - Stacking: Max 2 visible.
 - Priority: Only errors/success, avoid info noise.
 
+**Motion**
+
+- Infinite scroll carousels pause on hover; `prefers-reduced-motion` disables marquee animations.
+
+**SEO Metadata**
+
+- Title/description set in `frontend/app/layout.tsx`.
+
 **Search**
+
 - Not used in MVP.
 
 **Date/Time**
+
 - Not used in MVP.
 
 ---
@@ -341,11 +344,13 @@ flowchart TD
 ### 8.1 Responsive Strategy
 
 **Breakpoints:**
+
 - Mobile: ≤ 640px (1‑column, stacked sections, full‑width CTA)
 - Tablet: 641–1024px (2‑column where applicable)
 - Desktop: ≥ 1025px (full grid layout)
 
 **Adaptation Patterns:**
+
 - Navigation: Collapses to minimal top nav with anchor links.
 - Hero: CTA stack on mobile; aligned row on desktop.
 - Cards/Lists: Grid → single column.
@@ -354,6 +359,7 @@ flowchart TD
 - Forms: Single column on mobile.
 
 **Accessibility Strategy (WCAG 2.1 AA):**
+
 - Color contrast: 4.5:1 for body text, 3:1 for large text.
 - Keyboard navigation: All interactive elements reachable.
 - Focus indicators: Visible for all focusable elements.
@@ -364,6 +370,7 @@ flowchart TD
 - Touch targets: ≥ 44px.
 
 **Testing:**
+
 - Automated: Lighthouse, axe DevTools.
 - Manual: Keyboard‑only navigation and screen reader checks (VoiceOver/NVDA).
 
@@ -377,23 +384,24 @@ Excellent work! Your UX Design Specification is complete.
 
 **What we created together:**
 
-- **Design System:** shadcn/ui + Radix with 3 custom components
-- **Visual Foundation:** Approximate reference palette with CSS tokens
-- **Design Direction:** Clone + Slight Polish (pixel‑close structure, refined spacing/typography)
-- **User Journeys:** 4 core flows covering checkout → auth → dashboard
+- **Design System:** Tailwind CSS + custom components
+- **Visual Foundation:** Implemented palette from `frontend/app/globals.css`
+- **Design Direction:** Built UI (reference‑inspired marketing layout with purple brand accents)
+- **User Journeys:** 4 core flows covering `/checkout` → `/auth` → `/dashboard`
 - **UX Patterns:** Consistent button, form, feedback, and navigation rules
 - **Responsive Strategy:** 3 breakpoints with mobile‑first adaptations
 - **Accessibility:** WCAG 2.1 AA target
 
 **Your Deliverables:**
+
 - UX Design Document: `docs/ux-design-specification.md`
-- Interactive Color Themes: `docs/ux-color-themes.html`
-- Design Direction Mockups: `docs/ux-design-directions.html`
 
 **What happens next:**
+
 - Designers can produce high‑fidelity screens from the clone blueprint
 - Developers can implement with clear, consistent UX rules
 - All decisions are documented with rationale for fast iteration
+- Frontend source of truth: `frontend/`
 
 ---
 
@@ -401,30 +409,13 @@ Excellent work! Your UX Design Specification is complete.
 
 ### Related Documents
 
-- Product Requirements: `{{prd_file}}`
-- Product Brief: `{{brief_file}}`
-- Brainstorming: `{{brainstorm_file}}`
+- Product Requirements: `docs/PRD.md`
+- Product Brief: `product-brief.md`
+- Brainstorming: N/A
 
 ### Core Interactive Deliverables
 
-This UX Design Specification was created through visual collaboration:
-
-- **Color Theme Visualizer**: {{color_themes_html}}
-  - Interactive HTML showing all color theme options explored
-  - Live UI component examples in each theme
-  - Side-by-side comparison and semantic color usage
-
-- **Design Direction Mockups**: {{design_directions_html}}
-  - Interactive HTML with 6-8 complete design approaches
-  - Full-screen mockups of key screens
-  - Design philosophy and rationale for each direction
-
-### Optional Enhancement Deliverables
-
-Additional HTML artifacts generated:
-
-- **Key Screens Showcase**: `docs/ux-key-screens.html`
-- **User Journey Visualization** (all four flows): `docs/ux-journeys.html`
+None. The implemented UI in `frontend/` is the canonical artifact.
 
 <!-- Additional deliverables added here by other workflows -->
 
@@ -443,7 +434,7 @@ This UX Design Specification can serve as input to:
 
 | Date     | Version | Changes                         | Author        |
 | -------- | ------- | ------------------------------- | ------------- |
-| {{date}} | 1.0     | Initial UX Design Specification | {{user_name}} |
+| 2026-02-03 | 1.0     | Initial UX Design Specification | darko |
 
 ---
 

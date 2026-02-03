@@ -10,6 +10,8 @@
 
 autopilotreels is a payment-first demand-validation MVP for an AI short-form video SaaS idea. The product's purpose is to test conversion, pricing, and willingness to pay by delivering a high-conversion landing experience, frictionless checkout, and a realistic post-payment onboarding flow. This PRD focuses on the minimum scope needed to validate market demand, not on building AI video capabilities.
 
+**Current state:** The pixel-close landing UI is implemented in `frontend/`. Checkout, auth, and dashboard exist as placeholder pages pending Stripe + Supabase integration.
+
 ### What Makes This Special
 
 The magic is the **pixel‑close landing experience** that mirrors a proven, high‑converting SaaS page and drives users directly into a payment‑first flow. The standout moment is when a visitor sees a familiar, polished layout, trusts it, and completes checkout before ever creating an account.
@@ -48,7 +50,8 @@ The magic is the **pixel‑close landing experience** that mirrors a proven, hig
 
 **Included in MVP:**
 
-- Landing page that mirrors the reference site’s structure, section order, spacing, and flow
+- Landing page that mirrors the reference site’s structure, section order, spacing, and flow (implemented in `frontend/`)
+- Supporting trust pages: /privacy, /terms, /refund, /support, /contact, /blog (implemented in `frontend/`)
 - CTA → Stripe checkout (payment before signup)
 - Checkout success/cancel pages
 - Post‑payment signup/login (email + Google OAuth)
@@ -128,6 +131,8 @@ Key requirements:
 - Copy is updated for autopilotreels without altering section order
 - Fully responsive on desktop and mobile
 
+**Implementation Status:** Complete in `frontend/` (marketing UI + supporting pages).
+
 ### 2. Pricing & CTA Flow
 
 **Requirement:** Drive users directly from the landing page into checkout without requiring signup.
@@ -146,6 +151,8 @@ Key requirements:
 - Success and cancel pages are implemented
 - Payment metadata is stored for linking to a user later
 
+**Implementation Status:** Placeholder pages exist; Stripe integration pending.
+
 ### 4. Post‑Payment Authentication
 
 **Requirement:** Require signup/login only after successful payment.
@@ -155,6 +162,8 @@ Key requirements:
 - Paid sessions are linked to created accounts
 - Authenticated users are redirected to dashboard
 
+**Implementation Status:** Placeholder page exists; Supabase Auth integration pending.
+
 ### 5. Placeholder Dashboard
 
 **Requirement:** Provide a protected dashboard that confirms access but clearly states limited availability.
@@ -163,6 +172,8 @@ Key requirements:
 - Dashboard is accessible only after auth
 - Message communicates “high demand / service unavailable”
 - Basic account info is displayed
+
+**Implementation Status:** Placeholder page exists; protection + account data pending.
 
 ### 6. Funnel Analytics
 

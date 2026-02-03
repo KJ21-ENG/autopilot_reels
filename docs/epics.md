@@ -1,9 +1,9 @@
 # autopilotreels - Epic Breakdown
 
 **Author:** darko
-**Date:** 2026-02-02
-**Project Level:** Low
-**Target Scale:** MVP validation
+**Date:** 2026-02-03
+**Project Level:** MVP
+**Target Scale:** Validation MVP
 
 ---
 
@@ -11,402 +11,556 @@
 
 This document provides the complete epic and story breakdown for autopilotreels, decomposing the requirements from the [PRD](./PRD.md) into implementable stories.
 
-**Proposed Epic Structure (value-based)**
+**Proposed Epic Structure (MVP Focused)**
 
-1. **Foundation & Delivery Readiness**
-    - **Value:** Establishes a stable, secure, and deployable MVP base.
-    - **Scope:** Repo setup, CI/CD baseline, environment config (Vercel/Supabase), core routing, shared UI primitives, analytics plumbing, security/privacy defaults.
-    - **Why:** De-risks all downstream work and ensures a production-grade baseline for paid traffic.
+Epic 1: Foundation & Delivery Readiness (Partially Complete)
+Value: Establish the production-ready backbone (project setup, env, deploy, instrumentation) to enable secure payments and auth.
+Scope: Repo/app scaffolding alignment (frontend UI present), env config, deployment pipeline, baseline observability, route protection scaffolds.
 
-2. **Pixel-Close Marketing Experience**
-    - **Value:** Delivers the trust-building landing flow that drives conversion.
-    - **Scope:** FacelessReels-structured landing, responsive layout, SEO structure, CTA wiring, copy adaptation, performance tuning for LCP.
-    - **Why:** The landing page is the primary conversion asset and must feel polished before payment.
+Epic 2: Pixel‑Close Marketing Experience (Completed)
+Value: High-conversion, trust-building landing and supporting pages that drive payment-first flow.
+Scope: Landing page UI, pricing CTA routing, and supporting trust pages (/privacy, /terms, /refund, /support, /contact, /blog).
 
-3. **Payment-First Checkout Flow**
-    - **Value:** Enables real payment conversion without pre-signup friction.
-    - **Scope:** Stripe Checkout integration, success/cancel handling, payment metadata capture, secure redirect to post-payment auth.
-    - **Why:** Payment-first flow is the core validation mechanism.
+Epic 3: Payment‑First Checkout (Stripe)
+Value: Enable real payments without requiring prior signup, with reliable success/cancel handling and payment metadata capture.
+Scope: Stripe Checkout integration, webhook handling, success/cancel pages, payment record storage.
 
-4. **Post-Payment Auth & Access**
-    - **Value:** Converts paid sessions into authenticated users and grants access.
-    - **Scope:** Email + Google OAuth, account creation/login, payment-user linkage, protected dashboard access.
-    - **Why:** Maintains funnel continuity and validates post-payment completion.
+Epic 4: Post‑Payment Auth & Account Linking
+Value: Convert paid sessions into authenticated users with secure access and correct payment-to-user linkage.
+Scope: Supabase Auth (email + Google), session handling, linking payment to user, redirect flow to dashboard.
 
-5. **Funnel Analytics & Admin Visibility**
-    - **Value:** Provides actionable demand signals and operational visibility.
-    - **Scope:** Event tracking (visit → CTA → checkout → payment → signup → dashboard), exportable paid user list, minimal admin view.
-    - **Why:** Enables pricing/positioning decisions and supports MVP validation goals.
+Epic 5: Protected Placeholder Dashboard
+Value: Provide a credible post‑payment destination that confirms access while setting correct expectations.
+Scope: Protected routes, “high demand / unavailable” messaging, basic account info display.
 
-**Suggested Sequencing:** 1 → 2 → 3 → 4 → 5  
-**Rationale:** Foundation supports landing performance and reliability; marketing experience must be credible before payments; payment flow precedes post-payment auth; analytics rounds out validation insights.
+Epic 6: Funnel Analytics & Admin Visibility
+Value: Measure conversion end‑to‑end and enable lightweight admin visibility for paid users.
+Scope: Event tracking (visit → CTA → checkout → payment → signup → dashboard), exportable paid users, minimal admin view.
+
+**Suggested Sequencing**
+1. Epic 1 → Epic 3 → Epic 4 → Epic 5 → Epic 6
+2. Epic 2 is already complete; no new work required except verification.
+
+**Why This Grouping**
+Payment-first validation depends on reliable infrastructure, real checkout, and post-payment auth before the dashboard experience is meaningful.
+Analytics comes last to instrument the full funnel once the core flow is wired end‑to‑end.
 
 ---
 
-## Epic 1: Foundation & Delivery Readiness
+<!-- Repeat for each epic (N = 1, 2, 3...) -->
 
-Establish a stable, secure, and deployable MVP foundation with core infrastructure, configuration, and shared primitives that enable all downstream work.
+## Epic 1: Foundation & Delivery Readiness (Partially Complete)
 
-### Story 1.1: Initialize project and deployment baseline
+Goal: Establish the production-ready backbone (env config, deploy readiness, and route protection scaffolds) to enable secure payments and auth while acknowledging the existing frontend UI.
+
+<!-- Repeat for each story (M = 1, 2, 3...) within epic N -->
+
+### Story 1.1: Initialize project runtime & environment scaffolding
 
 As a developer,
-I want the repo, framework, and deployment baseline initialized,
-So that the MVP can be built and deployed reliably from day one.
+I want a consistent runtime and environment configuration baseline,
+So that all subsequent integrations can be built and deployed reliably.
 
 **Acceptance Criteria:**
 
-**Given** a new project workspace
-**When** I initialize the app and deployment config
-**Then** the project builds locally and has a deployable baseline target (Vercel)
+**Given** the existing `frontend/` UI and repository,
+**When** the project is run locally and in a preview deployment,
+**Then** environment variables are loaded correctly and the app builds without manual patching.
 
-**And** the repository includes standard scripts, environment templates, and linting defaults
+**And** a documented `.env.example` (or equivalent) exists with required keys for Stripe/Supabase placeholders.
 
 **Prerequisites:** None
 
-**Technical Notes:** Use Next.js + Tailwind baseline; add `.env.example` for Vercel/Supabase/Stripe; keep configs minimal.
+**Technical Notes:** Establish environment loading strategy (e.g., Next.js env config), add baseline config files, and ensure `frontend/` paths are the source of truth.
 
-### Story 1.2: Configure core environment and secrets handling
-
-As a developer,
-I want structured environment and secrets handling,
-So that integrations can be safely configured across local and production.
-
-**Acceptance Criteria:**
-
-**Given** the app configuration
-**When** I load environment variables
-**Then** missing secrets are validated and local/dev/prod values are separated
-
-**And** secrets never ship to the client unless explicitly required
-
-**Prerequisites:** Story 1.1
-
-**Technical Notes:** Centralize env access; document required keys for Supabase + Stripe + OAuth.
-
-### Story 1.3: Establish core routing shell and shared UI primitives
-
-As a developer,
-I want a minimal app shell and shared UI primitives,
-So that feature pages can be assembled consistently and quickly.
-
-**Acceptance Criteria:**
-
-**Given** the app router and layout
-**When** I navigate between core routes
-**Then** the shell renders consistently and shared UI components are available
-
-**And** global styles and typography are applied across pages
-
-**Prerequisites:** Story 1.1
-
-**Technical Notes:** Include layout, nav/footer placeholders, buttons, section wrappers; avoid final marketing copy here.
-
-### Story 1.4: Add baseline analytics event plumbing
+### Story 1.2: Set up deployment baseline and preview pipeline
 
 As a product owner,
-I want a minimal analytics event pipeline,
-So that funnel events can be captured consistently across the app.
+I want a reliable deployment baseline,
+So that the payment-first flow can be validated in production-like previews.
 
 **Acceptance Criteria:**
 
-**Given** a shared analytics helper
-**When** a page or CTA triggers an event
-**Then** the event is recorded with consistent naming and metadata
+**Given** the current repository,
+**When** a deployment is triggered (preview and production),
+**Then** the app builds and serves the `frontend/` routes without missing assets or route errors.
 
-**And** events can be swapped between providers without code changes per page
+**And** deployment configuration documents required environment variables and secrets.
+**And** the deployment runtime is pinned to Node 24.x (to match local/tooling expectations).
 
 **Prerequisites:** Story 1.1
 
-**Technical Notes:** Implement a lightweight event wrapper; defer provider choice (simple internal logging acceptable).
+**Technical Notes:** Configure Vercel settings or equivalent, ensure build output targets the existing frontend app, and document deploy steps.
+
+### Story 1.3: Add baseline route protection scaffolds
+
+As a developer,
+I want route protection scaffolds in place,
+So that protected areas can be enforced once auth is wired.
+
+**Acceptance Criteria:**
+
+**Given** public marketing routes and a placeholder dashboard,
+**When** a user navigates to protected routes,
+**Then** unauthenticated access is redirected to the post‑payment auth flow or a clear access message.
+
+**And** the protection logic is centralized and reusable.
+
+**Prerequisites:** Story 1.1
+
+**Technical Notes:** Implement middleware or route guards aligned with the framework in `frontend/` and document expected auth checks.
+
+### Story 1.4: Establish baseline analytics plumbing
+
+As a product owner,
+I want a minimal analytics plumbing baseline,
+So that funnel events can be wired quickly once checkout and auth are live.
+
+**Acceptance Criteria:**
+
+**Given** the marketing and placeholder routes,
+**When** a user performs key actions (view landing, click CTA),
+**Then** events are captured in a consistent format and can be extended for later funnel steps.
+
+**And** the tracking system is documented for future story implementation.
+
+**Prerequisites:** Story 1.1
+
+**Technical Notes:** Choose a lightweight analytics approach (internal logging or simple analytics tool) and define a shared event schema.
+
+### Story 1.5: Define database schema and migrations
+
+As a developer,
+I want the database schema and migrations explicitly defined,
+So that payment linkage and analytics storage are reliable from day one.
+
+**Acceptance Criteria:**
+
+**Given** the MVP data requirements,
+**When** the backend is initialized,
+**Then** the core tables exist with migrations applied (`payments`, `user_payment_links`, `events`).
+
+**And** any required indices/constraints (e.g., unique `stripe_session_id`) are documented.
+
+**Prerequisites:** Story 1.1
+
+**Technical Notes:** Use Supabase SQL migrations or equivalent; include schema definitions and constraints.
 
 ---
 
-## Epic 2: Pixel-Close Marketing Experience
+## Epic 2: Pixel‑Close Marketing Experience (Completed)
 
-Deliver the trust-building, facelessreels-style landing experience with pixel-close layout, responsive behavior, and performance/SEO readiness.
+Goal: Deliver the high‑conversion marketing experience with trust‑building supporting pages and clear pricing → checkout entry, matching the reference layout.
 
-### Story 2.1: Map and scaffold landing page structure
+Status: Completed in `frontend/` (landing, pricing CTA flow, and supporting pages `/privacy`, `/terms`, `/refund`, `/support`, `/contact`, `/blog`).
+
+Verification: UI matches the pixel‑close spec; any deviations are logged separately if needed.
+
+### Story 2.1: Add MVP transparency disclosures across key surfaces
 
 As a product owner,
-I want the landing page sections and structure scaffolded to match the reference,
-So that the overall hierarchy and flow mirrors the proven layout.
+I want clear, consistent disclosure that the product is a validation MVP with limited availability,
+So that users are not misled and expectations are honest.
 
 **Acceptance Criteria:**
 
-**Given** the reference layout structure
-**When** I create the landing page scaffold
-**Then** the section order, spacing rhythm, and CTA placements mirror the reference
+**Given** the landing, checkout success, auth, and dashboard flows,
+**When** a user interacts with any of these surfaces,
+**Then** they see a brief, consistent disclosure about limited availability and MVP status.
 
-**And** each section has clear placeholders for final copy and visuals
+**And** trust pages (/terms, /refund, /privacy) reflect the same disclosure language where appropriate.
 
-**Prerequisites:** Story 1.3
+**Prerequisites:** None
 
-**Technical Notes:** Use semantic sections; keep spacing tokens consistent; create section components for reuse.
+**Technical Notes:** Add consistent copy blocks and ensure they appear on key conversion pages and post‑payment flows.
 
-### Story 2.2: Implement pixel-close hero and primary CTA
+### Story 2.2: Perform accessibility QA for marketing and trust pages
 
-As a visitor,
-I want the hero section to feel polished and familiar,
-So that I trust the product and follow the primary CTA.
-
-**Acceptance Criteria:**
-
-**Given** the hero section
-**When** I view it on desktop and mobile
-**Then** the layout, spacing, typography, and CTA prominence mirror the reference
-
-**And** the primary CTA routes to the checkout entry point
-
-**Prerequisites:** Story 2.1
-
-**Technical Notes:** Use responsive typography and spacing; avoid layout shifts on load.
-
-### Story 2.3: Implement feature and “how it works” sections
-
-As a visitor,
-I want the feature and explanation sections to be clear and scannable,
-So that I quickly understand the value before pricing.
+As a product owner,
+I want accessibility verification for the marketing experience,
+So that the landing and trust pages meet baseline WCAG 2.1 AA expectations.
 
 **Acceptance Criteria:**
 
-**Given** the feature and how-it-works sections
-**When** I scroll the page
-**Then** the section structure, spacing, and visual hierarchy mirror the reference
+**Given** the marketing and trust pages,
+**When** I run a11y checks (Lighthouse/axe) and keyboard-only navigation,
+**Then** there are no critical accessibility violations and issues are tracked or fixed.
 
-**And** copy is adapted for autopilotreels without changing section order
+**Prerequisites:** None
 
-**Prerequisites:** Story 2.1
-
-**Technical Notes:** Use reusable cards/rows; ensure mobile stacking matches reference.
-
-### Story 2.4: Implement pricing section and CTA wiring
-
-As a visitor,
-I want pricing to be clear with immediate checkout access,
-So that I can start payment without signing up.
-
-**Acceptance Criteria:**
-
-**Given** the pricing section
-**When** I click a primary CTA
-**Then** I am routed to Stripe checkout
-
-**And** CTA click events are tracked
-
-**Prerequisites:** Story 2.1, Story 1.4
-
-**Technical Notes:** Wire CTA to checkout route; ensure pricing cards are consistent with reference.
-
-### Story 2.5: Optimize landing performance, SEO, and accessibility
-
-As a marketing owner,
-I want the landing page to load fast and be SEO-ready,
-So that paid and organic traffic convert effectively.
-
-**Acceptance Criteria:**
-
-**Given** the landing page
-**When** performance and accessibility are checked
-**Then** LCP is ~2.5s on typical 4G and no major layout shifts occur
-
-**And** semantic headings, metadata, and focus states meet baseline SEO/WCAG expectations
-
-**Prerequisites:** Stories 2.1–2.4
-
-**Technical Notes:** Prefer static rendering; optimize images; ensure focus styles and contrast.
+**Technical Notes:** Document findings and fixes; prioritize contrast, focus states, and semantic headings.
 
 ---
 
-## Epic 3: Payment-First Checkout Flow
+## Epic 3: Payment‑First Checkout (Stripe)
 
-Enable a frictionless Stripe checkout experience prior to signup, with proper success/cancel handling and payment metadata capture.
+Goal: Enable real payments without requiring prior signup, with reliable success/cancel handling and payment metadata capture.
 
-### Story 3.1: Create checkout initiation route and session creation
+### Story 3.1: Configure Stripe Checkout session creation
 
 As a visitor,
-I want to start payment directly from the landing CTA,
-So that I can pay without creating an account.
+I want to start checkout directly from the CTA,
+So that I can pay without creating an account first.
 
 **Acceptance Criteria:**
 
-**Given** a pricing CTA
-**When** I click it
-**Then** a Stripe Checkout session is created and I am redirected to Stripe-hosted checkout
+**Given** a pricing CTA,
+**When** I click “Get Started” (or equivalent),
+**Then** a Stripe Checkout session is created and I am redirected to Stripe‑hosted checkout.
 
-**And** the session includes product/price metadata for later linking
+**And** the session includes plan/price metadata for later linkage.
 
-**Prerequisites:** Story 2.4
+**Prerequisites:** Story 1.1
 
-**Technical Notes:** Use server-side route to create sessions; include plan identifiers in metadata.
+**Technical Notes:** Implement API route or server action to create Stripe Checkout sessions with product/price IDs.
 
-### Story 3.2: Implement checkout success and cancel pages
+### Story 3.2: Implement checkout success and cancel handling
 
-As a paid or canceled user,
-I want clear success/cancel pages,
-So that I understand what happens next and how to proceed.
+As a paying user,
+I want clear success and cancel outcomes,
+So that I know what happened and how to proceed.
 
 **Acceptance Criteria:**
 
-**Given** a successful payment
-**When** I return from Stripe
-**Then** I see a success page that directs me to signup/login
+**Given** a completed checkout,
+**When** Stripe redirects to the success URL,
+**Then** I see a confirmation page with next‑step guidance to authentication.
 
-**And** cancel returns me to pricing with a clear retry CTA
+**And** when checkout is cancelled, I see a cancel page with a path back to pricing.
 
 **Prerequisites:** Story 3.1
 
-**Technical Notes:** Success page should carry checkout session reference for linking.
+**Technical Notes:** Implement success/cancel routes in `frontend/` and handle Stripe redirect parameters.
 
-### Story 3.3: Capture and store payment metadata
+### Story 3.3: Store payment metadata for user linkage
 
 As a system,
-I want to record payment metadata,
-So that I can link payments to users after auth.
+I want to record payment metadata at checkout,
+So that I can link the payment to a user after authentication.
 
 **Acceptance Criteria:**
 
-**Given** a successful checkout
-**When** the payment completes
-**Then** the payment metadata is stored in the database
+**Given** a successful payment,
+**When** Stripe sends a webhook event,
+**Then** the payment record is stored with session ID, customer email, and price info.
 
-**And** records are queryable by session or customer id
+**And** the record is queryable for later account linkage.
 
 **Prerequisites:** Story 3.1
 
-**Technical Notes:** Use Stripe webhook or success redirect handler; store minimal metadata in Supabase.
+**Technical Notes:** Implement Stripe webhook handler and persist records in Supabase/Postgres.
 
----
+### Story 3.4: Validate payment‑first flow end‑to‑end
 
-## Epic 4: Post-Payment Auth & Access
-
-Convert paid sessions into authenticated users and ensure only authenticated users reach the dashboard.
-
-### Story 4.1: Implement email/password auth
-
-As a paid user,
-I want to sign up or log in with email and password,
-So that I can access the dashboard after payment.
+As a product owner,
+I want to verify the payment‑first flow works reliably,
+So that I can trust it for demand validation.
 
 **Acceptance Criteria:**
 
-**Given** the auth page
-**When** I submit valid credentials
-**Then** I am authenticated and redirected to the dashboard
+**Given** a test Stripe payment,
+**When** I complete checkout and return to the app,
+**Then** the success path guides me into post‑payment auth without errors.
 
-**And** errors are shown clearly for invalid or existing accounts
+**And** the payment record exists for linkage.
+
+**Prerequisites:** Stories 3.1–3.3
+
+**Technical Notes:** Use Stripe test mode; document any known edge cases.
+
+### Story 3.5: Harden Stripe webhook security and verification testing
+
+As a developer,
+I want webhook signature verification and replay protection tested,
+So that payment events are reliable and secure.
+
+**Acceptance Criteria:**
+
+**Given** Stripe webhook handling,
+**When** I send valid and invalid webhook payloads,
+**Then** valid payloads are processed and invalid signatures are rejected.
+
+**And** replayed events are detected or safely idempotent.
+
+**Prerequisites:** Story 3.3
+
+**Technical Notes:** Verify Stripe signing secret usage and document test steps.
+
+---
+
+## Epic 4: Post‑Payment Auth & Account Linking
+
+Goal: Convert paid sessions into authenticated users with secure access and correct payment‑to‑user linkage.
+
+### Story 4.1: Implement Supabase Auth (email + Google)
+
+As a paid user,
+I want to sign up or log in after payment,
+So that I can access my account.
+
+**Acceptance Criteria:**
+
+**Given** a successful payment,
+**When** I choose email/password or Google OAuth,
+**Then** I can authenticate successfully and return to the app.
+
+**And** auth errors are shown clearly with recovery guidance.
 
 **Prerequisites:** Story 3.2
 
-**Technical Notes:** Use Supabase Auth; keep UX minimal and aligned to landing style.
+**Technical Notes:** Configure Supabase Auth providers, redirect URIs, and UI flow in `frontend/`.
 
-### Story 4.2: Implement Google OAuth login
-
-As a paid user,
-I want to log in with Google,
-So that I can authenticate quickly after payment.
-
-**Acceptance Criteria:**
-
-**Given** the auth page
-**When** I choose Google login
-**Then** I complete OAuth and land in the dashboard
-
-**And** redirect URIs are correctly configured for local and production
-
-**Prerequisites:** Story 4.1
-
-**Technical Notes:** Supabase OAuth config; ensure callback handling.
-
-### Story 4.3: Link payment records to user accounts
+### Story 4.2: Link payment records to authenticated users
 
 As a system,
-I want to link payments to user accounts,
-So that I can verify paid access and track conversions.
+I want to link a payment to the authenticated user,
+So that account access reflects a real paid purchase.
 
 **Acceptance Criteria:**
 
-**Given** a user with a successful payment session
-**When** they authenticate
-**Then** their account links to the payment record
+**Given** a payment record and a newly authenticated user,
+**When** the user completes auth,
+**Then** the payment record is associated with the user ID.
 
-**And** access is granted only if payment exists
+**And** the link is stored in the database for future checks.
 
-**Prerequisites:** Story 3.3, Story 4.1
+**Prerequisites:** Stories 3.3 and 4.1
 
-**Technical Notes:** Match using session id or customer id; store linkage in Supabase.
+**Technical Notes:** Use Stripe session ID or customer email to connect payment and user in Supabase.
 
-### Story 4.4: Protect dashboard routes
+### Story 4.3: Enforce post‑payment access control
+
+As a system,
+I want to ensure only paid users reach the dashboard,
+So that unpaid access is prevented.
+
+**Acceptance Criteria:**
+
+**Given** an authenticated user,
+**When** they attempt to access the dashboard,
+**Then** access is allowed only if a paid record is linked.
+
+**And** unpaid users see a clear message and a path to checkout.
+
+**Prerequisites:** Stories 1.3 and 4.2
+
+**Technical Notes:** Implement authorization checks using Supabase session + payment linkage.
+
+---
+
+## Epic 5: Protected Placeholder Dashboard
+
+Goal: Provide a credible post‑payment destination that confirms access while setting correct expectations.
+
+### Story 5.1: Implement protected dashboard shell
 
 As a paid user,
-I want the dashboard to be protected,
-So that only authenticated paid users can access it.
+I want a protected dashboard route,
+So that I can access the product after authenticating.
 
 **Acceptance Criteria:**
 
-**Given** an unauthenticated or unpaid user
-**When** they navigate to the dashboard
-**Then** they are redirected to auth or pricing appropriately
+**Given** a paid, authenticated user,
+**When** I navigate to the dashboard,
+**Then** the dashboard renders without access errors.
 
-**And** authenticated paid users can access the dashboard without friction
+**And** unauthenticated or unpaid users are blocked.
 
-**Prerequisites:** Story 4.1, Story 4.3
+**Prerequisites:** Story 4.3
 
-**Technical Notes:** Use server-side session checks where possible; avoid exposing dashboard data publicly.
+**Technical Notes:** Use existing `frontend/` placeholder page and wire protection logic.
 
----
+### Story 5.2: Display “high demand / unavailable” messaging
 
-## Epic 5: Funnel Analytics & Admin Visibility
+As a paid user,
+I want clear messaging about limited availability,
+So that I understand the current state of the service.
 
-Provide baseline analytics and minimal admin visibility for MVP validation insights.
+**Acceptance Criteria:**
 
-### Story 5.1: Track funnel events end-to-end
+**Given** the protected dashboard,
+**When** I land on the page,
+**Then** I see a clear “high demand / unavailable” message with context.
+
+**And** the message avoids misleading promises.
+
+**Prerequisites:** Story 5.1
+
+**Technical Notes:** Implement as copy content on the dashboard placeholder.
+
+### Story 5.3: Show basic account information
+
+As a paid user,
+I want to see basic account info,
+So that I can confirm my access is recognized.
+
+**Acceptance Criteria:**
+
+**Given** a paid, authenticated session,
+**When** I view the dashboard,
+**Then** I see my email or account identifier.
+
+**And** the info is pulled from the auth session.
+
+**Prerequisites:** Story 5.1
+
+**Technical Notes:** Render Supabase user fields on the dashboard.
+
+### Story 5.4: Perform accessibility QA for auth and dashboard
 
 As a product owner,
-I want funnel events tracked consistently,
-So that I can measure conversion across the flow.
+I want accessibility verification for auth and dashboard screens,
+So that post‑payment flows are inclusive and usable.
 
 **Acceptance Criteria:**
 
-**Given** a user journey
-**When** they move through the funnel
-**Then** events are captured for visit, CTA click, checkout start, payment, signup, and dashboard
+**Given** the auth and dashboard screens,
+**When** I run a11y checks (Lighthouse/axe) and keyboard-only navigation,
+**Then** there are no critical accessibility violations and issues are tracked or fixed.
 
-**And** event data includes timestamps and key identifiers
+**Prerequisites:** Story 4.1, Story 5.1
 
-**Prerequisites:** Story 1.4, Story 3.1, Story 4.1
+**Technical Notes:** Focus on form labels, focus indicators, and error messaging.
 
-**Technical Notes:** Map event names clearly; avoid PII in event payloads unless required.
+---
 
-### Story 5.2: Build minimal admin view and export
+## Epic 6: Funnel Analytics & Admin Visibility
 
-As an operator,
-I want a minimal admin view and export,
-So that I can see paid users and download their emails.
+Goal: Measure conversion end‑to‑end and enable lightweight admin visibility for paid users.
+
+### Story 6.1: Define funnel event schema
+
+As a product owner,
+I want a consistent event schema for funnel tracking,
+So that analytics are reliable and comparable.
 
 **Acceptance Criteria:**
 
-**Given** an admin route
-**When** I access it
-**Then** I can view total users, paid users, and export emails
+**Given** the funnel stages (visit → CTA → checkout → payment → signup → dashboard),
+**When** events are defined,
+**Then** each stage has a named event with required properties.
 
-**And** access to admin view is protected
+**And** the schema is documented for implementation.
 
-**Prerequisites:** Story 5.1, Story 4.1
+**Prerequisites:** Story 1.4
 
-**Technical Notes:** Simple table + CSV export; secure with environment-flagged admin allowlist.
+**Technical Notes:** Define event names, properties (plan, price, session ID), and capture points.
+Store events in Supabase `events` table for queryable funnel counts (no external analytics required for MVP).
+
+### Story 6.2: Track CTA clicks and checkout starts
+
+As a product owner,
+I want to track intent signals,
+So that I can measure early funnel conversion.
+
+**Acceptance Criteria:**
+
+**Given** the landing page,
+**When** a visitor clicks a CTA,
+**Then** a `cta_click` event is recorded.
+
+**And** when checkout starts, a `checkout_start` event is recorded.
+
+**Prerequisites:** Stories 3.1 and 6.1
+
+**Technical Notes:** Instrument CTA handler and checkout redirect creation.
+
+### Story 6.3: Track payments and post‑payment auth
+
+As a product owner,
+I want to track payments and signup completion,
+So that I can measure purchase-to-auth conversion.
+
+**Acceptance Criteria:**
+
+**Given** a successful Stripe payment,
+**When** the webhook is processed,
+**Then** a `payment_success` event is recorded.
+
+**And** when a paid user completes auth, a `signup_complete` event is recorded.
+
+**Prerequisites:** Stories 3.3 and 4.1
+
+**Technical Notes:** Emit events from Stripe webhook and auth completion handler.
+
+### Story 6.4: Track dashboard access
+
+As a product owner,
+I want to track dashboard access,
+So that I can measure the final funnel stage.
+
+**Acceptance Criteria:**
+
+**Given** a paid, authenticated user,
+**When** they access the dashboard,
+**Then** a `dashboard_view` event is recorded.
+
+**Prerequisites:** Story 5.1
+
+**Technical Notes:** Instrument dashboard route load.
+
+### Story 6.5: Provide exportable paid‑users list
+
+As a product owner,
+I want an exportable list of paid users,
+So that I can follow up and analyze results.
+
+**Acceptance Criteria:**
+
+**Given** stored payments and linked users,
+**When** I access the admin view,
+**Then** I can export a CSV of paid users.
+
+**And** the export includes payment date, plan, and user email.
+
+**Prerequisites:** Stories 3.3 and 4.2
+
+**Technical Notes:** Minimal admin endpoint or protected route; export CSV from Supabase.
+
+### Story 6.6: Add minimal admin funnel overview
+
+As a product owner,
+I want a minimal admin view of funnel counts,
+So that I can quickly see conversion health.
+
+**Acceptance Criteria:**
+
+**Given** recorded events,
+**When** I open the admin view,
+**Then** I see counts for each funnel stage.
+
+**And** the view loads quickly and is protected.
+
+**Prerequisites:** Stories 6.1–6.4
+
+**Technical Notes:** Simple aggregate queries; protect route via auth.
+Embed admin view in main app (e.g., `frontend/app/admin`) to avoid a separate deploy.
+<!-- End story repeat -->
+
+### Story 6.7: Define analytics data retention and PII handling
+
+As a product owner,
+I want a clear data retention and PII handling policy for analytics,
+So that payment and event data are managed responsibly.
+
+**Acceptance Criteria:**
+
+**Given** analytics events and payment records,
+**When** retention and access policies are defined,
+**Then** documentation specifies what is stored, for how long, and who can access it.
+
+**And** any PII fields are explicitly identified.
+
+**Prerequisites:** Story 6.1
+
+**Technical Notes:** Keep this lightweight and documented in `docs/`.
+
+**Scope Note:** Stories 6.5 and 6.6 are optional for the strictest MVP; defer if timeline is tight.
 
 ---
 
+<!-- End epic repeat -->
+
 ---
-
-## Epic Breakdown Summary
-
-**Coverage:** All MVP functional requirements are mapped: pixel-close landing (Epic 2), payment-first Stripe checkout (Epic 3), post-payment auth and access (Epic 4), and funnel analytics/admin visibility (Epic 5). Foundation work (Epic 1) establishes deployment, environment, routing, and analytics plumbing.
-
-**Sequencing:** Epic 1 establishes delivery readiness; Epic 2 builds the conversion-critical landing experience; Epic 3 enables payment-first validation; Epic 4 converts paid sessions into authenticated users with protected access; Epic 5 completes validation insights with end-to-end funnel tracking and minimal admin visibility.
-
-**Story sizing:** Each story is vertically sliced and scoped for a single focused implementation session, with clear prerequisites and BDD-style acceptance criteria.
-
-**Compliance & constraints:** Uses Stripe-hosted checkout (minimizes PCI scope), Supabase Auth for secure sessions, minimal data storage, and explicit limited-availability messaging on the dashboard. Performance and accessibility requirements are included in Epic 2.
 
 _For implementation: Use the `create-story` workflow to generate individual story implementation plans from this epic breakdown._

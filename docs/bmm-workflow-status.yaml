@@ -7,6 +7,7 @@
 # project_type: software
 # selected_track: method
 # field_type: greenfield
+# note: Greenfield project with existing frontend implementation (UI complete in Frontend/).
 # workflow_path: /home/darko/Code/autopilotreels/bmad/bmm/workflows/workflow-status/paths/method-greenfield.yaml
 
 # STATUS DEFINITIONS:
@@ -39,9 +40,9 @@ workflow_status:
   create-design: /home/darko/Code/autopilotreels/docs/ux-design-specification.md
 
   # Phase 2: Solutioning
-  create-architecture: "/home/darko/Code/autopilotreels/docs/bmm-architecture-2026-02-02.md"
+  create-architecture: "/home/darko/Code/autopilotreels/docs/architecture.md"
   validate-architecture: optional
-  solutioning-gate-check: required
+  solutioning-gate-check: "/home/darko/Code/autopilotreels/docs/bmm-readiness-assessment-2026-02-03.md"
 
   # Phase 3: Implementation
   sprint-planning: required
