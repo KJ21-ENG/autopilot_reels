@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>autopilotreels - Color Theme Explorer</title>
+        <style>
+            :root {
+                --color-bg: #f9fafb;
+                --color-surface: #ffffff;
+                --color-text: #0b0b0f;
+                --color-text-muted: #6b7280;
+                --color-border: #e5e7eb;
+                --color-primary: #111827;
+                --color-primary-contrast: #ffffff;
+                --color-accent: #3b82f6;
+                --color-success: #22c55e;
+                --color-warning: #f59e0b;
+                --color-error: #ef4444;
+                --color-info: #0ea5e9;
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+            body {
+                margin: 0;
+                font-family:
+                    "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+                background: var(--color-bg);
+                color: var(--color-text);
+            }
+            .wrap {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 32px 20px 64px;
+            }
+            header {
+                display: flex;
+                align-items: baseline;
+                justify-content: space-between;
+                border-bottom: 1px solid var(--color-border);
+                padding-bottom: 16px;
+                margin-bottom: 24px;
+            }
+            h1 {
+                font-size: 28px;
+                margin: 0;
+            }
+            .sub {
+                color: var(--color-text-muted);
+                font-size: 14px;
+            }
+
+            .grid {
+                display: grid;
+                grid-template-columns: repeat(12, 1fr);
+                gap: 16px;
+            }
+            .card {
+                grid-column: span 12;
+                background: var(--color-surface);
+                border: 1px solid var(--color-border);
+                border-radius: 12px;
+                padding: 20px;
+            }
+            .card h2 {
+                margin: 0 0 8px;
+                font-size: 18px;
+            }
+
+            .swatches {
+                display: grid;
+                grid-template-columns: repeat(6, 1fr);
+                gap: 12px;
+            }
+            .swatch {
+                border: 1px solid var(--color-border);
+                border-radius: 10px;
+                overflow: hidden;
+                background: #fff;
+            }
+            .swatch .color {
+                height: 56px;
+            }
+            .swatch .label {
+                padding: 8px 10px;
+                font-size: 12px;
+                color: var(--color-text-muted);
+            }
+
+            .components {
+                display: grid;
+                grid-template-columns: repeat(12, 1fr);
+                gap: 16px;
+            }
+            .demo {
+                grid-column: span 6;
+                border: 1px solid var(--color-border);
+                border-radius: 12px;
+                padding: 16px;
+                background: #fff;
+            }
+
+            .btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 10px 16px;
+                border-radius: 8px;
+                border: 1px solid var(--color-primary);
+                background: var(--color-primary);
+                color: var(--color-primary-contrast);
+                font-weight: 600;
+                cursor: pointer;
+            }
+            .btn.secondary {
+                background: transparent;
+                color: var(--color-primary);
+            }
+            .btn.disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+            .input {
+                width: 100%;
+                padding: 10px 12px;
+                border: 1px solid var(--color-border);
+                border-radius: 8px;
+                background: #fff;
+            }
+            .input.error {
+                border-color: var(--color-error);
+            }
+
+            .alert {
+                padding: 12px 14px;
+                border-radius: 10px;
+                border: 1px solid var(--color-border);
+                background: #fff;
+                font-size: 14px;
+            }
+            .alert.success {
+                border-color: var(--color-success);
+            }
+            .alert.error {
+                border-color: var(--color-error);
+            }
+
+            .nav {
+                display: flex;
+                gap: 16px;
+                font-size: 14px;
+                color: var(--color-text-muted);
+            }
+            .nav .active {
+                color: var(--color-text);
+                font-weight: 600;
+            }
+
+            .card-mini {
+                border: 1px solid var(--color-border);
+                border-radius: 10px;
+                padding: 14px;
+                background: #fff;
+            }
+
+            @media (max-width: 900px) {
+                .demo {
+                    grid-column: span 12;
+                }
+                .swatches {
+                    grid-template-columns: repeat(3, 1fr);
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="wrap">
+            <header>
+                <div>
+                    <h1>Color Theme Explorer</h1>
+                    <div class="sub">
+                        autopilotreels · Reference Clone (Approx Palette)
+                    </div>
+                </div>
+                <div class="sub">Light theme preview</div>
+            </header>
+
+            <div class="card">
+                <h2>Palette</h2>
+                <div class="swatches">
+                    <div class="swatch">
+                        <div
+                            class="color"
+                            style="background: var(--color-primary)"
+                        ></div>
+                        <div class="label">Primary / CTA · #111827</div>
+                    </div>
+                    <div class="swatch">
+                        <div
+                            class="color"
+                            style="background: var(--color-accent)"
+                        ></div>
+                        <div class="label">Accent · #3B82F6</div>
+                    </div>
+                    <div class="swatch">
+                        <div
+                            class="color"
+                            style="background: var(--color-text)"
+                        ></div>
+                        <div class="label">Text · #0B0B0F</div>
+                    </div>
+                    <div class="swatch">
+                        <div
+                            class="color"
+                            style="background: var(--color-text-muted)"
+                        ></div>
+                        <div class="label">Muted Text · #6B7280</div>
+                    </div>
+                    <div class="swatch">
+                        <div
+                            class="color"
+                            style="background: var(--color-bg)"
+                        ></div>
+                        <div class="label">Background · #F9FAFB</div>
+                    </div>
+                    <div class="swatch">
+                        <div
+                            class="color"
+                            style="background: var(--color-surface)"
+                        ></div>
+                        <div class="label">Surface · #FFFFFF</div>
+                    </div>
+                    <div class="swatch">
+                        <div
+                            class="color"
+                            style="background: var(--color-border)"
+                        ></div>
+                        <div class="label">Border · #E5E7EB</div>
+                    </div>
+                    <div class="swatch">
+                        <div
+                            class="color"
+                            style="background: var(--color-success)"
+                        ></div>
+                        <div class="label">Success · #22C55E</div>
+                    </div>
+                    <div class="swatch">
+                        <div
+                            class="color"
+                            style="background: var(--color-warning)"
+                        ></div>
+                        <div class="label">Warning · #F59E0B</div>
+                    </div>
+                    <div class="swatch">
+                        <div
+                            class="color"
+                            style="background: var(--color-error)"
+                        ></div>
+                        <div class="label">Error · #EF4444</div>
+                    </div>
+                    <div class="swatch">
+                        <div
+                            class="color"
+                            style="background: var(--color-info)"
+                        ></div>
+                        <div class="label">Info · #0EA5E9</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Component Examples</h2>
+                <div class="components">
+                    <div class="demo">
+                        <div class="nav">
+                            <div class="active">Product</div>
+                            <div>How it works</div>
+                            <div>Pricing</div>
+                            <div>FAQ</div>
+                        </div>
+                        <h3 style="margin: 14px 0 6px">
+                            Create viral faceless videos on auto‑pilot
+                        </h3>
+                        <p
+                            style="
+                                margin: 0 0 12px;
+                                color: var(--color-text-muted);
+                            "
+                        >
+                            Get your generated video in less than 5 minutes.
+                        </p>
+                        <button class="btn">Create your first video</button>
+                        <button class="btn secondary" style="margin-left: 8px">
+                            See it in action
+                        </button>
+                    </div>
+                    <div class="demo">
+                        <label
+                            style="
+                                font-size: 12px;
+                                color: var(--color-text-muted);
+                            "
+                            >Email</label
+                        >
+                        <input class="input" placeholder="you@example.com" />
+                        <div style="height: 8px"></div>
+                        <label
+                            style="
+                                font-size: 12px;
+                                color: var(--color-text-muted);
+                            "
+                            >Promo code</label
+                        >
+                        <input class="input error" placeholder="Invalid code" />
+                        <div style="height: 12px"></div>
+                        <div class="alert success">
+                            Success: Payment verified
+                        </div>
+                        <div style="height: 8px"></div>
+                        <div class="alert error">Error: Card was declined</div>
+                    </div>
+                    <div class="demo">
+                        <div class="card-mini">
+                            <strong>Trusted by 353k+ users</strong>
+                            <p
+                                style="
+                                    margin: 6px 0 0;
+                                    color: var(--color-text-muted);
+                                "
+                            >
+                                Social proof blocks reinforce trust in the
+                                funnel.
+                            </p>
+                        </div>
+                        <div style="height: 12px"></div>
+                        <div class="card-mini">
+                            <strong>How it works</strong>
+                            <ol
+                                style="
+                                    margin: 6px 0 0;
+                                    padding-left: 18px;
+                                    color: var(--color-text-muted);
+                                "
+                            >
+                                <li>Create a series</li>
+                                <li>Customize</li>
+                                <li>Watch your socials grow</li>
+                            </ol>
+                        </div>
+                    </div>
+                    <div class="demo">
+                        <div class="card-mini">
+                            <strong>Pricing</strong>
+                            <p
+                                style="
+                                    margin: 6px 0 0;
+                                    color: var(--color-text-muted);
+                                "
+                            >
+                                Simple, high‑trust pricing block with a clear
+                                CTA.
+                            </p>
+                            <div style="height: 10px"></div>
+                            <button class="btn">Start now</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

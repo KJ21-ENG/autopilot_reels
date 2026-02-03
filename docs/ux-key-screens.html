@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>autopilotreels - Key Screens Showcase</title>
+        <link rel="stylesheet" href="ux-tokens.css" />
+        <style>
+            :root {
+                --bg: #f9fafb;
+                --surface: #ffffff;
+                --text: #0b0b0f;
+                --muted: #6b7280;
+                --border: #e5e7eb;
+                --primary: #111827;
+                --accent: #3b82f6;
+            }
+            * {
+                box-sizing: border-box;
+            }
+            body {
+                margin: 0;
+                font-family:
+                    "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+                background: var(--bg);
+                color: var(--text);
+            }
+            .wrap {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 28px 20px 60px;
+            }
+            header {
+                display: flex;
+                align-items: baseline;
+                justify-content: space-between;
+                border-bottom: 1px solid var(--border);
+                padding-bottom: 16px;
+            }
+            h1 {
+                margin: 0;
+                font-size: 28px;
+                font-weight: 600;
+            }
+            h2 {
+                margin: 10px 0 4px;
+                font-size: 20px;
+                font-weight: 600;
+            }
+            .sub {
+                color: var(--muted);
+                font-size: 14px;
+            }
+
+            .grid {
+                display: grid;
+                grid-template-columns: repeat(12, 1fr);
+                gap: 16px;
+                margin-top: 20px;
+            }
+            .card {
+                grid-column: span 6;
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                padding: 16px;
+                min-height: 220px;
+            }
+            .card h3 {
+                margin: 0 0 8px;
+                font-size: 16px;
+                font-weight: 600;
+            }
+
+            .btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 10px 16px;
+                border-radius: 8px;
+                border: 1px solid var(--primary);
+                background: var(--primary);
+                color: #fff;
+                font-weight: 600;
+                font-size: 14px;
+            }
+            .btn.ghost {
+                background: transparent;
+                color: var(--primary);
+            }
+
+            .badge {
+                display: inline-block;
+                padding: 4px 8px;
+                border: 1px solid var(--border);
+                border-radius: 999px;
+                font-size: 12px;
+                color: var(--muted);
+            }
+
+            .mini-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }
+            .mini-card {
+                border: 1px solid var(--border);
+                border-radius: 10px;
+                padding: 10px;
+                font-size: 12px;
+                color: var(--muted);
+            }
+
+            @media (max-width: 900px) {
+                .card {
+                    grid-column: span 12;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="wrap">
+            <header>
+                <div>
+                    <h1>Key Screens Showcase</h1>
+                    <div class="sub">
+                        autopilotreels · Clone + Slight Polish
+                    </div>
+                </div>
+                <div class="sub">6–8 representative panels</div>
+            </header>
+
+            <div class="grid">
+                <div class="card">
+                    <h3>Landing / Hero</h3>
+                    <div class="badge">Trusted by 353k+ users</div>
+                    <h2>Create viral faceless videos on auto‑pilot</h2>
+                    <div class="sub">
+                        Get your generated video in less than 5 minutes.
+                    </div>
+                    <div style="margin-top: 10px">
+                        <span class="btn">Create your first video</span>
+                        <span class="btn ghost" style="margin-left: 8px"
+                            >See it in action</span
+                        >
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Proof / Metrics</h3>
+                    <div class="mini-grid">
+                        <div class="mini-card">Channel A · 2.1M views</div>
+                        <div class="mini-card">Channel B · 1.3M views</div>
+                        <div class="mini-card">Channel C · 980k views</div>
+                    </div>
+                    <div style="margin-top: 10px" class="sub">
+                        We actually get views — real results from real creators.
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Comparison</h3>
+                    <div class="mini-grid">
+                        <div class="mini-card">
+                            Hiring editors · expensive + slow
+                        </div>
+                        <div class="mini-card">DIY tools · time‑heavy</div>
+                        <div class="mini-card">
+                            FacelessReels · fast + automated
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>How it Works</h3>
+                    <ol
+                        style="
+                            margin: 6px 0 0;
+                            padding-left: 18px;
+                            color: var(--muted);
+                        "
+                    >
+                        <li>Create a Series</li>
+                        <li>Customize</li>
+                        <li>Watch your socials grow</li>
+                    </ol>
+                </div>
+
+                <div class="card">
+                    <h3>Pricing / CTA</h3>
+                    <div class="sub">
+                        Simple pricing with a clear path to checkout.
+                    </div>
+                    <div style="margin-top: 10px">
+                        <span class="btn">Start now</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Checkout (Stripe)</h3>
+                    <div class="sub">
+                        Payment‑first checkout with pre‑selected plan.
+                    </div>
+                    <div style="margin-top: 10px" class="mini-card">
+                        Stripe hosted checkout UI
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Post‑Payment Auth</h3>
+                    <div class="sub">Email + Google OAuth</div>
+                    <div style="margin-top: 10px" class="mini-card">
+                        Auth form
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Dashboard Placeholder</h3>
+                    <div class="mini-card">
+                        High demand · Limited availability
+                    </div>
+                    <div class="sub" style="margin-top: 8px">
+                        Account info + status
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

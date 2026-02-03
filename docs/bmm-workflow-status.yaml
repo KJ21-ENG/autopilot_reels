@@ -34,11 +34,12 @@ workflow_status:
 
   # Phase 1: Planning
   prd: /home/darko/Code/autopilotreels/docs/PRD.md
+  create-epics-and-stories: /home/darko/Code/autopilotreels/docs/epics.md
   validate-prd: optional
-  create-design: conditional
+  create-design: /home/darko/Code/autopilotreels/docs/ux-design-specification.md
 
   # Phase 2: Solutioning
-  create-architecture: required
+  create-architecture: "/home/darko/Code/autopilotreels/docs/bmm-architecture-2026-02-02.md"
   validate-architecture: optional
   solutioning-gate-check: required
 
