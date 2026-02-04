@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { ANALYTICS_EVENT_NAMES, emitAnalyticsEvent } from "@/lib/analytics";
 const plans = [
     {
         name: "Starter",
@@ -148,6 +149,15 @@ export default function Pricing() {
                                     ? "bg-purple-600 hover:bg-purple-700 text-white"
                                     : "bg-gray-100 hover:bg-gray-200 text-gray-900"
                                     }`}
+                                onClick={() => {
+                                    void emitAnalyticsEvent(
+                                        {
+                                            event_name: ANALYTICS_EVENT_NAMES.ctaClick,
+                                            metadata: { location: "pricing", plan: plan.name },
+                                        },
+                                        { useBeacon: true, beaconOnly: true }
+                                    );
+                                }}
                             >
                                 {plan.cta}
                             </a>

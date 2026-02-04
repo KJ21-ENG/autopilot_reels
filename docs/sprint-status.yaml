@@ -38,15 +38,15 @@ story_location: "{project-root}/docs/stories"
 development_status:
   epic-1: contexted
   1-1-initialize-project-runtime-environment-scaffolding: done
-  1-2-set-up-deployment-baseline-and-preview-pipeline: backlog
-  1-3-add-baseline-route-protection-scaffolds: backlog
-  1-4-establish-baseline-analytics-plumbing: backlog
+  1-2-set-up-deployment-baseline-and-preview-pipeline: done
+  1-3-add-baseline-route-protection-scaffolds: done
+  1-4-establish-baseline-analytics-plumbing: review
   1-5-define-database-schema-and-migrations: backlog
   epic-1-retrospective: optional
 
-  epic-2: backlog
-  2-1-add-mvp-transparency-disclosures-across-key-surfaces: backlog
-  2-2-perform-accessibility-qa-for-marketing-and-trust-pages: backlog
+  epic-2: done
+  2-1-add-mvp-transparency-disclosures-across-key-surfaces: done
+  2-2-perform-accessibility-qa-for-marketing-and-trust-pages: done
   epic-2-retrospective: optional
 
   epic-3: backlog

@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 
+import { ANALYTICS_EVENT_NAMES, emitAnalyticsEvent } from "@/lib/analytics";
+
 export default function Header() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
@@ -41,6 +43,15 @@ export default function Header() {
           <Link
             href="/checkout"
             className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
+            onClick={() => {
+              void emitAnalyticsEvent(
+                {
+                  event_name: ANALYTICS_EVENT_NAMES.ctaClick,
+                  metadata: { location: "header" },
+                },
+                { useBeacon: true, beaconOnly: true }
+              );
+            }}
           >
             Get Started
           </Link>

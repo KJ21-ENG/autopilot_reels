@@ -1,5 +1,7 @@
 "use client";
 
+import { ANALYTICS_EVENT_NAMES, emitAnalyticsEvent } from "@/lib/analytics";
+
 const videoExamples = [
     { id: 1, title: "Ancient Wars", niche: "History" },
     { id: 2, title: "Hidden Secrets", niche: "Mystery" },
@@ -74,6 +76,15 @@ export default function Hero() {
                     <a
                         href="/checkout"
                         className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold px-8 py-4 rounded-lg text-lg transition-all hover:scale-105 shadow-lg shadow-purple-200"
+                        onClick={() => {
+                            void emitAnalyticsEvent(
+                                {
+                                    event_name: ANALYTICS_EVENT_NAMES.ctaClick,
+                                    metadata: { location: "hero" },
+                                },
+                                { useBeacon: true, beaconOnly: true }
+                            );
+                        }}
                     >
                         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M12 2L9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2z" />

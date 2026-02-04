@@ -7,6 +7,44 @@
 - `frontend/next.config.ts` has no custom env handling; environment loading relies on default Next.js behavior.
 - `frontend/README.md` is still the default Next.js template, so project-specific setup is captured here in `docs/`.
 
+## Deployment Baseline (Preview + Production)
+
+### Deployment Configuration Audit (2026-02-04)
+
+- No `vercel.json` is present in the repo; deployment configuration lives in the Vercel project settings.
+- The deployment target is the existing `frontend/` Next.js app; this must remain the only build surface.
+- Build output and routing assume the `frontend/` app is the project root for preview/production builds.
+
+**Potential Gaps / Checks**
+
+- Ensure Vercel "Root Directory" is set to `frontend/` (if unset, builds may target repo root and miss routes/assets).
+- Confirm the Build Command is `npm run build` and the Install Command is `npm install` (run within `frontend/`).
+- Verify Preview + Production environment variables are set to match `.env.example` keys.
+- Confirm Node.js Version is pinned to `24.x` in Vercel project settings.
+
+### Preview Deployment Evidence (2026-02-04)
+
+- Root Directory: default (empty)
+- Build Command: default (Vercel auto-detect)
+- Install Command: default (Vercel auto-detect)
+- Node.js Version: `24.x`
+- Preview URL: https://nextjs-boilerplate-mu-flame-76.vercel.app/
+
+### Required Environment Variables (Preview + Production)
+
+Use `.env.example` as the source of truth for required keys. Set these in both Preview and Production:
+
+- `STRIPE_SECRET_KEY`
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
+- `STRIPE_WEBHOOK_SECRET`
+- `STRIPE_PRICE_ID`
+- `STRIPE_PRODUCT_ID`
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+
+No secrets are stored in the repo. Populate values in the Vercel dashboard for each environment.
+
 ## Runtime Pinning
 
 - **Local**: use Node `24.13.0` (see `.nvmrc`).
@@ -28,6 +66,7 @@ npm install
 - Node runtime set to `24.x`.
 - Environment variables defined based on `.env.example`.
 - Build command: `npm run build` from `frontend/`.
+- Root directory set to `frontend/` for Vercel previews/production.
 
 ## Build Verification
 

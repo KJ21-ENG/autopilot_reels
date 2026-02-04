@@ -9,11 +9,13 @@ import StudioPreview from "@/components/StudioPreview";
 import Pricing from "@/components/Pricing";
 import FAQ from "@/components/FAQ";
 import Footer from "@/components/Footer";
+import LandingAnalytics from "@/components/LandingAnalytics";
 
 export default function Home() {
   return (
     <>
       <Header />
+      <LandingAnalytics />
       <main>
         {/* ATTENTION - Hook */}
         <Hero />
