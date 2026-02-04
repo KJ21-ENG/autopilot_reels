@@ -40,8 +40,8 @@ development_status:
   1-1-initialize-project-runtime-environment-scaffolding: done
   1-2-set-up-deployment-baseline-and-preview-pipeline: done
   1-3-add-baseline-route-protection-scaffolds: done
-  1-4-establish-baseline-analytics-plumbing: review
-  1-5-define-database-schema-and-migrations: backlog
+  1-4-establish-baseline-analytics-plumbing: done
+  1-5-define-database-schema-and-migrations: done
   epic-1-retrospective: optional
 
   epic-2: done
@@ -50,8 +50,8 @@ development_status:
   epic-2-retrospective: optional
 
   epic-3: backlog
-  3-1-configure-stripe-checkout-session-creation: backlog
-  3-2-implement-checkout-success-and-cancel-handling: backlog
+  3-1-configure-stripe-checkout-session-creation: done
+  3-2-implement-checkout-success-and-cancel-handling: done
   3-3-store-payment-metadata-for-user-linkage: backlog
   3-4-validate-payment-first-flow-end-to-end: backlog
   3-5-harden-stripe-webhook-security-and-verification-testing: backlog

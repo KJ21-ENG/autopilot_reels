@@ -74,7 +74,7 @@ export default function Hero() {
                 {/* CTA Button */}
                 <div className="mb-2">
                     <a
-                        href="/checkout"
+                        href="/checkout?source=hero"
                         className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold px-8 py-4 rounded-lg text-lg transition-all hover:scale-105 shadow-lg shadow-purple-200"
                         onClick={() => {
                             void emitAnalyticsEvent(

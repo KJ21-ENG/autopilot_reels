@@ -268,6 +268,24 @@ So that I can trust it for demand validation.
 
 **Technical Notes:** Use Stripe test mode; document any known edge cases.
 
+### Story 3.6: Embed Stripe Checkout for redirect-based payment methods
+
+As a product owner,
+I want redirect-based payment methods to return inside the app,
+So that customers do not end up in Stripe-hosted tabs after authentication.
+
+**Acceptance Criteria:**
+
+**Given** a Stripe Checkout session that supports redirect-based methods (e.g., Cash App Pay),
+**When** the user completes or fails authentication,
+**Then** the return flow lands back inside the app (not a Stripe-hosted Checkout page).
+
+**And** the checkout page renders embedded Checkout UI in `/checkout` using Stripe's embedded mode.
+
+**Prerequisites:** Story 3.1, Story 3.2
+
+**Technical Notes:** Use `ui_mode: embedded` with `return_url` and handle the return route inside the app.
+
 ### Story 3.5: Harden Stripe webhook security and verification testing
 
 As a developer,

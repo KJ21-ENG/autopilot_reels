@@ -96,7 +96,12 @@ export default function Pricing() {
 
                 {/* Pricing Cards */}
                 <div className="grid md:grid-cols-3 gap-6">
-                    {plans.map((plan, index) => (
+                    {plans.map((plan, index) => {
+                        const planHref = `/checkout?source=pricing&plan=${encodeURIComponent(
+                            plan.name
+                        )}&billing=${isYearly ? "yearly" : "monthly"}`;
+
+                        return (
                         <div
                             key={index}
                             className={`relative rounded-2xl p-8 transition-all flex flex-col h-full ${plan.highlighted
@@ -144,7 +149,7 @@ export default function Pricing() {
 
                             {/* CTA Button */}
                             <a
-                                href="/checkout"
+                                href={planHref}
                                 className={`w-full py-3 rounded-lg font-semibold transition-all mt-auto ${plan.highlighted
                                     ? "bg-purple-600 hover:bg-purple-700 text-white"
                                     : "bg-gray-100 hover:bg-gray-200 text-gray-900"
@@ -162,7 +167,7 @@ export default function Pricing() {
                                 {plan.cta}
                             </a>
                         </div>
-                    ))}
+                    )})}
                 </div>
 
 

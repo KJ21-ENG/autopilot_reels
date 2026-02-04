@@ -161,6 +161,14 @@ Aligns with the architecture decisions: use the existing Next.js App Router app 
 5. Baseline analytics plumbing is defined with an event schema and capture mechanism.
 6. Supabase migrations define `payments`, `user_payment_links`, and `events` tables with required constraints.
 
+**Story-Level Mapping (Epic 1)**
+
+- Story 1.1 → AC1, AC2
+- Story 1.2 → AC3
+- Story 1.3 → AC4
+- Story 1.4 → AC5
+- Story 1.5 → AC6
+
 ## Traceability Mapping
 
 | Acceptance Criteria | Spec Section(s) | Component(s)/API(s) | Test Idea |

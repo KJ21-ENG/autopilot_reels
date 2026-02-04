@@ -1,6 +1,6 @@
 # Story 1.4: Establish baseline analytics plumbing
 
-Status: review
+Status: done
 
 ## Story
 
@@ -88,22 +88,106 @@ so that funnel events can be wired quickly once checkout and auth are live.
 - ✅ Updated CTA tracking to use `sendBeacon` only to avoid navigation race conditions; tests + lint green.
 
 ### File List
-- frontend/lib/analytics/events.ts
-- frontend/lib/analytics/validate.ts
-- frontend/lib/analytics/emit.ts
-- frontend/lib/analytics/index.ts
-- frontend/lib/analytics/validate.test.ts
-- frontend/lib/analytics/docs.test.ts
-- frontend/app/api/analytics/event/route.ts
-- frontend/app/api/analytics/event/route.test.ts
-- frontend/components/LandingAnalytics.tsx
-- frontend/app/page.tsx
-- frontend/components/Header.tsx
-- frontend/components/Hero.tsx
-- frontend/components/Pricing.tsx
-- frontend/docs/analytics.md
+- NEW: frontend/lib/analytics/events.ts
+- NEW: frontend/lib/analytics/validate.ts
+- NEW: frontend/lib/analytics/emit.ts
+- NEW: frontend/lib/analytics/index.ts
+- NEW: frontend/lib/analytics/validate.test.ts
+- NEW: frontend/lib/analytics/docs.test.ts
+- NEW: frontend/app/api/analytics/event/route.ts
+- NEW: frontend/app/api/analytics/event/route.test.ts
+- NEW: frontend/components/LandingAnalytics.tsx
+- NEW: frontend/app/page.tsx
+- NEW: frontend/components/Header.tsx
+- NEW: frontend/components/Hero.tsx
+- NEW: frontend/components/Pricing.tsx
+- NEW: frontend/docs/analytics.md
 
 ## Change Log
 
 - 2026-02-04: Draft created from Epic 1 story 1.4 requirements.
 - 2026-02-04: Implemented baseline analytics plumbing, docs, and tests; added CTA + landing instrumentation.
+- 2026-02-04: Senior Developer Review notes appended.
+
+## Senior Developer Review (AI)
+
+**Reviewer:** darko  
+**Date:** 2026-02-04  
+**Outcome:** Approve  
+**Justification:** All acceptance criteria are fully implemented with supporting tests and documentation. Tasks marked complete are verified with code evidence. No architectural or security issues found.
+
+### Summary
+Baseline analytics plumbing is in place with a documented schema, consistent event payload validation, a `/api/analytics/event` route handler returning the `{ data, error }` envelope, and landing/CTA instrumentation. Lightweight unit tests cover validation, API response shape, and documentation presence. File List was reviewed and found complete for this story. Code quality review performed; no issues found.
+
+**Warning:** No story context file found for this story; review proceeded without a context XML.
+
+Docs reviewed: `docs/tech-spec-epic-1.md`, `docs/architecture.md`.
+
+### Key Findings
+
+- **HIGH:** None
+- **MEDIUM:** None
+- **LOW:** None
+
+### Acceptance Criteria Coverage
+
+| AC# | Description | Status | Evidence |
+| --- | --- | --- | --- |
+| 1 | Capture key actions (landing view, CTA click) in consistent format and extendable for later funnel steps | IMPLEMENTED | `frontend/components/LandingAnalytics.tsx:7-13`, `frontend/app/page.tsx:12-19`, `frontend/components/Hero.tsx:74-86`, `frontend/components/Header.tsx:42-53`, `frontend/components/Pricing.tsx:145-159`, `frontend/lib/analytics/events.ts:1-30`, `frontend/app/api/analytics/event/route.ts:9-20` |
+| 2 | Tracking system documented for future story implementation | IMPLEMENTED | `frontend/docs/analytics.md:1-48`, `frontend/lib/analytics/events.ts:17-24` |
+
+**Summary:** 2 of 2 acceptance criteria fully implemented.
+
+### Task Completion Validation
+
+| Task | Marked As | Verified As | Evidence |
+| --- | --- | --- | --- |
+| Define baseline event schema and payload shape + document it | Completed | VERIFIED COMPLETE | `frontend/lib/analytics/events.ts:10-24`, `frontend/docs/analytics.md:6-26` |
+| Subtask: confirm event names align with funnel stages | Completed | VERIFIED COMPLETE | `frontend/lib/analytics/events.ts:1-30`, `frontend/docs/analytics.md:23-31` |
+| Implement baseline analytics plumbing + API route | Completed | VERIFIED COMPLETE | `frontend/lib/analytics/emit.ts:8-45`, `frontend/lib/analytics/validate.ts:19-69`, `frontend/app/api/analytics/event/route.ts:9-20` |
+| Subtask: console-only logging | Completed | VERIFIED COMPLETE | `frontend/app/api/analytics/event/route.ts:18-22` |
+| Add minimal usage guidance | Completed | VERIFIED COMPLETE | `frontend/docs/analytics.md:28-48` |
+| Testing: unit coverage for validation and API response | Completed | VERIFIED COMPLETE | `frontend/lib/analytics/validate.test.ts:5-37`, `frontend/app/api/analytics/event/route.test.ts:5-39` |
+| Subtask: documentation-focused check | Completed | VERIFIED COMPLETE | `frontend/lib/analytics/docs.test.ts:8-20` |
+
+**Summary:** 7 of 7 completed tasks verified, 0 questionable, 0 falsely marked complete.
+
+### Test Coverage and Gaps
+
+- Validation logic coverage: `frontend/lib/analytics/validate.test.ts:5-37`
+- API response shape coverage: `frontend/app/api/analytics/event/route.test.ts:5-39`
+- Documentation coverage: `frontend/lib/analytics/docs.test.ts:8-20`
+- No E2E required for this baseline plumbing story.
+
+### Tech Stack Detected
+
+- Next.js App Router (Next.js 16.x)
+- React 19.x
+- TypeScript 5.x
+
+### Architectural Alignment
+
+- Matches architecture location patterns (`frontend/lib/analytics/*`, `frontend/app/api/analytics/event/route.ts`).
+- `{ data, error }` envelope is preserved at the API boundary.
+- Logging stays console-only.
+
+### Security Notes
+
+- Payload validation enforces required `event_name` format and metadata shape (`frontend/lib/analytics/validate.ts:19-69`).
+- Endpoint accepts only JSON and returns a consistent error envelope on validation failures.
+
+### Best-Practices and References
+
+- Next.js Route Handlers (App Router): https://nextjs.org/docs/app/getting-started/route-handlers
+- Next.js proxy convention (middleware deprecation): https://nextjs.org/docs/app/api-reference/file-conventions/middleware
+- Beacon API (analytics-safe telemetry): https://developer.mozilla.org/en-US/docs/Web/API/Beacon_API.
+- `navigator.sendBeacon()` (analytics delivery semantics): https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon
+- Web fallback used for best-practices lookup (no MCP sources available).
+
+### Action Items
+
+**Code Changes Required:**
+- None
+
+**Advisory Notes:**
+- Note: Consider migrating `middleware.ts` to `proxy.ts` per Next.js deprecation guidance in a future story (not required for this AC set).
