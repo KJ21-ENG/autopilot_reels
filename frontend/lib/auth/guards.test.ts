@@ -3,7 +3,11 @@ import path from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { getAuthStateFromCookies, getProtectedRouteDecision } from "./guards";
+import {
+  getAuthStateFromCookies,
+  getProtectedRouteDecision,
+  resolveVerifiedAuthState,
+} from "./guards";
 
 const makeCookies = (values: Record<string, string>) => ({
   get: (name: string) => (values[name] ? { value: values[name] } : undefined),
@@ -50,6 +54,65 @@ describe("getProtectedRouteDecision", () => {
 
     expect(decision.allowed).toBe(true);
     expect(decision.reason).toBe("authorized");
+  });
+});
+
+describe("resolveVerifiedAuthState", () => {
+  it("denies access when session token cannot be verified", async () => {
+    const authState = await resolveVerifiedAuthState(
+      makeCookies({
+        autopilotreels_session: "forged-token",
+        autopilotreels_paid: "1",
+      }),
+      {
+        getSupabaseServer: () => ({
+          auth: {
+            getUser: async () => ({ data: { user: null }, error: { message: "invalid token" } }),
+          },
+          from: () => ({
+            select: () => ({
+              eq: () => ({
+                limit: async () => ({ data: null, error: null }),
+              }),
+            }),
+          }),
+        }),
+      }
+    );
+
+    expect(authState).toEqual({
+      isKnown: false,
+      hasSession: false,
+      hasPaid: false,
+    });
+  });
+
+  it("requires verified paid linkage to mark user paid", async () => {
+    const authState = await resolveVerifiedAuthState(
+      makeCookies({
+        autopilotreels_session: "valid-token",
+      }),
+      {
+        getSupabaseServer: () => ({
+          auth: {
+            getUser: async () => ({ data: { user: { id: "user-1" } }, error: null }),
+          },
+          from: () => ({
+            select: () => ({
+              eq: () => ({
+                limit: async () => ({ data: [{ id: "upl-1" }], error: null }),
+              }),
+            }),
+          }),
+        }),
+      }
+    );
+
+    expect(authState).toEqual({
+      isKnown: true,
+      hasSession: true,
+      hasPaid: true,
+    });
   });
 });
 

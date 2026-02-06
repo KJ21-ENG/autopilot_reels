@@ -67,8 +67,10 @@ describe("checkout result pages", () => {
   it("renders a success confirmation when session_id is present", async () => {
     const markup = await renderSuccess("?session_id=cs_test_123");
 
-    expect(markup).toContain("Payment confirmed");
-    expect(markup).toContain("/auth");
+    expect(markup).toContain("Your plan is active. Let’s finish setup.");
+    expect(markup).toContain(
+      "/auth?redirect=/dashboard&amp;post_payment=1&amp;session_id=cs_test_123"
+    );
   });
 
   it("links success and cancel pages to the correct destinations", async () => {
@@ -77,8 +79,10 @@ describe("checkout result pages", () => {
       renderCancel(),
     ]);
 
-    expect(successMarkup).toContain("href=\"/auth\"");
+    expect(successMarkup).toContain("href=\"/auth?redirect=/dashboard&amp;post_payment=1\"");
+    expect(successMarkup).toContain("Continue to Account Setup");
     expect(cancelMarkup).toContain("href=\"/#pricing\"");
+    expect(cancelMarkup).toContain("Back to Pricing");
   });
 
   it("hides the main confirmation when rendered in the auth-only tab", async () => {
@@ -103,7 +107,7 @@ describe("checkout result pages", () => {
     const markup = await renderSuccess("");
 
     expect(markup).toContain("Close This Tab");
-    expect(markup).not.toContain("Payment confirmed");
+    expect(markup).not.toContain("Your plan is active. Let’s finish setup.");
   });
 
   it("shows confirmation when checkout was initiated in this tab", async () => {
@@ -118,7 +122,7 @@ describe("checkout result pages", () => {
       sessionStorage: sessionStorageMock as unknown as Storage,
     });
 
-    expect(markup).toContain("Payment confirmed");
+    expect(markup).toContain("Your plan is active. Let’s finish setup.");
     expect(markup).not.toContain("Close This Tab");
   });
 
@@ -151,7 +155,7 @@ describe("checkout result pages", () => {
     });
 
     expect(markup).toContain("Close This Tab");
-    expect(markup).not.toContain("Payment confirmed");
+    expect(markup).not.toContain("Your plan is active. Let’s finish setup.");
   });
 
   it("shows confirmation when checkout timestamp is stale", async () => {
@@ -166,7 +170,7 @@ describe("checkout result pages", () => {
       sessionStorage: sessionStorageMock as unknown as Storage,
     });
 
-    expect(markup).toContain("Thanks for checking out");
+    expect(markup).toContain("Thanks for your order");
     expect(markup).not.toContain("Close This Tab");
   });
 });

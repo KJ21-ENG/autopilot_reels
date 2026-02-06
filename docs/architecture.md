@@ -197,6 +197,13 @@ Primary tables:
 - `user_payment_links`: `id`, `user_id`, `payment_id`, `linked_at`
 - `events`: `id`, `event_name`, `user_id`, `session_id`, `metadata`, `created_at`
 
+### Payment Linkage Expectations
+
+- Payments are stored first via Stripe webhooks in the `payments` table using `stripe_session_id` as the stable lookup key.
+- User linkage is created later by inserting into `user_payment_links` with `user_id` (Supabase Auth) and `payment_id` (from `payments.id`).
+- Linkage creation does not happen in Epic 3; it is expected in Epic 4 when auth is introduced.
+- Payment lookup by email is restricted to internal tooling via `x-payment-lookup-token` matching `PAYMENT_LOOKUP_TOKEN`.
+
 ## API Contracts
 
 `POST /api/stripe/checkout` → `{ data: { checkout_url }, error: null }`  

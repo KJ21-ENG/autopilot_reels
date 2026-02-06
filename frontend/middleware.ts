@@ -1,22 +1,61 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getAuthStateFromCookies, getProtectedRouteDecision } from "@/lib/auth/guards";
+import {
+    getGuestRouteDecision,
+    getProtectedRouteDecision,
+    resolveVerifiedAuthState,
+} from "@/lib/auth/guards";
+import { getSupabaseServer } from "@/lib/supabase/server";
 
-export function middleware(request: NextRequest) {
-  const authState = getAuthStateFromCookies(request.cookies);
-  const decision = getProtectedRouteDecision({
-    route: request.nextUrl.pathname,
-    auth: authState,
-  });
+export async function middleware(request: NextRequest) {
+    const { pathname } = request.nextUrl;
 
-  if (decision.allowed) {
+    const authState = await resolveVerifiedAuthState(request.cookies, {
+        getSupabaseServer,
+    });
+
+    // Handle Protected Routes (/dashboard)
+    if (pathname.startsWith("/dashboard")) {
+        const decision = getProtectedRouteDecision({
+            route: pathname,
+            auth: authState,
+        });
+
+        if (decision.allowed || decision.reason === "unpaid") {
+            return NextResponse.next();
+        }
+
+        const redirectUrl = new URL(
+            decision.redirectTo ?? "/auth",
+            request.nextUrl.origin,
+        );
+        return NextResponse.redirect(redirectUrl);
+    }
+
+    // Handle Guest Routes (/, /auth, /checkout)
+    const isGuestRoute =
+        pathname === "/" || pathname === "/auth" || pathname === "/checkout";
+
+    if (isGuestRoute) {
+        const decision = getGuestRouteDecision({
+            route: pathname,
+            auth: authState,
+        });
+
+        if (decision.allowed) {
+            return NextResponse.next();
+        }
+
+        const redirectUrl = new URL(
+            decision.redirectTo ?? "/dashboard/series",
+            request.nextUrl.origin,
+        );
+        return NextResponse.redirect(redirectUrl);
+    }
+
     return NextResponse.next();
-  }
-
-  const redirectUrl = new URL(decision.redirectTo ?? "/auth", request.nextUrl.origin);
-  return NextResponse.redirect(redirectUrl);
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*"],
+    matcher: ["/", "/auth", "/checkout", "/dashboard/:path*"],
 };
