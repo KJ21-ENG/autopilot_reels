@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { createServerClient } from "@supabase/ssr";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 // --- Inlined Types & Constants from @/lib/auth/guards ---
@@ -205,7 +205,7 @@ export async function middleware(request: NextRequest) {
                         return request.cookies.getAll();
                     },
                     setAll(cookiesToSet) {
-                        cookiesToSet.forEach(({ name, value, options }) =>
+                        cookiesToSet.forEach(({ name, value }) =>
                             request.cookies.set(name, value),
                         );
                         response = NextResponse.next({

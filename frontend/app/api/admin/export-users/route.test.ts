@@ -23,14 +23,32 @@ vi.mock("@supabase/supabase-js", () => ({
     createClient: vi.fn(() => mockSupabase),
 }));
 
+interface MockPayment {
+    created_at: string;
+    price_id: string;
+    email: string;
+    amount: number;
+    currency: string;
+    status: string;
+}
+
+interface MockChain {
+    select: ReturnType<typeof vi.fn>;
+    eq: ReturnType<typeof vi.fn>;
+    single: ReturnType<typeof vi.fn>;
+    limit: ReturnType<typeof vi.fn>;
+    in: ReturnType<typeof vi.fn>;
+    order: ReturnType<typeof vi.fn>;
+}
+
 const createMockFrom = (options: {
     isAdmin: boolean;
     hasPaid: boolean;
-    payments?: any[];
+    payments?: MockPayment[];
 }) => {
     return (table: string) => {
         if (table === "user_roles") {
-            const chain: any = {};
+            const chain = {} as MockChain;
             chain.select = vi.fn().mockReturnValue(chain);
             chain.eq = vi.fn().mockReturnValue(chain);
             chain.single = vi.fn().mockResolvedValue({
@@ -40,7 +58,7 @@ const createMockFrom = (options: {
             return chain;
         }
         if (table === "user_payment_links") {
-            const chain: any = {};
+            const chain = {} as MockChain;
             chain.select = vi.fn().mockReturnValue(chain);
             chain.eq = vi.fn().mockReturnValue(chain);
             chain.limit = vi.fn().mockResolvedValue({
@@ -50,7 +68,7 @@ const createMockFrom = (options: {
             return chain;
         }
         if (table === "payments") {
-            const chain: any = {};
+            const chain = {} as MockChain;
             chain.select = vi.fn().mockReturnValue(chain);
             chain.in = vi.fn().mockReturnValue(chain);
             chain.order = vi.fn().mockResolvedValue({
