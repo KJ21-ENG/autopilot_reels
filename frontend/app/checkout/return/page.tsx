@@ -2,23 +2,22 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { loadStripe } from "@stripe/stripe-js";
-import {
-    EmbeddedCheckoutProvider,
-    EmbeddedCheckout,
-} from "@stripe/react-stripe-js";
+// import { loadStripe } from "@stripe/stripe-js";
+import {} from // EmbeddedCheckoutProvider,
+// EmbeddedCheckout,
+"@stripe/react-stripe-js";
 import Link from "next/link";
 import PrimaryLinkButton from "../../../components/PrimaryLinkButton";
 
-const stripePromise = loadStripe(
-    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "",
-);
+// const stripePromise = loadStripe(
+//     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "",
+// );
 
 export default function CheckoutReturnPage() {
     const searchParams = useSearchParams();
     const sessionId = searchParams.get("session_id");
     const [status, setStatus] = useState<string | null>(null);
-    const [clientSecret, setClientSecret] = useState<string | null>(null);
+    // const [clientSecret, setClientSecret] = useState<string | null>(null);
     const [customerEmail, setCustomerEmail] = useState<string | null>(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [emailStatus, setEmailStatus] = useState<{
@@ -38,7 +37,7 @@ export default function CheckoutReturnPage() {
             .then(res => res.json())
             .then(data => {
                 setStatus(data.status);
-                setClientSecret(data.client_secret);
+                // setClientSecret(data.client_secret);
                 setCustomerEmail(data.customer_email);
             })
             .catch(() => {
@@ -106,7 +105,10 @@ export default function CheckoutReturnPage() {
         // Check if another tab has already claimed this session
         const processedKey = `stripe_session_processed_${sessionId}`;
         if (localStorage.getItem(processedKey)) {
-            setIsDuplicate(true);
+            // Use setTimeout to avoid synchronous setState in effect body warning
+            setTimeout(() => {
+                setIsDuplicate(true);
+            }, 0);
             return;
         }
 
@@ -114,7 +116,10 @@ export default function CheckoutReturnPage() {
         localStorage.setItem(processedKey, "true");
         // Broadcast completion for this session to other tabs
         localStorage.setItem(`stripe_session_completed_${sessionId}`, "true");
-        setEmailStatus({ state: "sending", message: "" });
+
+        setTimeout(() => {
+            setEmailStatus({ state: "sending", message: "" });
+        }, 0);
 
         fetch("/api/auth/resume/request", {
             method: "POST",
@@ -229,8 +234,8 @@ export default function CheckoutReturnPage() {
                     </h1>
 
                     <p className="text-gray-500 mb-8 text-lg leading-relaxed">
-                        It looks like your payment wasn't finalized. This can
-                        happen if the payment window was closed to early or
+                        It looks like your payment wasn&apos;t finalized. This
+                        can happen if the payment window was closed to early or
                         canceled.
                     </p>
 
