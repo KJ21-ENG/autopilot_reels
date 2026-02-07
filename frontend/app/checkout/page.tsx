@@ -1,17 +1,25 @@
 "use client";
 
 import { Suspense, useEffect, useMemo, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { loadStripe } from "@stripe/stripe-js";
+import {
+    EmbeddedCheckoutProvider,
+    EmbeddedCheckout,
+} from "@stripe/react-stripe-js";
 
 import { ANALYTICS_EVENT_NAMES, emitAnalyticsEvent } from "@/lib/analytics";
 
+// Initialize Stripe outside of component
+const stripePromise = loadStripe(
+    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? "",
+);
+
 type CheckoutResponse =
-    | { data: { checkout_url: string }; error: null }
+    | { data: { client_secret: string }; error: null }
     | { data: null; error: { code: string; message: string } };
 
-const CHECKOUT_LOCK_MAX_AGE_MS = 90 * 1000;
-let activeCheckoutPromise: Promise<string> | null = null;
 const plans = [
     {
         name: "Starter",
@@ -65,167 +73,74 @@ const plans = [
 ];
 
 function CheckoutContent() {
-    const router = useRouter();
     const searchParams = useSearchParams();
-    const [hasError, setHasError] = useState(false);
-    const [isWaiting, setIsWaiting] = useState(false);
-    const [selectedBilling, setSelectedBilling] = useState<
-        "monthly" | "yearly"
-    >(searchParams.get("billing") === "yearly" ? "yearly" : "monthly");
+    const [clientSecret, setClientSecret] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    // Initialize state with search params if available, else default to monthly
+    const [billingMode, setBillingMode] = useState<"monthly" | "yearly">(() => {
+        return searchParams.get("billing") === "yearly" ? "yearly" : "monthly";
+    });
 
     const payload = useMemo(() => {
         const plan = searchParams.get("plan") ?? undefined;
-        const billingParam = searchParams.get("billing");
-        const billing =
-            billingParam === "yearly" || billingParam === "monthly"
-                ? billingParam
-                : undefined;
-        const source = searchParams.get("source") ?? undefined;
+        // If the user hasn't selected a plan, we can't create a session yet.
+        // But if they have, we use the CURRENT state for billing, not just the URL param.
+        // However, the original code used URL params to drive everything.
+        // Let's stick to using state for the UI toggle, and pass that to the API.
 
-        return { plan, billing, source };
-    }, [searchParams]);
+        const source = searchParams.get("source") ?? "checkout";
+        return { plan, billing: billingMode, source };
+    }, [searchParams, billingMode]);
+
     const hasSelectedPlan = Boolean(payload.plan);
-    const source = payload.source ?? "checkout";
 
     useEffect(() => {
         if (!hasSelectedPlan) {
+            setClientSecret(null);
             return;
         }
 
         let cancelled = false;
 
-        const startCheckout = async () => {
+        const createSession = async () => {
             try {
-                const alreadyInitiated =
-                    sessionStorage.getItem("checkout_initiated") === "1";
-                if (alreadyInitiated) {
-                    let shouldRecoverFromStaleLock = true;
-                    try {
-                        const startedAtRaw = localStorage.getItem(
-                            "checkout_started_at",
-                        );
-                        const startedAt = startedAtRaw
-                            ? Number.parseInt(startedAtRaw, 10)
-                            : NaN;
-                        const lockAge = Number.isNaN(startedAt)
-                            ? Number.POSITIVE_INFINITY
-                            : Date.now() - startedAt;
-                        shouldRecoverFromStaleLock =
-                            lockAge > CHECKOUT_LOCK_MAX_AGE_MS;
-                    } catch (error) {
-                        console.warn(
-                            "Unable to read checkout start timestamp.",
-                            error,
-                        );
-                    }
+                // Clear any previous error/secret when switching plans/billing
+                setError(null);
 
-                    if (!shouldRecoverFromStaleLock) {
-                        if (activeCheckoutPromise) {
-                            const checkoutUrl = await activeCheckoutPromise;
-                            if (!cancelled) {
-                                window.location.assign(checkoutUrl);
-                            }
-                            return;
-                        }
+                const response = await fetch("/api/stripe/checkout", {
+                    method: "POST",
+                    headers: { "content-type": "application/json" },
+                    body: JSON.stringify(payload),
+                });
+                const body = (await response.json()) as CheckoutResponse;
 
-                        if (!cancelled) {
-                            setIsWaiting(true);
-                        }
-                        return;
-                    }
-
-                    sessionStorage.removeItem("checkout_initiated");
-                    try {
-                        localStorage.removeItem("checkout_started_at");
-                    } catch (error) {
-                        console.warn(
-                            "Unable to clear stale checkout lock.",
-                            error,
-                        );
-                    }
+                if (!response.ok || body.error) {
+                    throw new Error(body.error?.message ?? "Checkout failed.");
                 }
 
-                sessionStorage.setItem("checkout_initiated", "1");
-                try {
-                    localStorage.setItem(
-                        "checkout_started_at",
-                        Date.now().toString(),
-                    );
-                } catch (error) {
-                    console.warn(
-                        "Unable to persist checkout start timestamp.",
-                        error,
-                    );
-                }
-
-                const requestPromise =
-                    activeCheckoutPromise ??
-                    (async () => {
-                        const response = await fetch("/api/stripe/checkout", {
-                            method: "POST",
-                            headers: { "content-type": "application/json" },
-                            body: JSON.stringify(payload),
-                        });
-                        const body =
-                            (await response.json()) as CheckoutResponse;
-
-                        if (!response.ok || body.error) {
-                            throw new Error(
-                                body.error?.message ?? "Checkout failed.",
-                            );
-                        }
-
-                        const checkoutUrl = body.data.checkout_url;
-                        if (!checkoutUrl) {
-                            throw new Error("Missing Stripe checkout URL.");
-                        }
-
-                        return checkoutUrl;
-                    })();
-
-                activeCheckoutPromise = requestPromise;
-                const checkoutUrl = await requestPromise;
-                await new Promise(resolve => setTimeout(resolve, 600));
                 if (!cancelled) {
-                    window.location.assign(checkoutUrl);
+                    setClientSecret(body.data.client_secret);
                 }
-            } catch (error) {
-                console.error("Checkout redirect failed.", error);
+            } catch (err: unknown) {
+                console.error("Checkout session creation failed.", err);
                 if (!cancelled) {
-                    setHasError(true);
-                    setIsWaiting(false);
-                }
-                sessionStorage.removeItem("checkout_initiated");
-                try {
-                    localStorage.removeItem("checkout_started_at");
-                } catch (error) {
-                    console.warn(
-                        "Unable to clear checkout start timestamp.",
-                        error,
+                    setError(
+                        err instanceof Error
+                            ? err.message
+                            : "Something went wrong.",
                     );
                 }
-            } finally {
-                activeCheckoutPromise = null;
             }
         };
 
-        void startCheckout();
+        void createSession();
 
         return () => {
             cancelled = true;
         };
-    }, [hasSelectedPlan, payload]);
+    }, [payload, hasSelectedPlan]);
 
-    const handleRetry = () => {
-        sessionStorage.removeItem("checkout_initiated");
-        try {
-            localStorage.removeItem("checkout_started_at");
-        } catch (error) {
-            console.warn("Unable to clear checkout start timestamp.", error);
-        }
-        window.location.reload();
-    };
-
+    // If no plan selected, show plan selector
     if (!hasSelectedPlan) {
         return (
             <main className="min-h-screen bg-gray-50 px-4 pt-8 pb-6 md:pt-10 md:pb-8 flex justify-center">
@@ -265,11 +180,9 @@ function CheckoutContent() {
                             <div className="inline-flex items-center gap-3 bg-white rounded-full p-1 shadow-sm border border-gray-200">
                                 <button
                                     type="button"
-                                    onClick={() =>
-                                        setSelectedBilling("monthly")
-                                    }
+                                    onClick={() => setBillingMode("monthly")}
                                     className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                                        selectedBilling === "monthly"
+                                        billingMode === "monthly"
                                             ? "bg-purple-600 text-white"
                                             : "text-gray-600 hover:text-gray-900"
                                     }`}
@@ -278,9 +191,9 @@ function CheckoutContent() {
                                 </button>
                                 <button
                                     type="button"
-                                    onClick={() => setSelectedBilling("yearly")}
+                                    onClick={() => setBillingMode("yearly")}
                                     className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                                        selectedBilling === "yearly"
+                                        billingMode === "yearly"
                                             ? "bg-purple-600 text-white"
                                             : "text-gray-600 hover:text-gray-900"
                                     }`}
@@ -322,14 +235,14 @@ function CheckoutContent() {
                                 <div className="mb-6">
                                     <span className="text-4xl font-bold text-gray-900">
                                         $
-                                        {selectedBilling === "yearly"
+                                        {billingMode === "yearly"
                                             ? plan.yearlyPrice
                                             : plan.monthlyPrice}
                                     </span>
                                     <span className="text-gray-500">
                                         /month
                                     </span>
-                                    {selectedBilling === "yearly" ? (
+                                    {billingMode === "yearly" ? (
                                         <p className="text-sm text-green-600 mt-1">
                                             Billed ${plan.yearlyPrice * 12}/year
                                         </p>
@@ -354,8 +267,12 @@ function CheckoutContent() {
                                     ))}
                                 </ul>
 
-                                <button
-                                    type="button"
+                                <Link
+                                    href={`/checkout?plan=${encodeURIComponent(
+                                        plan.name,
+                                    )}&billing=${billingMode}&source=${encodeURIComponent(
+                                        payload.source ?? "checkout",
+                                    )}`}
                                     onClick={() => {
                                         void emitAnalyticsEvent(
                                             {
@@ -371,19 +288,15 @@ function CheckoutContent() {
                                                 beaconOnly: true,
                                             },
                                         );
-                                        const next = `/checkout?plan=${encodeURIComponent(
-                                            plan.name,
-                                        )}&billing=${selectedBilling}&source=${encodeURIComponent(source)}`;
-                                        router.push(next);
                                     }}
-                                    className={`w-full py-3 rounded-lg font-semibold transition-all mt-auto ${
+                                    className={`block text-center w-full py-3 rounded-lg font-semibold transition-all mt-auto ${
                                         plan.highlighted
                                             ? "bg-purple-600 hover:bg-purple-700 text-white"
                                             : "bg-gray-100 hover:bg-gray-200 text-gray-900"
                                     }`}
                                 >
                                     {plan.cta}
-                                </button>
+                                </Link>
                             </div>
                         ))}
                     </div>
@@ -392,43 +305,44 @@ function CheckoutContent() {
         );
     }
 
+    // Render Embedded Checkout
     return (
-        <main className="min-h-screen bg-white flex items-center justify-center px-4">
-            <div className="max-w-md w-full text-center">
-                <h1 className="text-3xl font-bold text-gray-900 mb-3">
-                    Checkout
-                </h1>
-                <p className="text-gray-500 mb-6">
-                    Redirecting to secure checkout...
-                </p>
-                {isWaiting && !hasError && (
-                    <div className="space-y-3">
-                        <p className="text-sm text-gray-600">
-                            If checkout is already in progress, please complete
-                            or cancel it to continue. This page will stay here
-                            to avoid creating a duplicate session.
-                        </p>
+        <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+            <div className="w-full max-w-4xl bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden min-h-[600px]">
+                <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                    <Link
+                        href="/checkout"
+                        className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1"
+                    >
+                        ← Change Plan
+                    </Link>
+                    <span className="text-sm font-medium text-gray-900">
+                        Secure Checkout
+                    </span>
+                    <div className="w-20" /> {/* Spacer */}
+                </div>
+
+                {clientSecret ? (
+                    <EmbeddedCheckoutProvider
+                        stripe={stripePromise}
+                        options={{ clientSecret }}
+                    >
+                        <EmbeddedCheckout className="h-full w-full" />
+                    </EmbeddedCheckoutProvider>
+                ) : error ? (
+                    <div className="flex flex-col items-center justify-center h-[500px] p-8 text-center">
+                        <p className="text-red-600 mb-4">{error}</p>
                         <button
-                            type="button"
-                            onClick={handleRetry}
-                            className="block w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-lg"
+                            onClick={() => window.location.reload()}
+                            className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition"
                         >
-                            Retry Checkout
+                            Retry
                         </button>
                     </div>
-                )}
-                {hasError && (
-                    <div className="space-y-3">
-                        <p className="text-sm text-red-600">
-                            We couldn&apos;t start checkout. Please try again.
-                        </p>
-                        <button
-                            type="button"
-                            onClick={handleRetry}
-                            className="block w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-lg"
-                        >
-                            Retry Checkout
-                        </button>
+                ) : (
+                    <div className="flex flex-col items-center justify-center h-[500px]">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mb-4"></div>
+                        <p className="text-gray-500">Loading checkout...</p>
                     </div>
                 )}
             </div>
@@ -442,9 +356,8 @@ export default function CheckoutPage() {
             fallback={
                 <main className="min-h-screen bg-white flex items-center justify-center px-4">
                     <div className="max-w-md w-full text-center">
-                        <h1 className="text-3xl font-bold text-gray-900 mb-3">
-                            Loading...
-                        </h1>
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                        <p className="text-gray-500">Loading...</p>
                     </div>
                 </main>
             }

@@ -126,10 +126,10 @@ export async function POST(request: Request) {
 
     try {
         const session = await stripe.checkout.sessions.create({
+            ui_mode: "embedded",
             mode: "subscription",
             line_items: [{ price: priceId, quantity: 1 }],
-            success_url: `${baseUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${baseUrl}/checkout/cancel`,
+            return_url: `${baseUrl}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
             metadata: {
                 plan: payload.plan ?? "default",
                 billing: payload.billing ?? "monthly",
@@ -164,7 +164,7 @@ export async function POST(request: Request) {
         }
 
         return NextResponse.json({
-            data: { checkout_url: session.url },
+            data: { client_secret: session.client_secret },
             error: null,
         });
     } catch (error) {

@@ -49,7 +49,8 @@ describe("POST /api/stripe/checkout", () => {
         process.env.SITE_URL = "http://localhost:3000";
 
         createSession.mockResolvedValue({
-            url: "https://checkout.stripe.test/session",
+            id: "cs_test_123",
+            client_secret: "cs_test_secret_123",
         });
         supabaseInsert.mockResolvedValue({ error: null });
 
@@ -71,14 +72,14 @@ describe("POST /api/stripe/checkout", () => {
 
         expect(response.status).toBe(200);
         expect(body).toEqual({
-            data: { checkout_url: "https://checkout.stripe.test/session" },
+            data: { client_secret: "cs_test_secret_123" },
             error: null,
         });
         expect(createSession).toHaveBeenCalledWith(
             expect.objectContaining({
-                success_url:
-                    "http://localhost:3000/checkout/success?session_id={CHECKOUT_SESSION_ID}",
-                cancel_url: "http://localhost:3000/checkout/cancel",
+                ui_mode: "embedded",
+                return_url:
+                    "http://localhost:3000/checkout/return?session_id={CHECKOUT_SESSION_ID}",
                 line_items: [{ price: "price_starter_mo", quantity: 1 }],
                 metadata: expect.objectContaining({
                     plan: "Starter",
