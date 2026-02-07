@@ -313,15 +313,15 @@ function CheckoutContent() {
             : selectedPlan?.monthlyPrice;
 
     return (
-        <main className="min-h-screen bg-white flex flex-col md:flex-row-reverse">
-            {/* Right Side: Plan Details & Branding */}
-            <div className="w-full md:w-[45%] lg:w-[42%] bg-white p-8 md:p-12 lg:p-16 flex flex-col items-center justify-center border-l border-gray-50">
+        <main className="min-h-screen bg-white flex flex-col md:flex-row">
+            {/* Left Side: Plan Details & Branding */}
+            <div className="w-full md:w-[45%] lg:w-[42%] bg-white p-8 md:p-12 lg:p-16 flex flex-col items-end justify-center">
                 <div className="max-w-md w-full flex flex-col">
                     {/* Brand */}
                     <div className="mb-12">
                         <Link
                             href="/"
-                            className="flex items-center gap-2 group w-fit"
+                            className="flex items-center gap-2 group w-fit ml-auto"
                         >
                             <div className="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-200 group-hover:scale-105 transition-transform">
                                 <svg
@@ -332,108 +332,112 @@ function CheckoutContent() {
                                     <path d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm0 2v12h16V6H4zm4 3l6 3-6 3V9z" />
                                 </svg>
                             </div>
-                            <span className="text-xl font-bold text-gray-900 tracking-tight">
+                            <span className="text-xl font-bold text-gray-900 tracking-tight text-right">
                                 AutopilotReels
                             </span>
                         </Link>
                     </div>
 
-                    <Link
-                        href="/checkout"
-                        className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors mb-10 text-sm font-medium w-fit"
-                    >
-                        <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
+                    <div className="flex flex-col items-end">
+                        <Link
+                            href="/checkout"
+                            className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors mb-10 text-sm font-medium w-fit"
                         >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M15 19l-7-7 7-7"
-                            />
-                        </svg>
-                        Back to plans
-                    </Link>
-
-                    {/* Order Summary */}
-                    <div className="mb-10 text-left">
-                        <p className="text-gray-400 text-sm font-semibold uppercase tracking-wider mb-2">
-                            {payload.billing} Subscription
-                        </p>
-                        <h1 className="text-5xl font-extrabold text-gray-900 tracking-tight">
-                            ${price}
-                            <span className="text-2xl font-normal text-gray-400 ml-1">
-                                /mo
-                            </span>
-                        </h1>
-                    </div>
-
-                    <div className="space-y-8">
-                        <div className="flex items-start gap-4 p-5 bg-white rounded-2xl border border-gray-100 shadow-sm">
-                            <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                                <svg
-                                    className="w-6 h-6 text-purple-600"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M5 13l4 4L19 7"
-                                    />
-                                </svg>
-                            </div>
-                            <div>
-                                <h3 className="font-bold text-gray-900 text-lg">
-                                    {selectedPlan?.name} Plan
-                                </h3>
-                                <p className="text-sm text-gray-500">
-                                    {selectedPlan?.description}
-                                </p>
-                            </div>
-                        </div>
-
-                        <ul className="space-y-4">
-                            {selectedPlan?.features.map(feature => (
-                                <li
-                                    key={feature}
-                                    className="flex items-center gap-3 text-gray-600 text-sm"
-                                >
-                                    <div className="w-1.5 h-1.5 rounded-full bg-purple-600 flex-shrink-0" />
-                                    {feature}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    {/* Footer / Trust */}
-                    <div className="mt-16 border-t border-gray-200 pt-8">
-                        <div className="flex items-center gap-2 text-gray-300 text-[10px] font-bold uppercase tracking-[0.2em]">
                             <svg
-                                className="w-3.5 h-3.5"
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
+                                className="w-4 h-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
                             >
                                 <path
-                                    fillRule="evenodd"
-                                    d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
-                                    clipRule="evenodd"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M15 19l-7-7 7-7"
                                 />
                             </svg>
-                            Secure Checkout
+                            Back to plans
+                        </Link>
+
+                        {/* Order Summary */}
+                        <div className="mb-10 text-right w-full">
+                            <p className="text-gray-400 text-sm font-semibold uppercase tracking-wider mb-2">
+                                {payload.billing} Subscription
+                            </p>
+                            <h1 className="text-5xl font-extrabold text-gray-900 tracking-tight">
+                                ${price}
+                                <span className="text-2xl font-normal text-gray-400 ml-1">
+                                    /mo
+                                </span>
+                            </h1>
+                        </div>
+
+                        <div className="space-y-8 w-full">
+                            <div className="flex items-start gap-4 p-5 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                                <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                                    <svg
+                                        className="w-6 h-6 text-purple-600"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M5 13l4 4L19 7"
+                                        />
+                                    </svg>
+                                </div>
+                                <div className="text-left">
+                                    <h3 className="font-bold text-gray-900 text-lg">
+                                        {selectedPlan?.name} Plan
+                                    </h3>
+                                    <p className="text-sm text-gray-500">
+                                        {selectedPlan?.description}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <ul className="space-y-4">
+                                {selectedPlan?.features.map(feature => (
+                                    <li
+                                        key={feature}
+                                        className="flex items-center justify-end gap-3 text-gray-600 text-sm"
+                                    >
+                                        <span className="text-right">
+                                            {feature}
+                                        </span>
+                                        <div className="w-1.5 h-1.5 rounded-full bg-purple-600 flex-shrink-0" />
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+
+                        {/* Footer / Trust */}
+                        <div className="mt-16 border-t border-gray-200 pt-8 w-full flex justify-end">
+                            <div className="flex items-center gap-2 text-gray-300 text-[10px] font-bold uppercase tracking-[0.2em]">
+                                <svg
+                                    className="w-3.5 h-3.5"
+                                    fill="currentColor"
+                                    viewBox="0 0 20 20"
+                                >
+                                    <path
+                                        fillRule="evenodd"
+                                        d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                                        clipRule="evenodd"
+                                    />
+                                </svg>
+                                Secure Checkout
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Left Side: Checkout Form */}
-            <div className="w-full md:w-[55%] lg:w-[58%] p-8 md:p-12 lg:p-20 flex flex-col justify-center bg-white overflow-y-auto">
-                <div className="max-w-[480px] w-full mx-auto">
+            {/* Right Side: Checkout Form */}
+            <div className="w-full md:w-[55%] lg:w-[58%] p-8 md:p-12 lg:p-20 flex flex-col justify-center bg-white overflow-y-auto items-start">
+                <div className="max-w-[480px] w-full">
                     {clientSecret ? (
                         <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
                             <EmbeddedCheckoutProvider
