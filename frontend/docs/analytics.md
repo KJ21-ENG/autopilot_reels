@@ -1,9 +1,11 @@
 # Analytics Plumbing (Baseline)
 
 ## Purpose
+
 This project uses a minimal, internal analytics endpoint to capture funnel events without external tooling.
 
 ## Event Schema
+
 All events use a consistent payload:
 
 ```
@@ -21,16 +23,25 @@ All events use a consistent payload:
 - `metadata` contains small, JSON-serializable details.
 
 Baseline event names (expandable later):
+
 - `landing_view`
 - `cta_click`
 - `checkout_start`
+- `payment_success`
+- `signup_complete`
+- `dashboard_view`
 
 ## Where To Emit Events
+
 - Landing page render: `landing_view`
 - Primary CTA buttons: `cta_click`
-- Checkout start (future Stripe flow): `checkout_start`
+- Checkout start (Stripe session creation): `checkout_start`
+- Payment success (Stripe checkout completion): `payment_success`
+- Post-payment signup auth completion: `signup_complete`
+- Dashboard route load: `dashboard_view`
 
 ## How To Emit
+
 Use the helper in `frontend/lib/analytics/emit.ts`:
 
 ```
@@ -46,4 +57,5 @@ await emitAnalyticsEvent(
 ```
 
 ## API
+
 POST `/api/analytics/event` returns `{ data, error }` with `data.recorded = true` on success.

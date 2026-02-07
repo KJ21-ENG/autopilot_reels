@@ -1,67 +1,137 @@
 "use client";
 
-const testimonials = [
+import Image from "next/image";
+
+const testimonialsRow1 = [
     {
         id: 1,
         name: "Jerome Morton",
-        avatar: "JM",
+        avatarImage: "/avatars/avatar-jerome-morton.jpg",
         rating: 5,
         quote: "Love it. Makes it easy to post when you are having difficulty figuring an idea for a post.",
     },
     {
         id: 2,
         name: "Nana Bandoh",
-        avatar: "N",
+        avatarImage: "/avatars/avatar-nana-bandoh.jpg",
         rating: 5,
         quote: "Their content is high quality, reliable, and always engaging, which is exactly what I need to keep increasing my views and subscribers.",
     },
     {
         id: 3,
         name: "Cynthia Duncan",
-        avatar: "CD",
+        avatarImage: "/avatars/avatar-cynthia-duncan.jpg",
         rating: 5,
         quote: "Love the different styles and stories they come up with and find. I got lots of views and new subscribers. Still growing though.",
     },
     {
         id: 4,
         name: "Agnes Chen",
-        avatar: "AC",
+        avatarImage: "/avatars/avatar-agnes-chen.jpg",
         rating: 5,
         quote: "Good to use as a beginner content creator. The AI handles everything perfectly.",
     },
     {
         id: 5,
         name: "Josh Wright",
-        avatar: "JW",
+        avatarImage: "/avatars/avatar-josh-wright.jpg",
         rating: 5,
         quote: "AutopilotReels has been great. Grown my page a lot! Highly recommend for anyone starting out.",
     },
     {
         id: 6,
         name: "Tom Atemba",
-        avatar: "TA",
+        avatarImage: "/avatars/avatar-tom-atemba.jpg",
         rating: 5,
         quote: "For one it's convenient for those who want to tell stories but don't want to show their face.",
     },
     {
         id: 7,
         name: "Sarah Mitchell",
-        avatar: "SM",
+        avatarImage: "/avatars/avatar-sarah-mitchell.jpg",
         rating: 5,
         quote: "The automation is incredible. I set it up once and now I have consistent content daily.",
     },
     {
         id: 8,
         name: "David Park",
-        avatar: "DP",
+        avatarImage: "/avatars/avatar-david-park.jpg",
         rating: 5,
         quote: "Best investment for my content business. The ROI has been amazing.",
     },
 ];
 
+const testimonialsRow2 = [
+    {
+        id: 9,
+        name: "Emma Roberts",
+        avatarImage: "/avatars/avatar-emma-roberts.jpg",
+        rating: 5,
+        quote: "I was skeptical at first, but this tool has completely transformed my workflow. My engagement has tripled!",
+    },
+    {
+        id: 10,
+        name: "Marcus Johnson",
+        avatarImage: "/avatars/avatar-marcus-johnson.jpg",
+        rating: 5,
+        quote: "Finally found a tool that actually delivers on its promises. The video quality is exceptional.",
+    },
+    {
+        id: 11,
+        name: "Lisa Wong",
+        avatarImage: "/avatars/avatar-lisa-wong.jpg",
+        rating: 5,
+        quote: "As a busy entrepreneur, this saves me hours every week. The AI-generated content is spot on.",
+    },
+    {
+        id: 12,
+        name: "Ryan Cooper",
+        avatarImage: "/avatars/avatar-ryan-cooper.jpg",
+        rating: 5,
+        quote: "My YouTube Shorts are getting way more views now. The templates are exactly what my audience loves.",
+    },
+    {
+        id: 13,
+        name: "Priya Sharma",
+        avatarImage: "/avatars/avatar-priya-sharma.jpg",
+        rating: 5,
+        quote: "The variety of styles is amazing. I can create content for different niches without any hassle.",
+    },
+    {
+        id: 14,
+        name: "Alex Turner",
+        avatarImage: "/avatars/avatar-alex-turner.jpg",
+        rating: 5,
+        quote: "I've tried many tools but this one stands out. The quality and speed are unmatched.",
+    },
+    {
+        id: 15,
+        name: "Maria Santos",
+        avatarImage: "/avatars/avatar-maria-santos.jpg",
+        rating: 5,
+        quote: "Perfect for growing my TikTok presence. I went from 1K to 50K followers in just 3 months!",
+    },
+    {
+        id: 16,
+        name: "Kevin Lee",
+        avatarImage: "/avatars/avatar-kevin-lee.jpg",
+        rating: 5,
+        quote: "The scheduling feature combined with auto-posting is a game changer. Highly recommended!",
+    },
+];
+
 export default function Testimonials() {
-    // Duplicate for seamless infinite scroll
-    const duplicatedTestimonials = [...testimonials, ...testimonials, ...testimonials];
+    // Duplicate for seamless infinite scroll - separate arrays for each row
+    const duplicatedRow1 = [
+        ...testimonialsRow1,
+        ...testimonialsRow1,
+        ...testimonialsRow1,
+    ];
+    const duplicatedRow2 = [
+        ...testimonialsRow2,
+        ...testimonialsRow2,
+        ...testimonialsRow2,
+    ];
 
     return (
         <section className="py-16 px-4 bg-white overflow-hidden">
@@ -80,24 +150,36 @@ export default function Testimonials() {
                 <div className="relative mb-6">
                     <div className="scroll-container">
                         <div className="scroll-content-left">
-                            {duplicatedTestimonials.map((testimonial, index) => (
+                            {duplicatedRow1.map((testimonial, index) => (
                                 <div
                                     key={`row1-${testimonial.id}-${index}`}
-                                    className="flex-shrink-0 w-80 mx-2"
+                                    className="flex-shrink-0 w-72 sm:w-80 mx-2"
                                 >
                                     <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm h-full">
                                         {/* Header: Avatar + Name + Rating */}
                                         <div className="flex items-center justify-between mb-3">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center text-amber-700 text-sm font-semibold">
-                                                    {testimonial.avatar}
+                                                <div className="w-10 h-10 rounded-full overflow-hidden bg-white border border-amber-100">
+                                                    <Image
+                                                        src={
+                                                            testimonial.avatarImage
+                                                        }
+                                                        alt={`${testimonial.name} avatar`}
+                                                        width={40}
+                                                        height={40}
+                                                        className="w-full h-full object-cover"
+                                                    />
                                                 </div>
                                                 <span className="font-semibold text-gray-900 text-sm">
                                                     {testimonial.name}
                                                 </span>
                                             </div>
                                             <div className="flex gap-0.5">
-                                                {[...Array(testimonial.rating)].map((_, i) => (
+                                                {[
+                                                    ...Array(
+                                                        testimonial.rating,
+                                                    ),
+                                                ].map((_, i) => (
                                                     <svg
                                                         key={i}
                                                         className="w-4 h-4 text-yellow-400"
@@ -127,24 +209,36 @@ export default function Testimonials() {
                 <div className="relative">
                     <div className="scroll-container">
                         <div className="scroll-content-right">
-                            {duplicatedTestimonials.map((testimonial, index) => (
+                            {duplicatedRow2.map((testimonial, index) => (
                                 <div
                                     key={`row2-${testimonial.id}-${index}`}
-                                    className="flex-shrink-0 w-80 mx-2"
+                                    className="flex-shrink-0 w-72 sm:w-80 mx-2"
                                 >
                                     <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm h-full">
                                         {/* Header: Avatar + Name + Rating */}
                                         <div className="flex items-center justify-between mb-3">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center text-purple-700 text-sm font-semibold">
-                                                    {testimonial.avatar}
+                                                <div className="w-10 h-10 rounded-full overflow-hidden bg-white border border-purple-100">
+                                                    <Image
+                                                        src={
+                                                            testimonial.avatarImage
+                                                        }
+                                                        alt={`${testimonial.name} avatar`}
+                                                        width={40}
+                                                        height={40}
+                                                        className="w-full h-full object-cover"
+                                                    />
                                                 </div>
                                                 <span className="font-semibold text-gray-900 text-sm">
                                                     {testimonial.name}
                                                 </span>
                                             </div>
                                             <div className="flex gap-0.5">
-                                                {[...Array(testimonial.rating)].map((_, i) => (
+                                                {[
+                                                    ...Array(
+                                                        testimonial.rating,
+                                                    ),
+                                                ].map((_, i) => (
                                                     <svg
                                                         key={i}
                                                         className="w-4 h-4 text-yellow-400"
@@ -170,60 +264,6 @@ export default function Testimonials() {
                     <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-white to-transparent pointer-events-none z-10" />
                 </div>
             </div>
-
-            <style jsx>{`
-        .scroll-container {
-          overflow: hidden;
-          position: relative;
-        }
-
-        .scroll-content-left,
-        .scroll-content-right {
-          display: flex;
-          width: max-content;
-          will-change: transform;
-          backface-visibility: hidden;
-        }
-
-        .scroll-content-left {
-          animation: scroll-left 50s linear infinite;
-        }
-
-        .scroll-content-right {
-          animation: scroll-right 50s linear infinite;
-        }
-
-        @keyframes scroll-left {
-          from {
-            transform: translateX(0);
-          }
-          to {
-            transform: translateX(calc(-100% / 3));
-          }
-        }
-
-        @keyframes scroll-right {
-          from {
-            transform: translateX(calc(-100% / 3));
-          }
-          to {
-            transform: translateX(0);
-          }
-        }
-
-        .scroll-content-left:hover,
-        .scroll-content-right:hover {
-          animation-play-state: paused;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .scroll-content-left,
-          .scroll-content-right {
-            animation: none;
-            transform: none;
-          }
-        }
-      `}</style>
         </section>
     );
 }

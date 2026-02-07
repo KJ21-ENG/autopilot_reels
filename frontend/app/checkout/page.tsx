@@ -4,6 +4,8 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 
+import { ANALYTICS_EVENT_NAMES, emitAnalyticsEvent } from "@/lib/analytics";
+
 type CheckoutResponse =
     | { data: { checkout_url: string }; error: null }
     | { data: null; error: { code: string; message: string } };
@@ -355,6 +357,20 @@ function CheckoutContent() {
                                 <button
                                     type="button"
                                     onClick={() => {
+                                        void emitAnalyticsEvent(
+                                            {
+                                                event_name:
+                                                    ANALYTICS_EVENT_NAMES.ctaClick,
+                                                metadata: {
+                                                    location: "checkout",
+                                                    plan: plan.name,
+                                                },
+                                            },
+                                            {
+                                                useBeacon: true,
+                                                beaconOnly: true,
+                                            },
+                                        );
                                         const next = `/checkout?plan=${encodeURIComponent(
                                             plan.name,
                                         )}&billing=${selectedBilling}&source=${encodeURIComponent(source)}`;

@@ -41,9 +41,9 @@ export default function ConfirmDeletionPage() {
             setTimeout(() => {
                 router.push("/");
             }, 3000);
-        } catch (err: any) {
+        } catch (err) {
             setStatus("error");
-            setErrorMsg(err.message);
+            setErrorMsg(err instanceof Error ? err.message : String(err));
         }
     };
 
@@ -91,8 +91,8 @@ export default function ConfirmDeletionPage() {
                         Account Deleted
                     </h1>
                     <p className="text-gray-500 mb-6">
-                        Your account has been permanently deleted. We're sorry
-                        to see you go.
+                        Your account has been permanently deleted. We&apos;re
+                        sorry to see you go.
                     </p>
                     <Link
                         href="/"

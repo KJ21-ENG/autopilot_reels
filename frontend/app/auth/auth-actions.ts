@@ -183,7 +183,7 @@ export async function performEmailAuth({
     if (error) {
         const normalizedErrorMessage = error.message?.toLowerCase() ?? "";
         if (normalizedErrorMessage.includes("invalid login credentials")) {
-            return { error: `No account found with "${normalizedEmail}"` };
+            return { error: "Incorrect email or password." };
         }
 
         if (normalizedErrorMessage.includes("user already registered")) {
@@ -257,4 +257,36 @@ export async function performGoogleAuth({
     }
 
     return { error: "We couldn’t start Google sign-in. Please try again." };
+}
+
+export async function performPasswordReset({
+    email,
+    redirectTo,
+}: {
+    email: string;
+    redirectTo: string;
+}): Promise<AuthResult> {
+    const normalizedEmail = email.trim().toLowerCase();
+    const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail);
+
+    if (!isValidEmail) {
+        return { error: "Enter a valid email address to continue." };
+    }
+
+    const response = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: normalizedEmail, redirectTo }),
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        return { error: errorData.error || "Failed to send reset email." };
+    }
+
+    return {
+        notice: "Check your email for the reset link.",
+    };
 }

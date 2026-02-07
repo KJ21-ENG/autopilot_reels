@@ -9,6 +9,7 @@ import {
 import { getSupabaseServer } from "@/lib/supabase/server";
 import DashboardSidebar from "../../components/dashboard/DashboardSidebar";
 import DashboardBreadcrumb from "@/components/dashboard/DashboardBreadcrumb";
+import DashboardAnalytics from "@/components/dashboard/DashboardAnalytics";
 
 export default async function DashboardLayout({
     children,
@@ -42,8 +43,12 @@ export default async function DashboardLayout({
         );
     }
 
+    // Should be guaranteed by getProtectedRouteDecision if allowed is true, but safe fallback
+    const userId = authState.userId ?? "";
+
     return (
         <div className="h-screen w-full bg-gray-50 flex overflow-hidden">
+            <DashboardAnalytics userId={userId} />
             <DashboardSidebar />
             <main className="flex-1 flex flex-col h-full overflow-hidden">
                 <header className="h-16 bg-white border-b border-gray-200 flex items-center px-8 flex-shrink-0">

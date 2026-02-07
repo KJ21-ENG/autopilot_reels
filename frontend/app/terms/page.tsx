@@ -1,10 +1,112 @@
+import React from "react";
+import Link from "next/link";
+import { ArrowLeft, Play } from "lucide-react";
+
 export default function TermsPage() {
-  return (
-    <main className="min-h-screen bg-white flex items-center justify-center px-4">
-      <div className="max-w-md w-full text-center">
-        <h1 className="text-3xl font-bold text-gray-900 mb-3">Terms of Service</h1>
-        <p className="text-gray-500">Terms will be published here.</p>
-      </div>
-    </main>
-  );
+    return (
+        <div className="min-h-screen bg-gray-50">
+            <header className="bg-white border-b border-gray-100 p-4 sticky top-0 z-10">
+                <div className="max-w-4xl mx-auto flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center border-2 border-purple-600">
+                            <Play className="w-4 h-4 text-purple-600 fill-purple-600 ml-0.5" />
+                        </div>
+                        <span className="font-bold text-xl text-gray-900">
+                            AutopilotReels
+                        </span>
+                    </div>
+                    <Link
+                        href="/"
+                        className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                        Back to Home
+                    </Link>
+                </div>
+            </header>
+
+            <main className="max-w-4xl mx-auto px-4 py-12 prose prose-purple bg-white my-8 rounded-xl shadow-sm border border-gray-100">
+                <h1>Terms of Service</h1>
+                <p className="text-gray-600 mb-8">
+                    Last updated: {new Date().toLocaleDateString()}
+                </p>
+
+                <section className="mb-8">
+                    <h2>1. Acceptance of Terms</h2>
+                    <p>
+                        By accessing and using AutopilotReels (&quot;the
+                        Service&quot;), you agree to be bound by these Terms of
+                        Service. If you do not agree to these terms, please do
+                        not use the Service.
+                    </p>
+                </section>
+
+                <section className="mb-8">
+                    <h2>2. Description of Service</h2>
+                    <p>
+                        AutopilotReels provides automated video content
+                        generation services. We reserve the right to modify,
+                        suspend, or discontinue the Service at any time without
+                        notice.
+                    </p>
+                </section>
+
+                <section className="mb-8">
+                    <h2>3. User Accounts</h2>
+                    <p>
+                        You are responsible for maintaining the security of your
+                        account and password. You agree to notify us immediately
+                        of any unauthorized access to your account.
+                    </p>
+                </section>
+
+                <section className="mb-8">
+                    <h2>4. Content and Copyright</h2>
+                    <p>
+                        You retain ownership of the content you generate using
+                        our Service. However, by using the Service, you grant us
+                        a license to process and store your content as necessary
+                        to provide the Service.
+                    </p>
+                </section>
+
+                <section className="mb-8">
+                    <h2>5. Payment and Refunds</h2>
+                    <p>
+                        Paid services are billed in advance. Refunds are handled
+                        in accordance with our Refund Policy. We reserve the
+                        right to change our pricing at any time.
+                    </p>
+                </section>
+
+                <section className="mb-8">
+                    <h2>6. Limitation of Liability</h2>
+                    <p>
+                        AutopilotReels shall not be liable for any indirect,
+                        incidental, special, consequential, or punitive damages
+                        resulting from your use of or inability to use the
+                        Service.
+                    </p>
+                </section>
+
+                <section className="mb-8">
+                    <h2>7. Governing Law</h2>
+                    <p>
+                        These Terms shall be governed by and construed in
+                        accordance with the laws of the jurisdiction in which
+                        AutopilotReels operates, without regard to its conflict
+                        of law provisions.
+                    </p>
+                </section>
+
+                <section>
+                    <h2>8. Contact Us</h2>
+                    <p>
+                        If you have any questions about these Terms, please
+                        contact us at support@autopilotreels.com.
+                    </p>
+                </section>
+            </main>
+        </div>
+    );
 }

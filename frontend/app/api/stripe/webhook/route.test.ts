@@ -63,7 +63,13 @@ describe("POST /api/stripe/webhook", () => {
         });
 
         listLineItems.mockResolvedValue({
-            data: [{ price: { id: "price_123" }, amount_total: 1200, currency: "usd" }],
+            data: [
+                {
+                    price: { id: "price_123" },
+                    amount_total: 1200,
+                    currency: "usd",
+                },
+            ],
         });
 
         insert.mockResolvedValue({ error: null });
@@ -79,7 +85,11 @@ describe("POST /api/stripe/webhook", () => {
 
         expect(response.status).toBe(200);
         expect(body).toEqual({ data: { received: true }, error: null });
-        expect(constructEvent).toHaveBeenCalledWith("{}", "sig_test", "whsec_test");
+        expect(constructEvent).toHaveBeenCalledWith(
+            "{}",
+            "sig_test",
+            "whsec_test",
+        );
         expect(from).toHaveBeenCalledWith("payments");
         expect(insert).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -91,7 +101,20 @@ describe("POST /api/stripe/webhook", () => {
                 currency: "usd",
                 status: "paid",
                 created_at: expect.any(String),
-            })
+            }),
+        );
+        expect(from).toHaveBeenCalledWith("events");
+        expect(insert).toHaveBeenCalledWith(
+            expect.objectContaining({
+                event_name: "payment_success",
+                session_id: "cs_test_123",
+                metadata: expect.objectContaining({
+                    stripe_session_id: "cs_test_123",
+                    amount: 1200,
+                    currency: "usd",
+                    price_id: "price_123",
+                }),
+            }),
         );
     });
 
@@ -110,7 +133,10 @@ describe("POST /api/stripe/webhook", () => {
         expect(response.status).toBe(400);
         expect(body).toEqual({
             data: null,
-            error: { code: "missing_signature", message: "Webhook signature is missing." },
+            error: {
+                code: "missing_signature",
+                message: "Webhook signature is missing.",
+            },
         });
     });
 
@@ -134,7 +160,10 @@ describe("POST /api/stripe/webhook", () => {
         expect(response.status).toBe(400);
         expect(body).toEqual({
             data: null,
-            error: { code: "invalid_signature", message: "Webhook verification failed." },
+            error: {
+                code: "invalid_signature",
+                message: "Webhook verification failed.",
+            },
         });
         expect(listLineItems).not.toHaveBeenCalled();
         expect(insert).not.toHaveBeenCalled();
@@ -162,7 +191,13 @@ describe("POST /api/stripe/webhook", () => {
         });
 
         listLineItems.mockResolvedValue({
-            data: [{ price: { id: "price_456" }, amount_total: 2500, currency: "usd" }],
+            data: [
+                {
+                    price: { id: "price_456" },
+                    amount_total: 2500,
+                    currency: "usd",
+                },
+            ],
         });
 
         insert.mockResolvedValue({ error: { code: "23505" } });
@@ -182,7 +217,7 @@ describe("POST /api/stripe/webhook", () => {
         expect(insert).toHaveBeenCalled();
     });
 
-    it("keeps ingestion scoped to payments table only", async () => {
+    it("scopes ingestion to payments and events tables", async () => {
         process.env.STRIPE_SECRET_KEY = "sk_test_123";
         process.env.STRIPE_WEBHOOK_SECRET = "whsec_test";
         process.env.SUPABASE_URL = "https://supabase.test";
@@ -203,7 +238,13 @@ describe("POST /api/stripe/webhook", () => {
             },
         });
         listLineItems.mockResolvedValue({
-            data: [{ price: { id: "price_scope" }, amount_total: 1200, currency: "usd" }],
+            data: [
+                {
+                    price: { id: "price_scope" },
+                    amount_total: 1200,
+                    currency: "usd",
+                },
+            ],
         });
         insert.mockResolvedValue({ error: null });
 
@@ -216,8 +257,8 @@ describe("POST /api/stripe/webhook", () => {
         const response = await POST(request);
 
         expect(response.status).toBe(200);
-        expect(from).toHaveBeenCalledTimes(1);
         expect(from).toHaveBeenCalledWith("payments");
+        expect(from).toHaveBeenCalledWith("events");
         expect(from).not.toHaveBeenCalledWith("user_payment_links");
     });
 });

@@ -4,6 +4,7 @@ export type AuthState = {
     isKnown: boolean;
     hasSession: boolean;
     hasPaid: boolean;
+    userId?: string;
 };
 
 export type GuardDecision = {
@@ -17,7 +18,7 @@ type CookieStoreLike = {
     get: (name: string) => { value: string } | undefined;
 };
 
-const SESSION_COOKIE = "autopilotreels_session";
+export const SESSION_COOKIE = "autopilotreels_session";
 const PAID_COOKIE = "autopilotreels_paid";
 
 export const PROTECTED_ROUTES = ["/dashboard"] as const;
@@ -38,6 +39,7 @@ export function getAuthStateFromCookies(cookies: CookieStoreLike): AuthState {
 export async function resolveVerifiedAuthState(
     cookies: CookieStoreLike,
     deps: {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         getSupabaseServer: () => SupabaseClient<any, "public", any>;
     },
 ): Promise<AuthState> {
@@ -46,6 +48,7 @@ export async function resolveVerifiedAuthState(
         return { isKnown: false, hasSession: false, hasPaid: false };
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let supabase: SupabaseClient<any, "public", any>;
 
     try {
@@ -79,6 +82,7 @@ export async function resolveVerifiedAuthState(
         isKnown: true,
         hasSession: true,
         hasPaid,
+        userId: userData.user.id,
     };
 }
 

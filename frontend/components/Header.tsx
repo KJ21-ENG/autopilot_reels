@@ -37,30 +37,40 @@ export default function Header() {
                         >
                             FAQ
                         </Link>
-                        <Link
-                            href="/blog"
-                            className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
-                        >
-                            Blog
-                        </Link>
                     </div>
 
                     <div className="flex items-center gap-3">
                         <Link
                             href="/auth"
                             className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                            onClick={() => {
+                                void emitAnalyticsEvent(
+                                    {
+                                        event_name:
+                                            ANALYTICS_EVENT_NAMES.ctaClick,
+                                        metadata: {
+                                            location: "header",
+                                            label: "sign_in",
+                                        },
+                                    },
+                                    { useBeacon: true, beaconOnly: true },
+                                );
+                            }}
                         >
                             Sign in
                         </Link>
                         <Link
-                            href="/checkout"
+                            href="/checkout?source=header"
                             className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors"
                             onClick={() => {
                                 void emitAnalyticsEvent(
                                     {
                                         event_name:
                                             ANALYTICS_EVENT_NAMES.ctaClick,
-                                        metadata: { location: "header" },
+                                        metadata: {
+                                            location: "header",
+                                            label: "get_started",
+                                        },
                                     },
                                     { useBeacon: true, beaconOnly: true },
                                 );

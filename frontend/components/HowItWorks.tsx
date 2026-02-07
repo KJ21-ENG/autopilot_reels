@@ -1,14 +1,26 @@
 "use client";
 
+import Image from "next/image";
+
 const steps = [
     {
         step: 1,
         title: "Pick Your Niche",
-        description: "Tell us what topics you want to cover. Our AI understands hundreds of content categories.",
-        features: ["History, science, finance, lifestyle & more", "Custom topics supported"],
+        description:
+            "Tell us what topics you want to cover. Our AI understands hundreds of content categories.",
+        features: [
+            "History, science, finance, lifestyle & more",
+            "Custom topics supported",
+        ],
         imagePosition: "left",
         icon: (
-            <svg className="w-6 h-6 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+                className="w-6 h-6 text-purple-600"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+            >
                 <circle cx="12" cy="12" r="10" />
                 <polyline points="12 6 12 12 16 14" />
             </svg>
@@ -17,11 +29,21 @@ const steps = [
     {
         step: 2,
         title: "Style It Your Way",
-        description: "Choose visual styles and audio that match your brand personality.",
-        features: ["Multiple visual aesthetics", "Trending sounds or custom uploads"],
+        description:
+            "Choose visual styles and audio that match your brand personality.",
+        features: [
+            "Multiple visual aesthetics",
+            "Trending sounds or custom uploads",
+        ],
         imagePosition: "right",
         icon: (
-            <svg className="w-6 h-6 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+                className="w-6 h-6 text-purple-600"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+            >
                 <path d="M12 19l7-7 3 3-7 7-3-3z" />
                 <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
                 <path d="M2 2l7.586 7.586" />
@@ -31,12 +53,46 @@ const steps = [
     },
     {
         step: 3,
-        title: "Sit Back & Grow",
-        description: "Connect your accounts. We handle creation, scheduling, and posting.",
-        features: ["24/7 automatic publishing", "Multi-platform support"],
+        title: "Choose Your Language",
+        description:
+            "Pick the language for narration and captions before we generate your videos.",
+        features: [
+            "20+ languages supported",
+            "Auto-captions in your selected language",
+        ],
         imagePosition: "left",
         icon: (
-            <svg className="w-6 h-6 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+                className="w-6 h-6 text-purple-600"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+            >
+                <path d="M4 5h7" />
+                <path d="M9 3v2" />
+                <path d="M7 21l5-10 5 10" />
+                <path d="M12 19h6" />
+                <path d="M4 9h7" />
+                <path d="M4 13h4" />
+            </svg>
+        ),
+    },
+    {
+        step: 4,
+        title: "Sit Back & Grow",
+        description:
+            "Connect your accounts. We handle creation, scheduling, and posting.",
+        features: ["24/7 automatic publishing", "Multi-platform support"],
+        imagePosition: "right",
+        icon: (
+            <svg
+                className="w-6 h-6 text-purple-600"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+            >
                 <line x1="12" y1="20" x2="12" y2="10" />
                 <line x1="18" y1="20" x2="18" y2="4" />
                 <line x1="6" y1="20" x2="6" y2="16" />
@@ -45,12 +101,926 @@ const steps = [
     },
 ];
 
-const artStyles = [
-    { name: "Cinematic", color: "from-amber-200 to-amber-400" },
-    { name: "Artistic", color: "from-pink-200 to-pink-400" },
-    { name: "3D Render", color: "from-yellow-200 to-yellow-400" },
-    { name: "Animated", color: "from-purple-200 to-purple-400" },
+const niches = [
+    {
+        name: "History",
+        icon: "🏛️",
+        image: "/images/niche_history.png",
+        color: "from-amber-100 to-amber-200",
+        borderColor: "border-amber-300",
+    },
+    {
+        name: "Science",
+        icon: "🔬",
+        image: "/images/niche_science.png",
+        color: "from-blue-100 to-blue-200",
+        borderColor: "border-blue-300",
+    },
+    {
+        name: "Finance",
+        icon: "💰",
+        image: "/images/niche_finance.png",
+        color: "from-green-100 to-green-200",
+        borderColor: "border-green-300",
+    },
+    {
+        name: "Horror",
+        icon: "👻",
+        image: "/images/niche_horror.png",
+        color: "from-gray-100 to-gray-200",
+        borderColor: "border-gray-400",
+    },
+    {
+        name: "Tech",
+        icon: "💻",
+        image: "/images/niche_tech.png",
+        color: "from-cyan-100 to-cyan-200",
+        borderColor: "border-cyan-300",
+    },
+    {
+        name: "Lifestyle",
+        icon: "✨",
+        image: "/images/niche_lifestyle.png",
+        color: "from-pink-100 to-pink-200",
+        borderColor: "border-pink-300",
+    },
 ];
+
+const artStyles = [
+    {
+        name: "Cinematic",
+        icon: "🎬",
+        image: "/images/style_cinematic.png",
+        color: "from-amber-100 to-amber-200",
+        borderColor: "border-amber-300",
+    },
+    {
+        name: "Artistic",
+        icon: "🎨",
+        image: "/images/style_artistic.png",
+        color: "from-pink-100 to-pink-200",
+        borderColor: "border-pink-300",
+    },
+    {
+        name: "3D Render",
+        icon: "🎮",
+        image: "/images/style_3d_render.png",
+        color: "from-purple-100 to-purple-200",
+        borderColor: "border-purple-300",
+    },
+    {
+        name: "Animated",
+        icon: "✨",
+        image: "/images/style_animated.png",
+        color: "from-blue-100 to-blue-200",
+        borderColor: "border-blue-300",
+    },
+];
+
+const languages = [
+    { name: "English", code: "EN", icon: "🇺🇸" },
+    { name: "Spanish", code: "ES", icon: "🇪🇸" },
+    { name: "Hindi", code: "HI", icon: "🇮🇳" },
+    { name: "Arabic", code: "AR", icon: "🇸🇦" },
+];
+
+// Shared App Header Component - Videos tab active
+function AppHeader() {
+    return (
+        <div className="flex items-center justify-between px-3 py-2 sm:px-4 sm:py-2 border-b border-gray-100">
+            <div className="flex items-center gap-3 sm:gap-6 min-w-0">
+                <div className="flex items-center gap-2 min-w-0">
+                    <svg
+                        className="w-5 h-5 text-purple-600"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                    >
+                        <rect
+                            width="24"
+                            height="24"
+                            rx="4"
+                            ry="4"
+                            fill="#FFFFFF"
+                        />
+                        <path d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm0 2v12h16V6H4zm4 3l6 3-6 3V9z" />
+                    </svg>
+                    <span className="text-gray-900 font-semibold text-[10px] sm:text-xs truncate">
+                        AutopilotReels
+                    </span>
+                </div>
+                <div className="hidden sm:flex items-center gap-3">
+                    <span className="text-gray-400 text-[10px]">Dashboard</span>
+                    <span className="text-gray-900 text-[10px] font-medium">
+                        Videos
+                    </span>
+                    <span className="text-gray-400 text-[10px]">Schedule</span>
+                    <span className="text-gray-400 text-[10px]">Analytics</span>
+                </div>
+            </div>
+            <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gray-100 border border-gray-200 overflow-hidden relative">
+                <Image
+                    src="/images/user_avatar.png"
+                    alt="User"
+                    fill
+                    className="object-cover"
+                />
+            </div>
+        </div>
+    );
+}
+
+// Mac Browser Mockup Component for Step 1 - Widescreen
+function NicheMockup() {
+    return (
+        <div className="relative w-full">
+            {/* Subtle glow effect */}
+            <div className="absolute inset-0 bg-purple-200/30 blur-3xl rounded-full scale-90" />
+
+            {/* Mac Window Frame - 16:10 Widescreen */}
+            <div className="relative" style={{ aspectRatio: "16/10" }}>
+                <div className="absolute inset-0 bg-gray-100 rounded-xl shadow-2xl overflow-hidden border border-gray-200 flex flex-col">
+                    {/* Mac Title Bar */}
+                    <div className="bg-gray-200 px-3 py-1.5 sm:px-4 sm:py-2 flex items-center gap-3 border-b border-gray-300 flex-shrink-0">
+                        {/* Traffic Light Buttons */}
+                        <div className="flex items-center gap-1.5">
+                            <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F57]" />
+                            <div className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]" />
+                            <div className="w-2.5 h-2.5 rounded-full bg-[#28CA41]" />
+                        </div>
+
+                        {/* URL Bar */}
+                        <div className="flex-1 flex justify-center">
+                            <div className="bg-white rounded-md px-3 py-1 flex items-center gap-1.5 w-full max-w-[200px] sm:max-w-[240px] min-w-0 border border-gray-300 shadow-sm">
+                                <svg
+                                    className="w-3 h-3 text-gray-400"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                                    />
+                                </svg>
+                                <span className="text-gray-500 text-[9px] sm:text-[10px] truncate min-w-0 flex-1">
+                                    www.autopilotreels.com
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="w-6 sm:w-10" />
+                    </div>
+
+                    {/* Browser Content */}
+                    <div className="flex-1 flex flex-col bg-white overflow-hidden">
+                        <AppHeader />
+
+                        {/* Main Content - Niche Selection - Two Column Layout */}
+                        <div className="flex-1 p-3 sm:p-4 bg-gray-50/80 flex gap-3 sm:gap-4 overflow-hidden">
+                            {/* Left Side - Main Selection */}
+                            <div className="flex-1 flex flex-col min-w-0">
+                                {/* Progress Steps */}
+                                <div className="flex items-center gap-2 mb-3">
+                                    <div className="flex items-center gap-1">
+                                        <div className="w-5 h-5 rounded-full bg-purple-600 text-white text-[10px] flex items-center justify-center font-medium">
+                                            1
+                                        </div>
+                                        <span className="text-[10px] text-purple-600 font-medium hidden sm:inline">
+                                            Niche
+                                        </span>
+                                    </div>
+                                    <div className="w-4 sm:w-6 h-0.5 bg-gray-200" />
+                                    <div className="flex items-center gap-1">
+                                        <div className="w-5 h-5 rounded-full bg-gray-200 text-gray-400 text-[10px] flex items-center justify-center font-medium">
+                                            2
+                                        </div>
+                                        <span className="text-[10px] text-gray-400 hidden sm:inline">
+                                            Style
+                                        </span>
+                                    </div>
+                                    <div className="w-4 sm:w-6 h-0.5 bg-gray-200" />
+                                    <div className="flex items-center gap-1">
+                                        <div className="w-5 h-5 rounded-full bg-gray-200 text-gray-400 text-[10px] flex items-center justify-center font-medium">
+                                            3
+                                        </div>
+                                        <span className="text-[10px] text-gray-400 hidden sm:inline">
+                                            Language
+                                        </span>
+                                    </div>
+                                    <div className="w-4 sm:w-6 h-0.5 bg-gray-200" />
+                                    <div className="flex items-center gap-1">
+                                        <div className="w-5 h-5 rounded-full bg-gray-200 text-gray-400 text-[10px] flex items-center justify-center font-medium">
+                                            4
+                                        </div>
+                                        <span className="text-[10px] text-gray-400 hidden sm:inline">
+                                            Connect
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Header */}
+                                <h3 className="text-gray-900 text-sm font-semibold mb-1">
+                                    Pick Your Niche
+                                </h3>
+                                <p className="text-gray-400 text-[10px] mb-3">
+                                    Select a category for your content
+                                </p>
+
+                                {/* Niche Grid - 3 columns */}
+                                <div className="grid grid-cols-3 gap-2 flex-1">
+                                    {niches.map((niche, i) => (
+                                        <div
+                                            key={niche.name}
+                                            className={`relative border ${i === 0 ? "border-purple-500 ring-2 ring-purple-200" : niche.borderColor} rounded-lg cursor-pointer hover:scale-105 transition-all overflow-hidden`}
+                                        >
+                                            <Image
+                                                src={niche.image}
+                                                alt={niche.name}
+                                                fill
+                                                className="object-cover"
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Right Side - Info Panel */}
+                            <div className="w-24 sm:w-32 md:w-36 flex flex-col flex-shrink-0">
+                                <div className="bg-white border border-gray-200 rounded-lg p-2 sm:p-2.5 flex-1 flex flex-col">
+                                    <p className="text-gray-500 text-[9px] font-medium mb-2">
+                                        Selected
+                                    </p>
+                                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-2 mb-2">
+                                        <div className="flex items-center gap-1.5">
+                                            <div className="w-6 h-6 relative rounded overflow-hidden flex-shrink-0">
+                                                <Image
+                                                    src="/images/niche_history.png"
+                                                    alt="History"
+                                                    fill
+                                                    className="object-cover"
+                                                />
+                                            </div>
+                                            <div>
+                                                <p className="text-purple-900 text-[10px] font-medium">
+                                                    History
+                                                </p>
+                                                <p className="text-purple-600 text-[8px]">
+                                                    2.5M+ views/mo
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p className="text-gray-400 text-[8px] flex-1">
+                                        Ancient civilizations, wars, discoveries
+                                        & more
+                                    </p>
+                                </div>
+                                <button className="mt-2 w-full bg-purple-600 hover:bg-purple-700 text-white text-[10px] font-medium py-1.5 rounded-lg transition-colors flex items-center justify-center gap-1">
+                                    Continue
+                                    <svg
+                                        className="w-3 h-3"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M9 5l7 7-7 7"
+                                        />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// Mac Browser Mockup Component for Step 2 - Widescreen
+function StyleMockup() {
+    return (
+        <div className="relative w-full">
+            {/* Subtle glow effect */}
+            <div className="absolute inset-0 bg-purple-200/30 blur-3xl rounded-full scale-90" />
+
+            {/* Mac Window Frame - 16:10 Widescreen */}
+            <div className="relative" style={{ aspectRatio: "16/10" }}>
+                <div className="absolute inset-0 bg-gray-100 rounded-xl shadow-2xl overflow-hidden border border-gray-200 flex flex-col">
+                    {/* Mac Title Bar */}
+                    <div className="bg-gray-200 px-3 py-1.5 sm:px-4 sm:py-2 flex items-center gap-3 border-b border-gray-300 flex-shrink-0">
+                        <div className="flex items-center gap-1.5">
+                            <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F57]" />
+                            <div className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]" />
+                            <div className="w-2.5 h-2.5 rounded-full bg-[#28CA41]" />
+                        </div>
+                        <div className="flex-1 flex justify-center">
+                            <div className="bg-white rounded-md px-3 py-1 flex items-center gap-1.5 w-full max-w-[200px] sm:max-w-[240px] min-w-0 border border-gray-300 shadow-sm">
+                                <svg
+                                    className="w-3 h-3 text-gray-400"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                                    />
+                                </svg>
+                                <span className="text-gray-500 text-[9px] sm:text-[10px] truncate min-w-0 flex-1">
+                                    www.autopilotreels.com
+                                </span>
+                            </div>
+                        </div>
+                        <div className="w-6 sm:w-10" />
+                    </div>
+
+                    {/* Browser Content */}
+                    <div className="flex-1 flex flex-col bg-white overflow-hidden">
+                        <AppHeader />
+
+                        {/* Main Content - Style Selection - Two Column Layout */}
+                        <div className="flex-1 p-3 sm:p-4 bg-gray-50/80 flex gap-3 sm:gap-4 overflow-hidden">
+                            {/* Left Side - Style Cards */}
+                            <div className="flex-1 flex flex-col min-w-0">
+                                {/* Progress Steps */}
+                                <div className="flex items-center gap-2 mb-3">
+                                    <div className="flex items-center gap-1">
+                                        <div className="w-5 h-5 rounded-full bg-green-500 text-white text-[10px] flex items-center justify-center">
+                                            <svg
+                                                className="w-2.5 h-2.5"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={3}
+                                                    d="M5 13l4 4L19 7"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <span className="text-[10px] text-green-600 font-medium hidden sm:inline">
+                                            Niche
+                                        </span>
+                                    </div>
+                                    <div className="w-4 sm:w-6 h-0.5 bg-purple-600" />
+                                    <div className="flex items-center gap-1">
+                                        <div className="w-5 h-5 rounded-full bg-purple-600 text-white text-[10px] flex items-center justify-center font-medium">
+                                            2
+                                        </div>
+                                        <span className="text-[10px] text-purple-600 font-medium hidden sm:inline">
+                                            Style
+                                        </span>
+                                    </div>
+                                    <div className="w-4 sm:w-6 h-0.5 bg-gray-200" />
+                                    <div className="flex items-center gap-1">
+                                        <div className="w-5 h-5 rounded-full bg-gray-200 text-gray-400 text-[10px] flex items-center justify-center font-medium">
+                                            3
+                                        </div>
+                                        <span className="text-[10px] text-gray-400 hidden sm:inline">
+                                            Language
+                                        </span>
+                                    </div>
+                                    <div className="w-4 sm:w-6 h-0.5 bg-gray-200" />
+                                    <div className="flex items-center gap-1">
+                                        <div className="w-5 h-5 rounded-full bg-gray-200 text-gray-400 text-[10px] flex items-center justify-center font-medium">
+                                            4
+                                        </div>
+                                        <span className="text-[10px] text-gray-400 hidden sm:inline">
+                                            Connect
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Header */}
+                                <h3 className="text-gray-900 text-sm font-semibold mb-1">
+                                    Choose Your Style
+                                </h3>
+                                <p className="text-gray-400 text-[10px] mb-3">
+                                    Select a visual aesthetic
+                                </p>
+
+                                {/* Style Grid - 4 columns horizontal */}
+                                <div className="flex gap-1.5 sm:gap-2 flex-1">
+                                    {artStyles.map((style, i) => (
+                                        <div
+                                            key={style.name}
+                                            className={`relative border ${i === 0 ? "border-purple-500 ring-2 ring-purple-200" : style.borderColor} rounded-lg cursor-pointer hover:scale-105 transition-all overflow-hidden flex-1`}
+                                            style={{ aspectRatio: "9/14" }}
+                                        >
+                                            <Image
+                                                src={style.image}
+                                                alt={style.name}
+                                                fill
+                                                className="object-cover"
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Right Side - Voice Selection */}
+                            <div className="w-24 sm:w-32 md:w-36 flex flex-col flex-shrink-0">
+                                <div className="bg-white border border-gray-200 rounded-lg p-2 sm:p-2.5 flex-1 flex flex-col">
+                                    <p className="text-gray-500 text-[9px] font-medium mb-2">
+                                        Voice Style
+                                    </p>
+                                    <div className="space-y-1.5 flex-1">
+                                        <div className="bg-purple-50 border border-purple-200 rounded-md px-2 py-1.5 flex items-center gap-1.5">
+                                            <span className="text-xs">🎙️</span>
+                                            <span className="text-purple-700 text-[8px] font-medium">
+                                                Deep Male
+                                            </span>
+                                        </div>
+                                        <div className="bg-gray-50 border border-gray-200 rounded-md px-2 py-1.5 flex items-center gap-1.5">
+                                            <span className="text-xs">👩</span>
+                                            <span className="text-gray-500 text-[8px]">
+                                                Female
+                                            </span>
+                                        </div>
+                                        <div className="bg-gray-50 border border-gray-200 rounded-md px-2 py-1.5 flex items-center gap-1.5">
+                                            <span className="text-xs">🤖</span>
+                                            <span className="text-gray-500 text-[8px]">
+                                                AI Narrator
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button className="mt-2 w-full bg-purple-600 hover:bg-purple-700 text-white text-[10px] font-medium py-1.5 rounded-lg transition-colors flex items-center justify-center gap-1">
+                                    Continue
+                                    <svg
+                                        className="w-3 h-3"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M9 5l7 7-7 7"
+                                        />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// Mac Browser Mockup Component for Step 3 - Widescreen
+function LanguageMockup() {
+    return (
+        <div className="relative w-full">
+            {/* Subtle glow effect */}
+            <div className="absolute inset-0 bg-purple-200/30 blur-3xl rounded-full scale-90" />
+
+            {/* Mac Window Frame - 16:10 Widescreen */}
+            <div className="relative" style={{ aspectRatio: "16/10" }}>
+                <div className="absolute inset-0 bg-gray-100 rounded-xl shadow-2xl overflow-hidden border border-gray-200 flex flex-col">
+                    {/* Mac Title Bar */}
+                    <div className="bg-gray-200 px-3 py-1.5 sm:px-4 sm:py-2 flex items-center gap-3 border-b border-gray-300 flex-shrink-0">
+                        <div className="flex items-center gap-1.5">
+                            <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F57]" />
+                            <div className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]" />
+                            <div className="w-2.5 h-2.5 rounded-full bg-[#28CA41]" />
+                        </div>
+                        <div className="flex-1 flex justify-center">
+                            <div className="bg-white rounded-md px-3 py-1 flex items-center gap-1.5 w-full max-w-[200px] sm:max-w-[240px] min-w-0 border border-gray-300 shadow-sm">
+                                <svg
+                                    className="w-3 h-3 text-gray-400"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                                    />
+                                </svg>
+                                <span className="text-gray-500 text-[9px] sm:text-[10px] truncate min-w-0 flex-1">
+                                    www.autopilotreels.com
+                                </span>
+                            </div>
+                        </div>
+                        <div className="w-6 sm:w-10" />
+                    </div>
+
+                    {/* Browser Content */}
+                    <div className="flex-1 flex flex-col bg-white overflow-hidden">
+                        <AppHeader />
+
+                        {/* Main Content - Language Selection - Two Column Layout */}
+                        <div className="flex-1 p-3 sm:p-4 bg-gray-50/80 flex gap-3 sm:gap-4 overflow-hidden">
+                            {/* Left Side - Language Cards */}
+                            <div className="flex-1 flex flex-col min-w-0">
+                                {/* Progress Steps */}
+                                <div className="flex items-center gap-2 mb-3">
+                                    <div className="flex items-center gap-1">
+                                        <div className="w-5 h-5 rounded-full bg-green-500 text-white text-[10px] flex items-center justify-center">
+                                            <svg
+                                                className="w-2.5 h-2.5"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={3}
+                                                    d="M5 13l4 4L19 7"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <span className="text-[10px] text-green-600 font-medium hidden sm:inline">
+                                            Niche
+                                        </span>
+                                    </div>
+                                    <div className="w-4 sm:w-6 h-0.5 bg-green-500" />
+                                    <div className="flex items-center gap-1">
+                                        <div className="w-5 h-5 rounded-full bg-green-500 text-white text-[10px] flex items-center justify-center">
+                                            <svg
+                                                className="w-2.5 h-2.5"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={3}
+                                                    d="M5 13l4 4L19 7"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <span className="text-[10px] text-green-600 font-medium hidden sm:inline">
+                                            Style
+                                        </span>
+                                    </div>
+                                    <div className="w-4 sm:w-6 h-0.5 bg-purple-600" />
+                                    <div className="flex items-center gap-1">
+                                        <div className="w-5 h-5 rounded-full bg-purple-600 text-white text-[10px] flex items-center justify-center font-medium">
+                                            3
+                                        </div>
+                                        <span className="text-[10px] text-purple-600 font-medium hidden sm:inline">
+                                            Language
+                                        </span>
+                                    </div>
+                                    <div className="w-4 sm:w-6 h-0.5 bg-gray-200" />
+                                    <div className="flex items-center gap-1">
+                                        <div className="w-5 h-5 rounded-full bg-gray-200 text-gray-400 text-[10px] flex items-center justify-center font-medium">
+                                            4
+                                        </div>
+                                        <span className="text-[10px] text-gray-400 hidden sm:inline">
+                                            Connect
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Header */}
+                                <h3 className="text-gray-900 text-sm font-semibold mb-1">
+                                    Choose Language
+                                </h3>
+                                <p className="text-gray-400 text-[10px] mb-3">
+                                    Pick the narration language
+                                </p>
+
+                                {/* Language Cards - 2x2 Grid */}
+                                <div className="grid grid-cols-2 gap-2 flex-1">
+                                    {languages.map((language, i) => (
+                                        <div
+                                            key={language.name}
+                                            className={`border rounded-lg p-1.5 sm:p-2 flex items-center gap-2 ${
+                                                i === 0
+                                                    ? "border-purple-500 bg-purple-50 ring-2 ring-purple-200"
+                                                    : "border-gray-200 bg-white"
+                                            }`}
+                                        >
+                                            <span className="text-base sm:text-lg">
+                                                {language.icon}
+                                            </span>
+                                            <div>
+                                                <p className="text-gray-700 text-[8px] sm:text-[9px] font-medium">
+                                                    {language.name}
+                                                </p>
+                                                <p className="text-gray-400 text-[8px]">
+                                                    {language.code}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Right Side - Output Settings */}
+                            <div className="w-24 sm:w-32 md:w-36 flex flex-col flex-shrink-0">
+                                <div className="bg-white border border-gray-200 rounded-lg p-2 sm:p-2.5 flex-1 flex flex-col">
+                                    <p className="text-gray-500 text-[9px] font-medium mb-2">
+                                        Output
+                                    </p>
+                                    <div className="space-y-1.5 flex-1">
+                                        <div className="bg-purple-50 border border-purple-200 rounded-md px-2 py-1.5 flex items-center gap-1.5">
+                                            <span className="text-xs">🌍</span>
+                                            <span className="text-purple-700 text-[8px] font-medium">
+                                                English (EN)
+                                            </span>
+                                        </div>
+                                        <div className="bg-gray-50 border border-gray-200 rounded-md px-2 py-1.5 flex items-center gap-1.5">
+                                            <span className="text-xs">💬</span>
+                                            <span className="text-gray-500 text-[8px]">
+                                                Auto-captions on
+                                            </span>
+                                        </div>
+                                        <div className="bg-gray-50 border border-gray-200 rounded-md px-2 py-1.5 flex items-center gap-1.5">
+                                            <span className="text-xs">🎙️</span>
+                                            <span className="text-gray-500 text-[8px]">
+                                                Voice: Deep Male
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button className="mt-2 w-full bg-purple-600 hover:bg-purple-700 text-white text-[10px] font-medium py-1.5 rounded-lg transition-colors flex items-center justify-center gap-1">
+                                    Continue
+                                    <svg
+                                        className="w-3 h-3"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M9 5l7 7-7 7"
+                                        />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// Mac Browser Mockup Component for Step 4 - Widescreen
+function GrowMockup() {
+    return (
+        <div className="relative w-full">
+            {/* Subtle glow effect */}
+            <div className="absolute inset-0 bg-purple-200/30 blur-3xl rounded-full scale-90" />
+
+            {/* Mac Window Frame - 16:10 Widescreen */}
+            <div className="relative" style={{ aspectRatio: "16/10" }}>
+                <div className="absolute inset-0 bg-gray-100 rounded-xl shadow-2xl overflow-hidden border border-gray-200 flex flex-col">
+                    {/* Mac Title Bar */}
+                    <div className="bg-gray-200 px-3 py-1.5 sm:px-4 sm:py-2 flex items-center gap-3 border-b border-gray-300 flex-shrink-0">
+                        <div className="flex items-center gap-1.5">
+                            <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F57]" />
+                            <div className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]" />
+                            <div className="w-2.5 h-2.5 rounded-full bg-[#28CA41]" />
+                        </div>
+                        <div className="flex-1 flex justify-center">
+                            <div className="bg-white rounded-md px-3 py-1 flex items-center gap-1.5 w-full max-w-[200px] sm:max-w-[240px] min-w-0 border border-gray-300 shadow-sm">
+                                <svg
+                                    className="w-3 h-3 text-gray-400"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                                    />
+                                </svg>
+                                <span className="text-gray-500 text-[9px] sm:text-[10px] truncate min-w-0 flex-1">
+                                    www.autopilotreels.com
+                                </span>
+                            </div>
+                        </div>
+                        <div className="w-6 sm:w-10" />
+                    </div>
+
+                    {/* Browser Content */}
+                    <div className="flex-1 flex flex-col bg-white overflow-hidden">
+                        <AppHeader />
+
+                        {/* Main Content - Connect Accounts - Two Column Layout */}
+                        <div className="flex-1 p-3 sm:p-4 bg-gray-50/80 flex gap-3 sm:gap-4 overflow-hidden">
+                            {/* Left Side - Platform Cards */}
+                            <div className="flex-1 flex flex-col min-w-0">
+                                {/* Progress Steps */}
+                                <div className="flex items-center gap-2 mb-3">
+                                    <div className="flex items-center gap-1">
+                                        <div className="w-5 h-5 rounded-full bg-green-500 text-white text-[10px] flex items-center justify-center">
+                                            <svg
+                                                className="w-2.5 h-2.5"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={3}
+                                                    d="M5 13l4 4L19 7"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <span className="text-[10px] text-green-600 font-medium hidden sm:inline">
+                                            Niche
+                                        </span>
+                                    </div>
+                                    <div className="w-4 sm:w-6 h-0.5 bg-green-500" />
+                                    <div className="flex items-center gap-1">
+                                        <div className="w-5 h-5 rounded-full bg-green-500 text-white text-[10px] flex items-center justify-center">
+                                            <svg
+                                                className="w-2.5 h-2.5"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={3}
+                                                    d="M5 13l4 4L19 7"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <span className="text-[10px] text-green-600 font-medium hidden sm:inline">
+                                            Style
+                                        </span>
+                                    </div>
+                                    <div className="w-4 sm:w-6 h-0.5 bg-green-500" />
+                                    <div className="flex items-center gap-1">
+                                        <div className="w-5 h-5 rounded-full bg-green-500 text-white text-[10px] flex items-center justify-center">
+                                            <svg
+                                                className="w-2.5 h-2.5"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={3}
+                                                    d="M5 13l4 4L19 7"
+                                                />
+                                            </svg>
+                                        </div>
+                                        <span className="text-[10px] text-green-600 font-medium hidden sm:inline">
+                                            Language
+                                        </span>
+                                    </div>
+                                    <div className="w-4 sm:w-6 h-0.5 bg-purple-600" />
+                                    <div className="flex items-center gap-1">
+                                        <div className="w-5 h-5 rounded-full bg-purple-600 text-white text-[10px] flex items-center justify-center font-medium">
+                                            4
+                                        </div>
+                                        <span className="text-[10px] text-purple-600 font-medium hidden sm:inline">
+                                            Connect
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Header */}
+                                <h3 className="text-gray-900 text-sm font-semibold mb-1">
+                                    Connect Accounts
+                                </h3>
+                                <p className="text-gray-400 text-[10px] mb-3">
+                                    Auto-publish to your platforms
+                                </p>
+
+                                {/* Platform Cards - Horizontal row */}
+                                <div className="flex gap-1.5 sm:gap-2 flex-1">
+                                    {/* YouTube */}
+                                    <div className="flex-1 bg-white border border-green-200 rounded-lg p-2 sm:p-2.5 flex flex-col items-center justify-center text-center">
+                                        <div className="mb-1.5 flex items-center justify-center">
+                                            <Image
+                                                src="/brands/youtube.svg"
+                                                alt="YouTube"
+                                                width={32}
+                                                height={32}
+                                                unoptimized
+                                                className="w-7 h-7 sm:w-8 sm:h-8"
+                                            />
+                                        </div>
+                                        <p className="text-gray-900 text-[9px] sm:text-[10px] font-medium">
+                                            YouTube
+                                        </p>
+                                        <p className="text-green-600 text-[7px] sm:text-[8px]">
+                                            Connected ✓
+                                        </p>
+                                    </div>
+
+                                    {/* TikTok */}
+                                    <div className="flex-1 bg-white border border-green-200 rounded-lg p-2 sm:p-2.5 flex flex-col items-center justify-center text-center">
+                                        <div className="mb-1.5 flex items-center justify-center">
+                                            <Image
+                                                src="/brands/tiktok.png"
+                                                alt="TikTok"
+                                                width={32}
+                                                height={32}
+                                                className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg"
+                                            />
+                                        </div>
+                                        <p className="text-gray-900 text-[9px] sm:text-[10px] font-medium">
+                                            TikTok
+                                        </p>
+                                        <p className="text-green-600 text-[7px] sm:text-[8px]">
+                                            Connected ✓
+                                        </p>
+                                    </div>
+
+                                    {/* Instagram */}
+                                    <div className="flex-1 bg-white border border-gray-200 rounded-lg p-2 sm:p-2.5 flex flex-col items-center justify-center text-center cursor-pointer hover:border-purple-300 transition-colors">
+                                        <div className="mb-1.5 flex items-center justify-center">
+                                            <Image
+                                                src="/brands/instagram.svg"
+                                                alt="Instagram"
+                                                width={32}
+                                                height={32}
+                                                unoptimized
+                                                className="w-7 h-7 sm:w-8 sm:h-8"
+                                            />
+                                        </div>
+                                        <p className="text-gray-900 text-[9px] sm:text-[10px] font-medium">
+                                            Instagram
+                                        </p>
+                                        <p className="text-purple-600 text-[7px] sm:text-[8px]">
+                                            + Connect
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Right Side - Summary */}
+                            <div className="w-24 sm:w-32 md:w-36 flex flex-col flex-shrink-0">
+                                <div className="bg-white border border-gray-200 rounded-lg p-2 sm:p-2.5 flex-1 flex flex-col">
+                                    <p className="text-gray-500 text-[9px] font-medium mb-2">
+                                        Your Setup
+                                    </p>
+                                    <div className="space-y-1.5 flex-1">
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="text-xs">🏛️</span>
+                                            <span className="text-gray-700 text-[8px]">
+                                                History
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="text-xs">🎬</span>
+                                            <span className="text-gray-700 text-[8px]">
+                                                Cinematic
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="text-xs">🌍</span>
+                                            <span className="text-gray-700 text-[8px]">
+                                                English
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-1.5">
+                                            <span className="text-xs">🎙️</span>
+                                            <span className="text-gray-700 text-[8px]">
+                                                Deep Male
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="border-t border-gray-100 pt-1.5 mt-1.5">
+                                        <p className="text-green-600 text-[8px] font-medium">
+                                            2 connected
+                                        </p>
+                                    </div>
+                                </div>
+                                <button className="mt-2 w-full bg-gradient-to-r from-purple-600 to-purple-700 text-white text-[10px] font-medium py-1.5 rounded-lg transition-colors flex items-center justify-center gap-1 shadow-md shadow-purple-200">
+                                    🚀 Start Creating
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
 
 export default function HowItWorks() {
     return (
@@ -58,8 +1028,8 @@ export default function HowItWorks() {
             <div className="max-w-6xl mx-auto">
                 {/* Section Header */}
                 <div className="text-center mb-16">
-                    <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-                        Three steps to content freedom
+                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+                        Four steps to content freedom
                     </h2>
                     <p className="text-gray-500">
                         From zero to viral-ready in minutes, not months
@@ -67,27 +1037,41 @@ export default function HowItWorks() {
                 </div>
 
                 {/* Steps */}
-                <div className="space-y-24">
-                    {steps.map((item) => (
+                <div className="space-y-16 md:space-y-24">
+                    {steps.map(item => (
                         <div
                             key={item.step}
-                            className={`flex flex-col ${item.imagePosition === "right" ? "md:flex-row" : "md:flex-row-reverse"
-                                } items-center gap-12`}
+                            className={`flex flex-col ${
+                                item.imagePosition === "right"
+                                    ? "md:flex-row"
+                                    : "md:flex-row-reverse"
+                            } items-center gap-8 md:gap-12`}
                         >
                             {/* Content */}
-                            <div className="flex-1 space-y-4">
+                            <div className="flex-1 space-y-3 sm:space-y-4">
                                 <div className="inline-flex items-center gap-2 text-purple-600 text-sm font-medium">
-                                    <span className="px-2 py-1 bg-purple-100 rounded-md">Step {item.step}</span>
+                                    <span className="px-2 py-1 bg-purple-100 rounded-md">
+                                        Step {item.step}
+                                    </span>
                                 </div>
-                                <h3 className="text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-3">
+                                <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-3">
                                     {item.icon}
                                     {item.title}
                                 </h3>
-                                <p className="text-gray-500 text-lg">{item.description}</p>
+                                <p className="text-gray-500 text-base sm:text-lg">
+                                    {item.description}
+                                </p>
                                 <ul className="space-y-2">
                                     {item.features.map((feature, i) => (
-                                        <li key={i} className="flex items-center gap-2 text-gray-600">
-                                            <svg className="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
+                                        <li
+                                            key={i}
+                                            className="flex items-center gap-2 text-gray-600 text-sm sm:text-base"
+                                        >
+                                            <svg
+                                                className="w-5 h-5 text-purple-600"
+                                                fill="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
                                                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                                             </svg>
                                             {feature}
@@ -96,69 +1080,12 @@ export default function HowItWorks() {
                                 </ul>
                             </div>
 
-                            {/* Visual */}
+                            {/* Visual - Mac Browser Mockups - Widescreen */}
                             <div className="flex-1 w-full">
-                                {item.step === 1 && (
-                                    <div className="bg-gray-50 rounded-2xl p-6 shadow-lg">
-                                        <div className="space-y-3">
-                                            <div className="h-4 bg-gray-200 rounded w-1/3" />
-                                            <div className="grid grid-cols-3 gap-2">
-                                                {[1, 2, 3, 4, 5, 6].map((i) => (
-                                                    <div key={i} className="aspect-video bg-gray-200 rounded-lg" />
-                                                ))}
-                                            </div>
-                                            <div className="flex gap-2 mt-4">
-                                                <div className="h-8 bg-purple-600 rounded-lg w-24" />
-                                                <div className="h-8 bg-gray-200 rounded-lg w-24" />
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                                {item.step === 2 && (
-                                    <div className="flex justify-center gap-4">
-                                        {artStyles.map((style) => (
-                                            <div key={style.name} className="text-center">
-                                                <div className={`w-20 h-28 rounded-xl bg-gradient-to-br ${style.color} shadow-lg mb-2`} />
-                                                <span className="text-sm text-gray-600">{style.name}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                                {item.step === 3 && (
-                                    <div className="relative">
-                                        <div className="flex items-end gap-4 justify-center">
-                                            <div className="flex flex-col items-center">
-                                                <div className="w-12 h-12 rounded-xl bg-black flex items-center justify-center mb-2">
-                                                    <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
-                                                        <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
-                                                    </svg>
-                                                </div>
-                                                <span className="text-xs text-green-500 font-medium">100K</span>
-                                            </div>
-                                            <div className="flex flex-col items-center">
-                                                <div className="w-14 h-14 rounded-xl bg-red-600 flex items-center justify-center mb-2">
-                                                    <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">
-                                                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z" />
-                                                        <path fill="#fff" d="M9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
-                                                    </svg>
-                                                </div>
-                                                <span className="text-xs text-green-500 font-medium">250K</span>
-                                            </div>
-                                            <div className="flex flex-col items-center">
-                                                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 flex items-center justify-center mb-2">
-                                                    <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
-                                                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
-                                                    </svg>
-                                                </div>
-                                                <span className="text-xs text-green-500 font-medium">1M</span>
-                                            </div>
-                                        </div>
-                                        {/* Growth line */}
-                                        <svg className="absolute bottom-20 left-1/2 -translate-x-1/2 w-48 h-24" viewBox="0 0 200 100">
-                                            <path d="M10 80 Q 50 70, 100 40 T 190 10" stroke="#10b981" fill="none" strokeWidth="3" strokeLinecap="round" />
-                                        </svg>
-                                    </div>
-                                )}
+                                {item.step === 1 && <NicheMockup />}
+                                {item.step === 2 && <StyleMockup />}
+                                {item.step === 3 && <LanguageMockup />}
+                                {item.step === 4 && <GrowMockup />}
                             </div>
                         </div>
                     ))}

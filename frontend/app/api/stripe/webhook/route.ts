@@ -28,16 +28,22 @@ async function buildPaymentInsert({
     stripe: Stripe;
 }): Promise<{ data: PaymentInsert | null; error: string | null }> {
     const sessionId = session.id;
-    const email = session.customer_details?.email ?? session.customer_email ?? null;
+    const email =
+        session.customer_details?.email ?? session.customer_email ?? null;
     const customerId =
-        typeof session.customer === "string" ? session.customer : session.customer?.id ?? null;
+        typeof session.customer === "string"
+            ? session.customer
+            : (session.customer?.id ?? null);
 
     let priceId = session.metadata?.price_id ?? null;
     let amount = session.amount_total ?? null;
     let currency = session.currency ?? null;
 
     try {
-        const lineItems = await stripe.checkout.sessions.listLineItems(sessionId, { limit: 1 });
+        const lineItems = await stripe.checkout.sessions.listLineItems(
+            sessionId,
+            { limit: 1 },
+        );
         const firstItem = lineItems.data[0];
         if (firstItem?.price?.id) {
             priceId = firstItem.price.id;
@@ -82,16 +88,28 @@ export async function POST(request: Request) {
     if (!webhookSecret) {
         console.error("Missing Stripe webhook secret.");
         return jsonResponse(
-            { data: null, error: { code: "missing_env", message: "Stripe configuration is missing." } },
-            500
+            {
+                data: null,
+                error: {
+                    code: "missing_env",
+                    message: "Stripe configuration is missing.",
+                },
+            },
+            500,
         );
     }
 
     const signature = request.headers.get("stripe-signature");
     if (!signature) {
         return jsonResponse(
-            { data: null, error: { code: "missing_signature", message: "Webhook signature is missing." } },
-            400
+            {
+                data: null,
+                error: {
+                    code: "missing_signature",
+                    message: "Webhook signature is missing.",
+                },
+            },
+            400,
         );
     }
 
@@ -101,20 +119,36 @@ export async function POST(request: Request) {
     } catch (error) {
         console.error("Missing Stripe secret key configuration.", error);
         return jsonResponse(
-            { data: null, error: { code: "missing_env", message: "Stripe configuration is missing." } },
-            500
+            {
+                data: null,
+                error: {
+                    code: "missing_env",
+                    message: "Stripe configuration is missing.",
+                },
+            },
+            500,
         );
     }
 
     let event: Stripe.Event;
     try {
         const payload = await request.text();
-        event = stripe.webhooks.constructEvent(payload, signature, webhookSecret);
+        event = stripe.webhooks.constructEvent(
+            payload,
+            signature,
+            webhookSecret,
+        );
     } catch (error) {
         console.error("Stripe webhook signature verification failed.", error);
         return jsonResponse(
-            { data: null, error: { code: "invalid_signature", message: "Webhook verification failed." } },
-            400
+            {
+                data: null,
+                error: {
+                    code: "invalid_signature",
+                    message: "Webhook verification failed.",
+                },
+            },
+            400,
         );
     }
 
@@ -128,8 +162,14 @@ export async function POST(request: Request) {
     if (!paymentInsert.data) {
         console.warn("Stripe webhook missing required payment metadata.");
         return jsonResponse(
-            { data: null, error: { code: "invalid_payload", message: "Payment metadata is incomplete." } },
-            400
+            {
+                data: null,
+                error: {
+                    code: "invalid_payload",
+                    message: "Payment metadata is incomplete.",
+                },
+            },
+            400,
         );
     }
 
@@ -139,12 +179,20 @@ export async function POST(request: Request) {
     } catch (error) {
         console.error("Missing Supabase configuration.", error);
         return jsonResponse(
-            { data: null, error: { code: "missing_env", message: "Payment storage is unavailable." } },
-            500
+            {
+                data: null,
+                error: {
+                    code: "missing_env",
+                    message: "Payment storage is unavailable.",
+                },
+            },
+            500,
         );
     }
 
-    const { error } = await supabase.from("payments").insert(paymentInsert.data);
+    const { error } = await supabase
+        .from("payments")
+        .insert(paymentInsert.data);
     if (error) {
         if (error.code === "23505") {
             return jsonResponse({ data: { received: true }, error: null });
@@ -152,8 +200,14 @@ export async function POST(request: Request) {
 
         console.error("Failed to persist Stripe payment metadata.", error);
         return jsonResponse(
-            { data: null, error: { code: "storage_error", message: "Unable to store payment metadata." } },
-            500
+            {
+                data: null,
+                error: {
+                    code: "storage_error",
+                    message: "Unable to store payment metadata.",
+                },
+            },
+            500,
         );
     }
 
@@ -161,6 +215,24 @@ export async function POST(request: Request) {
         stripe_session_id: paymentInsert.data.stripe_session_id,
         email: paymentInsert.data.email,
     });
+
+    // Record payment_success event
+    try {
+        await supabase.from("events").insert({
+            event_name: "payment_success",
+            user_id: null, // User might not be authenticated yet/known
+            session_id: paymentInsert.data.stripe_session_id, // Use stripe session as session_id context
+            metadata: {
+                stripe_session_id: paymentInsert.data.stripe_session_id,
+                amount: paymentInsert.data.amount,
+                currency: paymentInsert.data.currency,
+                price_id: paymentInsert.data.price_id,
+                email: paymentInsert.data.email,
+            },
+        });
+    } catch (eventError) {
+        console.warn("Failed to record payment_success event.", eventError);
+    }
 
     return jsonResponse({ data: { received: true }, error: null });
 }

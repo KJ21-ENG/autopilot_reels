@@ -43,7 +43,7 @@ export async function POST(request: Request) {
         try {
             const verified = await jwtVerify(token, secret);
             payload = verified.payload;
-        } catch (e) {
+        } catch {
             return NextResponse.json(
                 { error: "Invalid or expired token" },
                 { status: 400 },
@@ -65,6 +65,14 @@ export async function POST(request: Request) {
             data: { user },
             error: userError,
         } = await supabaseAdmin.auth.admin.getUserById(userId);
+
+        if (userError || !user) {
+            console.error("User not found during deletion:", userError);
+            return NextResponse.json(
+                { error: "User not found" },
+                { status: 404 },
+            );
+        }
 
         if (user?.email) {
             try {

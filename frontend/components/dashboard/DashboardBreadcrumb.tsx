@@ -12,7 +12,7 @@ export default function DashboardBreadcrumb() {
         if (pathname === "/dashboard/guides") return "Guides";
 
         // Fallback for other paths
-        const segments = pathname.split("/").filter(Boolean);
+        const segments = (pathname ?? "").split("/").filter(Boolean);
         const last = segments[segments.length - 1];
         return last ? last.charAt(0).toUpperCase() + last.slice(1) : "Overview";
     };

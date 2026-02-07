@@ -25,7 +25,7 @@ export default function DeleteAccountModal() {
             console.error(e);
             setStatus("idle");
             // Optional: show toast/alert
-            alert(`Error: ${(e as any).message}`);
+            alert(`Error: ${e instanceof Error ? e.message : String(e)}`);
         }
     };
 
@@ -174,8 +174,8 @@ export default function DeleteAccountModal() {
                                     Check your email
                                 </h3>
                                 <p className="text-sm text-gray-500 mb-6">
-                                    We've sent a confirmation link to your email
-                                    address. Please click the link to
+                                    We&apos;ve sent a confirmation link to your
+                                    email address. Please click the link to
                                     permanently delete your account.
                                 </p>
                                 <button

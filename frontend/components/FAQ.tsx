@@ -56,23 +56,32 @@ export default function FAQ() {
                 {/* FAQ Items */}
                 <div className="space-y-4">
                     {faqItems.map((item, index) => (
-                        <div
-                            key={index}
-                            className="border-b border-gray-100"
-                        >
+                        <div key={index} className="border-b border-gray-100">
                             <button
-                                onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                                onClick={() =>
+                                    setOpenIndex(
+                                        openIndex === index ? null : index,
+                                    )
+                                }
                                 className="w-full py-5 flex items-center justify-between text-left hover:text-purple-600 transition-colors"
                             >
-                                <span className="font-medium text-gray-900">{item.question}</span>
+                                <span className="font-medium text-gray-900">
+                                    {item.question}
+                                </span>
                                 <svg
-                                    className={`w-5 h-5 text-gray-400 transition-transform ${openIndex === index ? "rotate-180" : ""
-                                        }`}
+                                    className={`w-5 h-5 text-gray-400 transition-transform ${
+                                        openIndex === index ? "rotate-180" : ""
+                                    }`}
                                     fill="none"
                                     stroke="currentColor"
                                     viewBox="0 0 24 24"
                                 >
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M19 9l-7 7-7-7"
+                                    />
                                 </svg>
                             </button>
                             {openIndex === index && (

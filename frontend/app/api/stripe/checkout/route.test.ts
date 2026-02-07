@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { POST } from "./route";
 
 const createSession = vi.fn();
+const supabaseInsert = vi.fn();
 
 vi.mock("stripe", () => {
     return {
@@ -12,21 +14,44 @@ vi.mock("stripe", () => {
     };
 });
 
-describe("POST /api/stripe/checkout", () => {
-    const originalEnv = { ...process.env };
+vi.mock("../../../../lib/supabase/server", () => ({
+    getSupabaseServer: () => ({
+        from: () => ({
+            insert: supabaseInsert,
+        }),
+    }),
+}));
 
+// Mock the plans module to return predictable IDs for testing
+vi.mock("../../../../lib/stripe/plans", () => ({
+    getPriceId: (plan: string, billing: string) => {
+        if (plan === "Starter" && billing === "monthly")
+            return "price_starter_mo";
+        if (plan === "Starter" && billing === "yearly")
+            return "price_starter_yr";
+        return null; // Simulate invalid plan
+    },
+    getProductId: (plan: string) => {
+        if (plan === "Starter") return "prod_starter";
+        return null;
+    },
+}));
+
+describe("POST /api/stripe/checkout", () => {
     afterEach(() => {
-        process.env = { ...originalEnv };
+        vi.unstubAllEnvs();
         createSession.mockReset();
+        supabaseInsert.mockReset();
     });
 
-    it("returns a checkout URL when Stripe session creation succeeds", async () => {
+    it("returns a checkout URL and emits checkout_start when session creation succeeds", async () => {
         process.env.STRIPE_SECRET_KEY = "sk_test_123";
-        process.env.STRIPE_PRICE_ID = "price_123";
-        process.env.STRIPE_PRODUCT_ID = "prod_123";
         process.env.SITE_URL = "http://localhost:3000";
 
-        createSession.mockResolvedValue({ url: "https://checkout.stripe.test/session" });
+        createSession.mockResolvedValue({
+            url: "https://checkout.stripe.test/session",
+        });
+        supabaseInsert.mockResolvedValue({ error: null });
 
         const request = new Request("http://localhost/api/stripe/checkout", {
             method: "POST",
@@ -34,7 +59,11 @@ describe("POST /api/stripe/checkout", () => {
                 "content-type": "application/json",
                 origin: "http://localhost:3000",
             },
-            body: JSON.stringify({ plan: "Starter", billing: "monthly", source: "pricing" }),
+            body: JSON.stringify({
+                plan: "Starter",
+                billing: "monthly",
+                source: "pricing",
+            }),
         });
 
         const response = await POST(request);
@@ -47,23 +76,36 @@ describe("POST /api/stripe/checkout", () => {
         });
         expect(createSession).toHaveBeenCalledWith(
             expect.objectContaining({
-                success_url: "http://localhost:3000/checkout/success?session_id={CHECKOUT_SESSION_ID}",
+                success_url:
+                    "http://localhost:3000/checkout/success?session_id={CHECKOUT_SESSION_ID}",
                 cancel_url: "http://localhost:3000/checkout/cancel",
+                line_items: [{ price: "price_starter_mo", quantity: 1 }],
                 metadata: expect.objectContaining({
                     plan: "Starter",
                     billing: "monthly",
                     source: "pricing",
-                    price_id: "price_123",
-                    product_id: "prod_123",
+                    price_id: "price_starter_mo",
+                    product_id: "prod_starter",
                 }),
-            })
+            }),
+        );
+
+        expect(supabaseInsert).toHaveBeenCalledWith(
+            expect.objectContaining({
+                event_name: "checkout_start",
+                metadata: expect.objectContaining({
+                    plan: "Starter",
+                    billing: "monthly",
+                    source: "pricing",
+                    price_id: "price_starter_mo",
+                    product_id: "prod_starter",
+                }),
+            }),
         );
     });
 
     it("returns error envelope when Stripe session creation fails", async () => {
         process.env.STRIPE_SECRET_KEY = "sk_test_123";
-        process.env.STRIPE_PRICE_ID = "price_123";
-        process.env.STRIPE_PRODUCT_ID = "prod_123";
         process.env.SITE_URL = "http://localhost:3000";
 
         createSession.mockRejectedValue(new Error("Stripe failure"));
@@ -83,11 +125,14 @@ describe("POST /api/stripe/checkout", () => {
         expect(response.status).toBe(500);
         expect(body).toEqual({
             data: null,
-            error: { code: "stripe_error", message: "Unable to start checkout right now." },
+            error: {
+                code: "stripe_error",
+                message: "Unable to start checkout right now.",
+            },
         });
     });
 
-    it("returns missing_env when Stripe configuration is missing", async () => {
+    it("returns invalid_plan when plan is invalid", async () => {
         process.env.STRIPE_SECRET_KEY = "sk_test_123";
         process.env.SITE_URL = "http://localhost:3000";
 
@@ -97,24 +142,25 @@ describe("POST /api/stripe/checkout", () => {
                 "content-type": "application/json",
                 origin: "http://localhost:3000",
             },
-            body: JSON.stringify({ plan: "Starter" }),
+            body: JSON.stringify({ plan: "InvalidPlan" }),
         });
 
         const response = await POST(request);
         const body = await response.json();
 
-        expect(response.status).toBe(500);
+        expect(response.status).toBe(400);
         expect(body).toEqual({
             data: null,
-            error: { code: "missing_env", message: "Stripe configuration is missing." },
+            error: {
+                code: "invalid_plan",
+                message: "Selected plan is invalid.",
+            },
         });
     });
 
     it("returns missing_env when Stripe secret key is missing", async () => {
-        delete process.env.STRIPE_SECRET_KEY;
-        process.env.STRIPE_PRICE_ID = "price_123";
-        process.env.STRIPE_PRODUCT_ID = "prod_123";
-        process.env.SITE_URL = "http://localhost:3000";
+        vi.stubEnv("SITE_URL", "http://localhost:3000");
+        vi.stubEnv("STRIPE_SECRET_KEY", undefined as any);
 
         const request = new Request("http://localhost/api/stripe/checkout", {
             method: "POST",
@@ -131,17 +177,18 @@ describe("POST /api/stripe/checkout", () => {
         expect(response.status).toBe(500);
         expect(body).toEqual({
             data: null,
-            error: { code: "missing_env", message: "Stripe configuration is missing." },
+            error: {
+                code: "missing_env",
+                message: "Stripe configuration is missing.",
+            },
         });
     });
 
     it("returns missing_origin when no origin is available", async () => {
-        process.env.STRIPE_SECRET_KEY = "sk_test_123";
-        process.env.STRIPE_PRICE_ID = "price_123";
-        process.env.STRIPE_PRODUCT_ID = "prod_123";
-        delete process.env.SITE_URL;
-        delete process.env.NEXT_PUBLIC_SITE_URL;
-        process.env.NODE_ENV = "production";
+        vi.stubEnv("STRIPE_SECRET_KEY", "sk_test_123");
+        vi.stubEnv("SITE_URL", undefined as any);
+        vi.stubEnv("NEXT_PUBLIC_SITE_URL", undefined as any);
+        vi.stubEnv("NODE_ENV", "production");
 
         const request = new Request("http://localhost/api/stripe/checkout", {
             method: "POST",
@@ -155,14 +202,15 @@ describe("POST /api/stripe/checkout", () => {
         expect(response.status).toBe(400);
         expect(body).toEqual({
             data: null,
-            error: { code: "missing_origin", message: "Unable to determine redirect URL." },
+            error: {
+                code: "missing_origin",
+                message: "Unable to determine redirect URL.",
+            },
         });
     });
 
     it("returns invalid_origin when origin does not match SITE_URL", async () => {
         process.env.STRIPE_SECRET_KEY = "sk_test_123";
-        process.env.STRIPE_PRICE_ID = "price_123";
-        process.env.STRIPE_PRODUCT_ID = "prod_123";
         process.env.SITE_URL = "http://localhost:3000";
 
         const request = new Request("http://localhost/api/stripe/checkout", {
@@ -180,7 +228,10 @@ describe("POST /api/stripe/checkout", () => {
         expect(response.status).toBe(400);
         expect(body).toEqual({
             data: null,
-            error: { code: "invalid_origin", message: "Request origin is not allowed." },
+            error: {
+                code: "invalid_origin",
+                message: "Request origin is not allowed.",
+            },
         });
     });
 });

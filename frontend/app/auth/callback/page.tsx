@@ -12,6 +12,7 @@ import {
     buildNoAccountRedirectHref,
     buildPaymentMismatchRedirectHref,
 } from "./recovery";
+import { emitAnalyticsEvent, ANALYTICS_EVENT_NAMES } from "@/lib/analytics";
 
 function AuthCallbackContent() {
     const router = useRouter();
@@ -62,6 +63,57 @@ function AuthCallbackContent() {
             hasRunRef.current = true;
             const errorDescription = searchParams.get("error_description");
             const authCode = searchParams.get("code");
+
+            // Handle implicit flow (recovery) where tokens are in the hash
+            // This is common for password resets or certain OAuth flows
+            const hash = window.location.hash;
+            if (hash && hash.includes("access_token")) {
+                const params = new URLSearchParams(hash.substring(1));
+                const accessToken = params.get("access_token");
+                const refreshToken = params.get("refresh_token");
+
+                if (accessToken && refreshToken) {
+                    const { error } = await supabase.auth.setSession({
+                        access_token: accessToken,
+                        refresh_token: refreshToken,
+                    });
+
+                    if (error) {
+                        if (active) {
+                            setStatus({
+                                state: "error",
+                                message: buildAuthErrorMessage(error),
+                            });
+                        }
+                        return;
+                    }
+
+                    // For recovery flow, we want to let the user reset their password
+                    // but first we need to ensure the session is set and valid
+                    // creating the app session cookie
+                    const sessionResult = await createAuthSession({
+                        accessToken,
+                        stripeSessionId,
+                        enforcePaid: true,
+                    });
+
+                    if (sessionResult.error) {
+                        if (active) {
+                            setStatus({
+                                state: "error",
+                                message: sessionResult.error.message,
+                            });
+                        }
+                        return;
+                    }
+
+                    if (active) {
+                        setStatus({ state: "success" });
+                        router.replace(redirectTo);
+                    }
+                    return;
+                }
+            }
 
             if (errorDescription) {
                 if (active) {
@@ -115,6 +167,15 @@ function AuthCallbackContent() {
                 }
 
                 if (active) {
+                    if (markPaidFlow && stripeSessionId) {
+                        void emitAnalyticsEvent({
+                            event_name: ANALYTICS_EVENT_NAMES.signupComplete,
+                            metadata: {
+                                stripe_session_id: stripeSessionId,
+                                method: "google_resume",
+                            },
+                        });
+                    }
                     setStatus({ state: "success" });
                     router.replace(redirectTo);
                 }
@@ -158,6 +219,16 @@ function AuthCallbackContent() {
                     }
 
                     if (active) {
+                        if (markPaidFlow && stripeSessionId) {
+                            void emitAnalyticsEvent({
+                                event_name:
+                                    ANALYTICS_EVENT_NAMES.signupComplete,
+                                metadata: {
+                                    stripe_session_id: stripeSessionId,
+                                    method: "google_exchange_fallback",
+                                },
+                            });
+                        }
                         setStatus({ state: "success" });
                         router.replace(redirectTo);
                     }
@@ -200,6 +271,15 @@ function AuthCallbackContent() {
             }
 
             if (active) {
+                if (markPaidFlow && stripeSessionId) {
+                    void emitAnalyticsEvent({
+                        event_name: ANALYTICS_EVENT_NAMES.signupComplete,
+                        metadata: {
+                            stripe_session_id: stripeSessionId,
+                            method: "google_exchange",
+                        },
+                    });
+                }
                 setStatus({ state: "success" });
                 router.replace(redirectTo);
             }

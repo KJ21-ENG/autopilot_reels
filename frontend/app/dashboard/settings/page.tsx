@@ -1,9 +1,25 @@
 import CreateResourceModal from "@/components/dashboard/CreateResourceModal";
 import DeleteAccountModal from "@/components/dashboard/DeleteAccountModal";
+import PasswordUpdateForm from "@/components/dashboard/PasswordUpdateForm";
 
 export default function SettingsPage() {
     return (
         <div className="max-w-4xl mx-auto space-y-8">
+            {/* Password Section */}
+            <section className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                <div className="p-6 border-b border-gray-200">
+                    <h2 className="text-lg font-medium text-gray-900">
+                        Security
+                    </h2>
+                    <p className="text-sm text-gray-500 mt-1">
+                        Update your password and manage account security.
+                    </p>
+                </div>
+                <div className="p-6">
+                    <PasswordUpdateForm />
+                </div>
+            </section>
+
             {/* Connected Accounts Section */}
             <section className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
                 <div className="p-6 border-b border-gray-200">

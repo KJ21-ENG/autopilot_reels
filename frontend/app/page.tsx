@@ -1,9 +1,8 @@
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import SocialProof from "@/components/SocialProof";
-import Comparison from "@/components/Comparison";
+import ManualVsAutopilot from "@/components/ManualVsAutopilot";
 import HowItWorks from "@/components/HowItWorks";
-import DemoVideo from "@/components/DemoVideo";
 import Testimonials from "@/components/Testimonials";
 import StudioPreview from "@/components/StudioPreview";
 import Pricing from "@/components/Pricing";
@@ -12,39 +11,36 @@ import Footer from "@/components/Footer";
 import LandingAnalytics from "@/components/LandingAnalytics";
 
 export default function Home() {
-  return (
-    <>
-      <Header />
-      <LandingAnalytics />
-      <main>
-        {/* ATTENTION - Hook */}
-        <Hero />
+    return (
+        <>
+            <Header />
+            <LandingAnalytics />
+            <main>
+                {/* ATTENTION - Hook */}
+                <Hero />
 
-        {/* TRUST - Immediate credibility */}
-        <SocialProof />
+                {/* TRUST - Immediate credibility */}
+                <SocialProof />
 
-        {/* PROBLEM/SOLUTION - Pain point + solution */}
-        <Comparison />
+                {/* COMPARISON - Manual vs Automated */}
+                <ManualVsAutopilot />
 
-        {/* SIMPLIFY - Show it's easy */}
-        <HowItWorks />
+                {/* SIMPLIFY - Show it's easy */}
+                <HowItWorks />
 
-        {/* SHOW - Visual proof */}
-        <DemoVideo />
+                {/* REINFORCE - Social proof after demo */}
+                <Testimonials />
 
-        {/* REINFORCE - Social proof after demo */}
-        <Testimonials />
+                {/* DESIRE - Show the product */}
+                <StudioPreview />
 
-        {/* DESIRE - Show the product */}
-        <StudioPreview />
+                {/* ACTION - After desire is built */}
+                <Pricing />
 
-        {/* ACTION - After desire is built */}
-        <Pricing />
-
-        {/* OBJECTIONS - Handle doubts */}
-        <FAQ />
-      </main>
-      <Footer />
-    </>
-  );
+                {/* OBJECTIONS - Handle doubts */}
+                <FAQ />
+            </main>
+            <Footer />
+        </>
+    );
 }

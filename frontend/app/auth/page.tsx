@@ -4,8 +4,13 @@ import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { getSupabaseBrowser } from "@/lib/supabase/client";
-import { DEFAULT_REDIRECT, normalizeRedirectTarget } from "./auth-utils";
-import { performEmailAuth, performGoogleAuth } from "./auth-actions";
+import { normalizeRedirectTarget } from "./auth-utils";
+import {
+    performEmailAuth,
+    performGoogleAuth,
+    performPasswordReset,
+} from "./auth-actions";
+import { emitAnalyticsEvent, ANALYTICS_EVENT_NAMES } from "@/lib/analytics";
 
 const EMPTY_STATE = { error: "", notice: "" };
 
@@ -13,7 +18,6 @@ function AuthPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const redirectTo = normalizeRedirectTarget(searchParams.get("redirect"));
-    const markPaid = searchParams.get("post_payment") === "1";
     const resumeToken = searchParams.get("resume_token");
     const authError = searchParams.get("error");
     const authErrorEmail = searchParams.get("email");
@@ -61,7 +65,10 @@ function AuthPageContent() {
     });
     const [resumePending, setResumePending] = useState(false);
     const [showCheckoutPrompt, setShowCheckoutPrompt] = useState(false);
-    const [loading, setLoading] = useState<"idle" | "email" | "google">("idle");
+    const [view, setView] = useState<"default" | "forgot_password">("default");
+    const [loading, setLoading] = useState<
+        "idle" | "email" | "google" | "reset"
+    >("idle");
     const emailRef = useRef<HTMLInputElement>(null);
     const firstNameRef = useRef<HTMLInputElement>(null);
     const lastNameRef = useRef<HTMLInputElement>(null);
@@ -152,7 +159,7 @@ function AuthPageContent() {
     const resolveAccountProviderMessage = async (
         normalizedEmail: string,
         sessionId?: string | null,
-    ) => {
+    ): Promise<{ type: "active_error" | "notice"; message: string }> => {
         try {
             const response = await fetch("/api/auth/account-provider", {
                 method: "POST",
@@ -163,21 +170,34 @@ function AuthPageContent() {
                 }),
             });
             if (!response.ok) {
-                return "That payment is already linked to an account. Please sign in instead.";
+                return {
+                    type: "active_error",
+                    message: "Incorrect email or password.",
+                };
             }
             const payload = (await response.json()) as {
                 data?: { has_google_provider?: boolean };
             };
             if (payload.data?.has_google_provider) {
-                return "That account uses Google. Please continue with Google to sign in.";
+                return {
+                    type: "notice",
+                    message:
+                        "That account uses Google. Please continue with Google to sign in.",
+                };
             }
-            return "That payment is already linked to an account. Please sign in instead.";
+            return {
+                type: "active_error",
+                message: "Incorrect email or password.",
+            };
         } catch (error) {
             console.warn(
                 "Unable to resolve account provider for resume.",
                 error,
             );
-            return "That payment is already linked to an account. Please sign in instead.";
+            return {
+                type: "active_error",
+                message: "Incorrect email or password.",
+            };
         }
     };
 
@@ -380,14 +400,18 @@ function AuthPageContent() {
 
         if (result.error) {
             const normalizedError = result.error.toLowerCase();
-            if (normalizedError.includes("no account found") && !allowSignup) {
+            if (
+                (normalizedError.includes("no account found") ||
+                    normalizedError.includes("incorrect email or password")) &&
+                !allowSignup
+            ) {
                 setResumePending(true);
                 const resumeResult = await requestResumeLink(normalizedEmail);
                 setResumePending(false);
                 if (resumeResult.code === "no_paid_payment") {
                     setShowCheckoutPrompt(true);
                     setStatus({
-                        error: `No account found with "${normalizedEmail}"`,
+                        error: result.error ?? "Incorrect email or password.",
                         notice: "",
                     });
                     return;
@@ -395,12 +419,15 @@ function AuthPageContent() {
                 if (resumeResult.ok) {
                     setShowCheckoutPrompt(false);
                     if (resumeResult.code === "already_linked") {
-                        const providerMessage =
+                        const { type, message } =
                             await resolveAccountProviderMessage(
                                 normalizedEmail,
                                 stripeSessionId,
                             );
-                        setStatus({ error: "", notice: providerMessage });
+                        setStatus({
+                            error: type === "active_error" ? message : "",
+                            notice: type === "notice" ? message : "",
+                        });
                     } else {
                         setStatus({
                             error: "",
@@ -422,7 +449,52 @@ function AuthPageContent() {
         }
 
         if (result.redirectTo) {
+            if (allowSignup) {
+                // Fire and forget, don't block redirect
+                void emitAnalyticsEvent({
+                    event_name: ANALYTICS_EVENT_NAMES.signupComplete,
+                    metadata: {
+                        stripe_session_id: stripeSessionId,
+                        method: "email",
+                    },
+                });
+            }
             router.replace(result.redirectTo);
+        }
+    };
+
+    const handlePasswordReset = async () => {
+        setHasInteracted(true);
+        const resolvedEmail = (email || emailRef.current?.value || "").trim();
+
+        if (!resolvedEmail) {
+            setStatus({
+                error: "Enter your email to receive a reset link.",
+                notice: "",
+            });
+            return;
+        }
+
+        setLoading("reset");
+        setStatus(EMPTY_STATE);
+
+        const result = await performPasswordReset({
+            email: resolvedEmail,
+            // When resetting password, we want them to go to settings page to change it
+            redirectTo: `${window.location.origin}/auth/callback?type=recovery&redirect=/dashboard/settings`,
+        });
+
+        setLoading("idle");
+
+        if (result.error) {
+            setStatus({ error: result.error, notice: "" });
+            return;
+        }
+
+        if (result.notice) {
+            setStatus({ error: "", notice: result.notice });
+            // Optionally switch back to default view after success, or stay to show notice
+            // setView("default");
         }
     };
 
@@ -472,12 +544,18 @@ function AuthPageContent() {
         <div className="max-w-md w-full">
             <div className="text-center mb-6">
                 <h1 className="text-3xl font-bold text-gray-900">
-                    {allowSignup ? "Complete Your Account" : "Sign In"}
+                    {view === "forgot_password"
+                        ? "Reset Password"
+                        : allowSignup
+                          ? "Complete Your Account"
+                          : "Sign In"}
                 </h1>
                 <p className="text-gray-500 mt-2">
-                    {allowSignup
-                        ? "Set up your account to activate your paid access."
-                        : "Sign in to access your dashboard."}
+                    {view === "forgot_password"
+                        ? "Enter your email to receive a reset link."
+                        : allowSignup
+                          ? "Set up your account to activate your paid access."
+                          : "Sign in to access your dashboard."}
                 </p>
             </div>
 
@@ -541,26 +619,44 @@ function AuthPageContent() {
                         </div>
                     )}
 
-                    <label className="block" htmlFor="password">
-                        <span className="text-sm font-medium text-gray-700">
-                            Password
-                        </span>
-                        <input
-                            id="password"
-                            ref={passwordRef}
-                            type="password"
-                            value={password}
-                            onChange={event => {
-                                setHasInteracted(true);
-                                setPassword(event.target.value);
-                            }}
-                            placeholder="••••••••"
-                            className="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                            autoComplete="current-password"
-                        />
-                    </label>
+                    {view === "default" && (
+                        <label className="block" htmlFor="password">
+                            <span className="text-sm font-medium text-gray-700">
+                                Password
+                            </span>
+                            <div className="relative">
+                                <input
+                                    id="password"
+                                    ref={passwordRef}
+                                    type="password"
+                                    value={password}
+                                    onChange={event => {
+                                        setHasInteracted(true);
+                                        setPassword(event.target.value);
+                                    }}
+                                    placeholder="••••••••"
+                                    className="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                    autoComplete="current-password"
+                                />
+                            </div>
+                            {!allowSignup && (
+                                <div className="mt-1 flex justify-end">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setStatus(EMPTY_STATE);
+                                            setView("forgot_password");
+                                        }}
+                                        className="text-xs text-purple-600 hover:text-purple-700 font-medium"
+                                    >
+                                        Forgot password?
+                                    </button>
+                                </div>
+                            )}
+                        </label>
+                    )}
 
-                    {allowSignup ? (
+                    {view === "default" && allowSignup ? (
                         <label className="block" htmlFor="confirmPassword">
                             <span className="text-sm font-medium text-gray-700">
                                 Confirm password
@@ -581,30 +677,57 @@ function AuthPageContent() {
                         </label>
                     ) : null}
 
-                    <button
-                        type="button"
-                        onClick={() =>
-                            handleEmail(allowSignup ? "sign-up" : "sign-in")
-                        }
-                        disabled={loading !== "idle" || resumePending}
-                        className={`w-full rounded-lg px-4 py-2 font-semibold disabled:cursor-not-allowed disabled:opacity-60 ${
-                            allowSignup
-                                ? "bg-purple-600 text-white hover:bg-purple-700"
-                                : "bg-white text-purple-700 border border-purple-200 hover:border-purple-300"
-                        }`}
-                    >
-                        {loading === "email" || resumePending
-                            ? "Working..."
-                            : allowSignup
-                              ? "Create account"
-                              : "Sign in"}
-                    </button>
+                    {view === "forgot_password" ? (
+                        <div className="space-y-3">
+                            <button
+                                type="button"
+                                onClick={handlePasswordReset}
+                                disabled={loading !== "idle"}
+                                className="w-full rounded-lg bg-purple-600 px-4 py-2 font-semibold text-white hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                {loading === "reset"
+                                    ? "Sending..."
+                                    : "Send Reset Link"}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setStatus(EMPTY_STATE);
+                                    setView("default");
+                                }}
+                                className="w-full text-sm text-gray-500 hover:text-gray-700"
+                            >
+                                Back to Sign In
+                            </button>
+                        </div>
+                    ) : (
+                        <button
+                            type="button"
+                            onClick={() =>
+                                handleEmail(allowSignup ? "sign-up" : "sign-in")
+                            }
+                            disabled={loading !== "idle" || resumePending}
+                            className={`w-full rounded-lg px-4 py-2 font-semibold disabled:cursor-not-allowed disabled:opacity-60 ${
+                                allowSignup
+                                    ? "bg-purple-600 text-white hover:bg-purple-700"
+                                    : "bg-white text-purple-700 border border-purple-200 hover:border-purple-300"
+                            }`}
+                        >
+                            {loading === "email" || resumePending
+                                ? "Working..."
+                                : allowSignup
+                                  ? "Create account"
+                                  : "Sign in"}
+                        </button>
+                    )}
 
                     {allowSignup ? (
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-gray-500 mt-4 text-center">
                             By creating an account, you agree to our{" "}
                             <a
                                 href="/terms"
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="text-purple-700 hover:text-purple-800 underline"
                             >
                                 Terms of Service
@@ -612,6 +735,8 @@ function AuthPageContent() {
                             and{" "}
                             <a
                                 href="/privacy"
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="text-purple-700 hover:text-purple-800 underline"
                             >
                                 Privacy Policy
@@ -620,54 +745,58 @@ function AuthPageContent() {
                         </p>
                     ) : null}
 
-                    <div className="relative my-4">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-gray-200" />
+                    {view === "default" && (
+                        <div className="relative my-4">
+                            <div className="absolute inset-0 flex items-center">
+                                <div className="w-full border-t border-gray-200" />
+                            </div>
+                            <div className="relative flex justify-center text-xs uppercase">
+                                <span className="bg-gray-50 px-2 text-gray-400">
+                                    Or
+                                </span>
+                            </div>
                         </div>
-                        <div className="relative flex justify-center text-xs uppercase">
-                            <span className="bg-gray-50 px-2 text-gray-400">
-                                Or
-                            </span>
-                        </div>
-                    </div>
+                    )}
 
-                    <button
-                        type="button"
-                        onClick={handleGoogle}
-                        disabled={loading !== "idle" || resumePending}
-                        className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 font-semibold text-gray-800 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 inline-flex items-center justify-center gap-2"
-                    >
-                        {loading === "google" ? (
-                            "Connecting..."
-                        ) : (
-                            <>
-                                <svg
-                                    aria-hidden="true"
-                                    focusable="false"
-                                    className="h-4 w-4"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        fill="#4285F4"
-                                        d="M23.49 12.27c0-.79-.07-1.55-.2-2.27H12v4.3h6.45a5.52 5.52 0 01-2.4 3.62v3h3.88c2.28-2.1 3.56-5.2 3.56-8.65z"
-                                    />
-                                    <path
-                                        fill="#34A853"
-                                        d="M12 24c3.24 0 5.95-1.07 7.94-2.9l-3.88-3A7.18 7.18 0 0112 19.2a7.2 7.2 0 01-6.76-4.98H1.23v3.13A12 12 0 0012 24z"
-                                    />
-                                    <path
-                                        fill="#FBBC05"
-                                        d="M5.24 14.22A7.2 7.2 0 015 12c0-.77.14-1.5.24-2.22V6.65H1.23A12 12 0 000 12c0 1.93.46 3.76 1.23 5.35l4.01-3.13z"
-                                    />
-                                    <path
-                                        fill="#EA4335"
-                                        d="M12 4.8c1.76 0 3.33.6 4.56 1.8l3.42-3.42C17.94 1.1 15.23 0 12 0A12 12 0 001.23 6.65l4.01 3.13A7.2 7.2 0 0112 4.8z"
-                                    />
-                                </svg>
-                                Continue with Google
-                            </>
-                        )}
-                    </button>
+                    {view === "default" && (
+                        <button
+                            type="button"
+                            onClick={handleGoogle}
+                            disabled={loading !== "idle" || resumePending}
+                            className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 font-semibold text-gray-800 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 inline-flex items-center justify-center gap-2"
+                        >
+                            {loading === "google" ? (
+                                "Connecting..."
+                            ) : (
+                                <>
+                                    <svg
+                                        aria-hidden="true"
+                                        focusable="false"
+                                        className="h-4 w-4"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            fill="#4285F4"
+                                            d="M23.49 12.27c0-.79-.07-1.55-.2-2.27H12v4.3h6.45a5.52 5.52 0 01-2.4 3.62v3h3.88c2.28-2.1 3.56-5.2 3.56-8.65z"
+                                        />
+                                        <path
+                                            fill="#34A853"
+                                            d="M12 24c3.24 0 5.95-1.07 7.94-2.9l-3.88-3A7.18 7.18 0 0112 19.2a7.2 7.2 0 01-6.76-4.98H1.23v3.13A12 12 0 0012 24z"
+                                        />
+                                        <path
+                                            fill="#FBBC05"
+                                            d="M5.24 14.22A7.2 7.2 0 015 12c0-.77.14-1.5.24-2.22V6.65H1.23A12 12 0 000 12c0 1.93.46 3.76 1.23 5.35l4.01-3.13z"
+                                        />
+                                        <path
+                                            fill="#EA4335"
+                                            d="M12 4.8c1.76 0 3.33.6 4.56 1.8l3.42-3.42C17.94 1.1 15.23 0 12 0A12 12 0 001.23 6.65l4.01 3.13A7.2 7.2 0 0112 4.8z"
+                                        />
+                                    </svg>
+                                    Continue with Google
+                                </>
+                            )}
+                        </button>
+                    )}
 
                     <div aria-live="polite" className="min-h-[1.25rem]">
                         {activeError && (
@@ -718,9 +847,6 @@ function AuthPageContent() {
                 </div>
             </div>
 
-            <p className="text-xs text-gray-400 mt-4 text-center">
-                Redirecting to {redirectTo ?? DEFAULT_REDIRECT} after sign-in.
-            </p>
             {!allowSignup ? (
                 <p className="text-xs text-gray-400 mt-2 text-center">
                     New account creation is only available right after checkout.

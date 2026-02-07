@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 
+import { ANALYTICS_EVENT_NAMES } from "../../../../lib/analytics";
+import { getSupabaseServer } from "../../../../lib/supabase/server";
 import { getStripeServer } from "../../../../lib/stripe/server";
+import { getPriceId, getProductId } from "../../../../lib/stripe/plans";
 
 type CheckoutRequest = {
     plan?: string;
@@ -25,7 +28,8 @@ function buildOrigin(request: Request) {
 }
 
 function resolveBaseUrl(request: Request) {
-    const configuredBaseUrl = process.env.SITE_URL ?? process.env.NEXT_PUBLIC_SITE_URL;
+    const configuredBaseUrl =
+        process.env.SITE_URL ?? process.env.NEXT_PUBLIC_SITE_URL;
     const requestOrigin = buildOrigin(request);
 
     if (configuredBaseUrl) {
@@ -50,7 +54,9 @@ function resolveBaseUrl(request: Request) {
     }
 
     if (process.env.NODE_ENV === "production") {
-        console.error("SITE_URL is required in production to validate Stripe redirects.");
+        console.error(
+            "SITE_URL is required in production to validate Stripe redirects.",
+        );
         return { error: "missing_origin" as const, baseUrl: null };
     }
 
@@ -58,14 +64,30 @@ function resolveBaseUrl(request: Request) {
 }
 
 export async function POST(request: Request) {
-    const priceId = process.env.STRIPE_PRICE_ID;
-    const productId = process.env.STRIPE_PRODUCT_ID;
+    let payload: CheckoutRequest = {};
+    try {
+        payload = await request.json();
+    } catch (error) {
+        console.warn("Invalid checkout request payload.", error);
+    }
+
+    const priceId = getPriceId(
+        payload.plan ?? "Starter",
+        payload.billing ?? "monthly",
+    );
+    const productId = getProductId(payload.plan ?? "Starter");
 
     if (!priceId || !productId) {
-        console.error("Missing Stripe price or product configuration.");
+        console.error("Invalid plan configuration.", payload);
         return NextResponse.json(
-            { data: null, error: { code: "missing_env", message: "Stripe configuration is missing." } },
-            { status: 500 }
+            {
+                data: null,
+                error: {
+                    code: "invalid_plan",
+                    message: "Selected plan is invalid.",
+                },
+            },
+            { status: 400 },
         );
     }
 
@@ -76,18 +98,13 @@ export async function POST(request: Request) {
             errorCode === "invalid_origin"
                 ? "Request origin is not allowed."
                 : "Unable to determine redirect URL.";
-        console.error("Unable to determine request origin for Stripe redirect URLs.");
+        console.error(
+            "Unable to determine request origin for Stripe redirect URLs.",
+        );
         return NextResponse.json(
             { data: null, error: { code: errorCode, message } },
-            { status: 400 }
+            { status: 400 },
         );
-    }
-
-    let payload: CheckoutRequest = {};
-    try {
-        payload = await request.json();
-    } catch (error) {
-        console.warn("Invalid checkout request payload.", error);
     }
 
     let stripe: ReturnType<typeof getStripeServer> | null = null;
@@ -96,8 +113,14 @@ export async function POST(request: Request) {
     } catch (error) {
         console.error("Missing Stripe secret key configuration.", error);
         return NextResponse.json(
-            { data: null, error: { code: "missing_env", message: "Stripe configuration is missing." } },
-            { status: 500 }
+            {
+                data: null,
+                error: {
+                    code: "missing_env",
+                    message: "Stripe configuration is missing.",
+                },
+            },
+            { status: 500 },
         );
     }
 
@@ -116,6 +139,23 @@ export async function POST(request: Request) {
             },
         });
 
+        // Record checkout_start event
+        try {
+            const supabase = getSupabaseServer();
+            await supabase.from("events").insert({
+                event_name: ANALYTICS_EVENT_NAMES.checkoutStart,
+                metadata: {
+                    plan: payload.plan ?? "default",
+                    billing: payload.billing ?? "monthly",
+                    source: payload.source ?? "unknown",
+                    price_id: priceId,
+                    product_id: productId,
+                },
+            });
+        } catch (eventError) {
+            console.warn("Failed to record checkout_start event.", eventError);
+        }
+
         if (process.env.NODE_ENV !== "production") {
             console.info("Stripe checkout session created.", {
                 id: session.id,
@@ -123,12 +163,21 @@ export async function POST(request: Request) {
             });
         }
 
-        return NextResponse.json({ data: { checkout_url: session.url }, error: null });
+        return NextResponse.json({
+            data: { checkout_url: session.url },
+            error: null,
+        });
     } catch (error) {
         console.error("Stripe checkout session creation failed.", error);
         return NextResponse.json(
-            { data: null, error: { code: "stripe_error", message: "Unable to start checkout right now." } },
-            { status: 500 }
+            {
+                data: null,
+                error: {
+                    code: "stripe_error",
+                    message: "Unable to start checkout right now.",
+                },
+            },
+            { status: 500 },
         );
     }
 }
