@@ -313,9 +313,9 @@ function CheckoutContent() {
             : selectedPlan?.monthlyPrice;
 
     return (
-        <main className="min-h-screen bg-white flex flex-col md:flex-row">
-            {/* Left Side: Plan Details & Branding */}
-            <div className="w-full md:w-[45%] lg:w-[42%] bg-white p-8 md:p-12 lg:p-16 flex flex-col items-center justify-center">
+        <main className="min-h-screen bg-white flex flex-col md:flex-row-reverse">
+            {/* Right Side: Plan Details & Branding */}
+            <div className="w-full md:w-[45%] lg:w-[42%] bg-white p-8 md:p-12 lg:p-16 flex flex-col items-center justify-center border-l border-gray-50">
                 <div className="max-w-md w-full flex flex-col">
                     {/* Brand */}
                     <div className="mb-12">
@@ -431,7 +431,7 @@ function CheckoutContent() {
                 </div>
             </div>
 
-            {/* Right Side: Checkout Form */}
+            {/* Left Side: Checkout Form */}
             <div className="w-full md:w-[55%] lg:w-[58%] p-8 md:p-12 lg:p-20 flex flex-col justify-center bg-white overflow-y-auto">
                 <div className="max-w-[480px] w-full mx-auto">
                     {clientSecret ? (
