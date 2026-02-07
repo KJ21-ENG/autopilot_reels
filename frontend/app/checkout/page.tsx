@@ -315,7 +315,7 @@ function CheckoutContent() {
     return (
         <main className="min-h-screen bg-white flex flex-col md:flex-row">
             {/* Left Side: Plan Details & Branding */}
-            <div className="w-full md:w-[45%] lg:w-[42%] bg-gray-50 border-r border-gray-100 p-8 md:p-12 lg:p-16 flex flex-col items-center justify-center">
+            <div className="w-full md:w-[45%] lg:w-[42%] bg-white p-8 md:p-12 lg:p-16 flex flex-col items-center justify-center">
                 <div className="max-w-md w-full flex flex-col">
                     {/* Brand */}
                     <div className="mb-12">
