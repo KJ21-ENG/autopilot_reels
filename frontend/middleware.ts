@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 // --- Inlined Types & Constants from @/lib/auth/guards ---
 
@@ -18,10 +19,6 @@ type GuardDecision = {
     message: string;
 };
 
-type CookieStoreLike = {
-    get: (name: string) => { value: string } | undefined;
-};
-
 const SESSION_COOKIE = "autopilotreels_session";
 
 function buildAuthRedirect(targetPath: string): string {
@@ -32,12 +29,12 @@ function buildAuthRedirect(targetPath: string): string {
 // --- Inlined Logic from @/lib/auth/guards ---
 
 async function resolveVerifiedAuthState(
-    cookies: CookieStoreLike,
-    deps: {
-        getSupabaseServer: () => SupabaseClient<any, "public", any>;
-    },
+    supabase: SupabaseClient,
+    cookies: { get: (name: string) => { value: string } | undefined },
 ): Promise<AuthState> {
     const accessToken = cookies.get(SESSION_COOKIE)?.value?.trim();
+
+    // If no access token, we are definitely a guest
     if (!accessToken) {
         return {
             isKnown: false,
@@ -47,23 +44,11 @@ async function resolveVerifiedAuthState(
         };
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let supabase: SupabaseClient<any, "public", any>;
-
-    try {
-        supabase = deps.getSupabaseServer();
-    } catch (error) {
-        console.warn("Unable to initialize Supabase for auth guard.", error);
-        return {
-            isKnown: false,
-            hasSession: false,
-            hasPaid: false,
-            isAdmin: false,
-        };
-    }
-
+    // Verify the user
+    // Note: getUser() is safe to call in middleware and will validate the JWT
     const { data: userData, error: userError } =
         await supabase.auth.getUser(accessToken);
+
     if (userError || !userData.user?.id) {
         return {
             isKnown: false,
@@ -73,6 +58,7 @@ async function resolveVerifiedAuthState(
         };
     }
 
+    // Check payment status
     const { data: links, error: linksError } = await supabase
         .from("user_payment_links")
         .select("id")
@@ -88,7 +74,7 @@ async function resolveVerifiedAuthState(
 
     const hasPaid = Boolean(links && links.length > 0);
 
-    // 2. Check for Admin role
+    // Check Admin role
     const { data: roleData } = await supabase
         .from("user_roles")
         .select("role")
@@ -199,77 +185,97 @@ function getGuestRouteDecision({
     };
 }
 
-// --- Local Supabase Helper (to avoid importing from @/lib/supabase/server) ---
-
-function getSupabaseServer() {
-    const url =
-        process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const key =
-        process.env.SUPABASE_SERVICE_ROLE_KEY ??
-        process.env.SUPABASE_ANON_KEY ??
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-    if (!url || !key) {
-        throw new Error("Missing Supabase configuration");
-    }
-
-    return createClient(url, key, {
-        auth: {
-            autoRefreshToken: false,
-            persistSession: false,
-        },
-    });
-}
-
 // --- Middleware Main ---
 
 export async function middleware(request: NextRequest) {
-    const { pathname } = request.nextUrl;
-
-    const authState = await resolveVerifiedAuthState(request.cookies, {
-        getSupabaseServer,
-    });
-
-    // Handle Protected Routes (/dashboard)
-    if (pathname.startsWith("/dashboard")) {
-        const decision = getProtectedRouteDecision({
-            route: pathname,
-            auth: authState,
+    try {
+        let response = NextResponse.next({
+            request: {
+                headers: request.headers,
+            },
         });
 
-        if (decision.allowed || decision.reason === "unpaid") {
-            return NextResponse.next();
+        // Initialize Supabase Client (Edge Compatible)
+        const supabase = createServerClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            {
+                cookies: {
+                    getAll() {
+                        return request.cookies.getAll();
+                    },
+                    setAll(cookiesToSet) {
+                        cookiesToSet.forEach(({ name, value, options }) =>
+                            request.cookies.set(name, value),
+                        );
+                        response = NextResponse.next({
+                            request: {
+                                headers: request.headers,
+                            },
+                        });
+                        cookiesToSet.forEach(({ name, value, options }) =>
+                            response.cookies.set(name, value, options),
+                        );
+                    },
+                },
+            },
+        );
+
+        // Resolve Auth State
+        const authState = await resolveVerifiedAuthState(
+            supabase,
+            request.cookies,
+        );
+
+        const { pathname } = request.nextUrl;
+
+        // Handle Protected Routes (/dashboard)
+        if (pathname.startsWith("/dashboard")) {
+            const decision = getProtectedRouteDecision({
+                route: pathname,
+                auth: authState,
+            });
+
+            if (decision.allowed || decision.reason === "unpaid") {
+                return response;
+            }
+
+            const redirectUrl = new URL(
+                decision.redirectTo ?? "/auth",
+                request.nextUrl.origin,
+            );
+            return NextResponse.redirect(redirectUrl);
         }
 
-        const redirectUrl = new URL(
-            decision.redirectTo ?? "/auth",
-            request.nextUrl.origin,
-        );
-        return NextResponse.redirect(redirectUrl);
-    }
+        // Handle Guest Routes (/, /auth, /checkout)
+        const isGuestRoute =
+            pathname === "/" ||
+            pathname === "/auth" ||
+            pathname === "/checkout";
 
-    // Handle Guest Routes (/, /auth, /checkout)
-    const isGuestRoute =
-        pathname === "/" || pathname === "/auth" || pathname === "/checkout";
+        if (isGuestRoute) {
+            const decision = getGuestRouteDecision({
+                route: pathname,
+                auth: authState,
+            });
 
-    if (isGuestRoute) {
-        const decision = getGuestRouteDecision({
-            route: pathname,
-            auth: authState,
-        });
+            if (decision.allowed) {
+                return response;
+            }
 
-        if (decision.allowed) {
-            return NextResponse.next();
+            const redirectUrl = new URL(
+                decision.redirectTo ?? "/dashboard/series",
+                request.nextUrl.origin,
+            );
+            return NextResponse.redirect(redirectUrl);
         }
 
-        const redirectUrl = new URL(
-            decision.redirectTo ?? "/dashboard/series",
-            request.nextUrl.origin,
-        );
-        return NextResponse.redirect(redirectUrl);
+        return response;
+    } catch (e) {
+        console.error("Middleware crash:", e);
+        // Fail open
+        return NextResponse.next();
     }
-
-    return NextResponse.next();
 }
 
 export const config = {
