@@ -315,13 +315,13 @@ function CheckoutContent() {
     return (
         <main className="min-h-screen bg-white flex flex-col md:flex-row">
             {/* Left Side: Plan Details & Branding */}
-            <div className="w-full md:w-[45%] lg:w-[40%] bg-gray-50 border-r border-gray-100 p-8 md:p-12 flex flex-col">
-                <div className="max-w-md mx-auto w-full flex flex-col h-full">
-                    {/* Brand & Back Button */}
-                    <div className="mb-12 flex items-center justify-between">
+            <div className="w-full md:w-[45%] lg:w-[42%] bg-gray-50 border-r border-gray-100 p-8 md:p-12 lg:p-16 flex flex-col items-end">
+                <div className="max-w-md w-full flex flex-col h-full">
+                    {/* Brand */}
+                    <div className="mb-12">
                         <Link
                             href="/"
-                            className="flex items-center gap-2 group"
+                            className="flex items-center gap-2 group w-fit"
                         >
                             <div className="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-200 group-hover:scale-105 transition-transform">
                                 <svg
@@ -340,7 +340,7 @@ function CheckoutContent() {
 
                     <Link
                         href="/checkout"
-                        className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors mb-12 text-sm font-medium w-fit"
+                        className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors mb-10 text-sm font-medium w-fit"
                     >
                         <svg
                             className="w-4 h-4"
@@ -360,20 +360,20 @@ function CheckoutContent() {
 
                     {/* Order Summary */}
                     <div className="flex-grow">
-                        <div className="mb-8">
-                            <p className="text-gray-500 text-sm font-medium mb-1 capitalize">
+                        <div className="mb-10">
+                            <p className="text-gray-400 text-sm font-semibold uppercase tracking-wider mb-2">
                                 {payload.billing} Subscription
                             </p>
-                            <h1 className="text-4xl font-bold text-gray-900">
+                            <h1 className="text-5xl font-extrabold text-gray-900 tracking-tight">
                                 ${price}
-                                <span className="text-xl font-normal text-gray-500">
+                                <span className="text-2xl font-normal text-gray-400 ml-1">
                                     /mo
                                 </span>
                             </h1>
                         </div>
 
-                        <div className="space-y-6">
-                            <div className="flex items-start gap-4 p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                        <div className="space-y-8">
+                            <div className="flex items-start gap-4 p-5 bg-white rounded-2xl border border-gray-100 shadow-sm">
                                 <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center flex-shrink-0">
                                     <svg
                                         className="w-6 h-6 text-purple-600"
@@ -390,7 +390,7 @@ function CheckoutContent() {
                                     </svg>
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-gray-900">
+                                    <h3 className="font-bold text-gray-900 text-lg">
                                         {selectedPlan?.name} Plan
                                     </h3>
                                     <p className="text-sm text-gray-500">
@@ -414,10 +414,10 @@ function CheckoutContent() {
                     </div>
 
                     {/* Footer / Trust */}
-                    <div className="mt-12 pt-8 border-t border-gray-200">
-                        <div className="flex items-center gap-2 text-gray-400 text-xs font-medium uppercase tracking-widest">
+                    <div className="mt-12 pt-8">
+                        <div className="flex items-center gap-2 text-gray-300 text-[10px] font-bold uppercase tracking-[0.2em]">
                             <svg
-                                className="w-4 h-4"
+                                className="w-3.5 h-3.5"
                                 fill="currentColor"
                                 viewBox="0 0 20 20"
                             >
@@ -434,8 +434,8 @@ function CheckoutContent() {
             </div>
 
             {/* Right Side: Checkout Form */}
-            <div className="w-full md:w-[55%] lg:w-[60%] p-8 md:p-12 lg:p-20 flex flex-col justify-center bg-white min-h-[600px]">
-                <div className="max-w-2xl mx-auto w-full">
+            <div className="w-full md:w-[55%] lg:w-[58%] p-8 md:p-12 lg:p-20 flex flex-col bg-white overflow-y-auto">
+                <div className="max-w-[480px] w-full mx-auto md:mx-0">
                     {clientSecret ? (
                         <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
                             <EmbeddedCheckoutProvider
@@ -447,7 +447,7 @@ function CheckoutContent() {
                             </EmbeddedCheckoutProvider>
                         </div>
                     ) : error ? (
-                        <div className="p-8 text-center bg-red-50 rounded-2xl border border-red-100">
+                        <div className="p-8 text-center bg-red-50 rounded-2xl border border-red-100 mt-20">
                             <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <svg
                                     className="w-6 h-6"
@@ -475,7 +475,7 @@ function CheckoutContent() {
                             </button>
                         </div>
                     ) : (
-                        <div className="flex flex-col items-center justify-center py-20">
+                        <div className="flex flex-col items-center justify-center py-40">
                             <div className="relative">
                                 <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-600"></div>
                                 <div className="absolute inset-0 flex items-center justify-center">
