@@ -125,17 +125,24 @@ export async function POST(request: Request) {
     }
 
     try {
+        const supabase = getSupabaseServer();
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
+
         const session = await stripe.checkout.sessions.create({
             ui_mode: "embedded",
             mode: "subscription",
             line_items: [{ price: priceId, quantity: 1 }],
             return_url: `${baseUrl}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
+            customer_email: user?.email,
             metadata: {
                 plan: payload.plan ?? "default",
                 billing: payload.billing ?? "monthly",
                 source: payload.source ?? "unknown",
                 price_id: priceId,
                 product_id: productId,
+                user_id: user?.id ?? null,
             },
         });
 

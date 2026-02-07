@@ -14,11 +14,16 @@ vi.mock("stripe", () => {
     };
 });
 
+const getUser = vi.fn();
+
 vi.mock("../../../../lib/supabase/server", () => ({
     getSupabaseServer: () => ({
         from: () => ({
             insert: supabaseInsert,
         }),
+        auth: {
+            getUser,
+        },
     }),
 }));
 
@@ -42,6 +47,8 @@ describe("POST /api/stripe/checkout", () => {
         vi.unstubAllEnvs();
         createSession.mockReset();
         supabaseInsert.mockReset();
+        getUser.mockReset();
+        getUser.mockResolvedValue({ data: { user: null } });
     });
 
     it("returns a checkout URL and emits checkout_start when session creation succeeds", async () => {
@@ -53,6 +60,10 @@ describe("POST /api/stripe/checkout", () => {
             client_secret: "cs_test_secret_123",
         });
         supabaseInsert.mockResolvedValue({ error: null });
+
+        getUser.mockResolvedValue({
+            data: { user: { id: "user_123", email: "test@example.com" } },
+        });
 
         const request = new Request("http://localhost/api/stripe/checkout", {
             method: "POST",
@@ -80,6 +91,7 @@ describe("POST /api/stripe/checkout", () => {
                 ui_mode: "embedded",
                 return_url:
                     "http://localhost:3000/checkout/return?session_id={CHECKOUT_SESSION_ID}",
+                customer_email: "test@example.com",
                 line_items: [{ price: "price_starter_mo", quantity: 1 }],
                 metadata: expect.objectContaining({
                     plan: "Starter",
@@ -87,6 +99,7 @@ describe("POST /api/stripe/checkout", () => {
                     source: "pricing",
                     price_id: "price_starter_mo",
                     product_id: "prod_starter",
+                    user_id: "user_123",
                 }),
             }),
         );
