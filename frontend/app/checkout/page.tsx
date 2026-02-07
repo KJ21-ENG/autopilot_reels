@@ -311,7 +311,7 @@ function CheckoutContent() {
     return (
         <main className="min-h-screen bg-white flex flex-col md:flex-row">
             {/* Left Side: Plan Details & Branding */}
-            <div className="w-full md:w-1/2 bg-white p-8 md:p-12 lg:p-16 flex flex-col items-end justify-center">
+            <div className="w-full md:w-1/2 bg-white p-8 md:p-12 lg:p-16 flex flex-col items-center md:items-end justify-center">
                 <div className="max-w-[480px] w-full flex flex-col">
                     {/* Brand */}
                     <div className="mb-12">
@@ -428,7 +428,7 @@ function CheckoutContent() {
             </div>
 
             {/* Right Side: Checkout Form */}
-            <div className="w-full md:w-1/2 p-8 md:p-12 lg:p-16 flex flex-col justify-center bg-white overflow-y-auto items-start">
+            <div className="w-full md:w-1/2 p-8 md:p-12 lg:p-16 flex flex-col justify-center bg-white overflow-y-auto items-center md:items-start">
                 <div className="max-w-[480px] w-full">
                     {clientSecret ? (
                         <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
