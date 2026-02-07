@@ -308,29 +308,40 @@ function CheckoutContent() {
     // Render Embedded Checkout
     return (
         <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
-            <div className="w-full max-w-4xl bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden min-h-[600px]">
-                <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+            <div className="w-full max-w-4xl mx-auto min-h-[600px]">
+                <div className="mb-8">
                     <Link
                         href="/checkout"
-                        className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1"
+                        className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1 w-fit"
                     >
                         ← Change Plan
                     </Link>
-                    <span className="text-sm font-medium text-gray-900">
-                        Secure Checkout
-                    </span>
-                    <div className="w-20" /> {/* Spacer */}
                 </div>
 
                 {clientSecret ? (
                     <EmbeddedCheckoutProvider
                         stripe={stripePromise}
-                        options={{ clientSecret }}
+                        options={
+                            {
+                                clientSecret,
+                                appearance: {
+                                    theme: "stripe",
+                                    variables: {
+                                        colorPrimary: "#9333ea", // purple-600
+                                        colorBackground: "#ffffff",
+                                        colorText: "#1f2937", // gray-900
+                                        fontFamily:
+                                            'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                                        borderRadius: "12px",
+                                    },
+                                },
+                            } as any
+                        }
                     >
                         <EmbeddedCheckout className="h-full w-full" />
                     </EmbeddedCheckoutProvider>
                 ) : error ? (
-                    <div className="flex flex-col items-center justify-center h-[500px] p-8 text-center">
+                    <div className="flex flex-col items-center justify-center h-[400px] p-8 text-center bg-white rounded-2xl shadow-sm border border-gray-100">
                         <p className="text-red-600 mb-4">{error}</p>
                         <button
                             onClick={() => window.location.reload()}
@@ -340,7 +351,7 @@ function CheckoutContent() {
                         </button>
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center justify-center h-[500px]">
+                    <div className="flex flex-col items-center justify-center h-[600px] bg-white rounded-2xl shadow-sm border border-gray-100">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mb-4"></div>
                         <p className="text-gray-500">Loading checkout...</p>
                     </div>
