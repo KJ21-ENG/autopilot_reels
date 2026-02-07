@@ -18,6 +18,8 @@ export default function CheckoutReturnPage() {
     const sessionId = searchParams.get("session_id");
     const [status, setStatus] = useState<string | null>(null);
     const [clientSecret, setClientSecret] = useState<string | null>(null);
+    const [customerEmail, setCustomerEmail] = useState<string | null>(null);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     useEffect(() => {
         if (!sessionId) {
@@ -29,10 +31,25 @@ export default function CheckoutReturnPage() {
             .then(data => {
                 setStatus(data.status);
                 setClientSecret(data.client_secret);
+                setCustomerEmail(data.customer_email);
             })
             .catch(() => {
                 setStatus("error");
             });
+
+        // Check for active session using our internal API
+        fetch("/api/auth/session", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ accessToken: "check" }), // API handles validation
+        })
+            .then(res => res.json())
+            .then(payload => {
+                if (payload.data?.session) {
+                    setIsLoggedIn(true);
+                }
+            })
+            .catch(() => setIsLoggedIn(false));
     }, [sessionId]);
 
     if (!sessionId) {
@@ -110,6 +127,8 @@ export default function CheckoutReturnPage() {
             );
         }
 
+        const isNewUser = !isLoggedIn;
+
         return (
             <main className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
                 <div className="text-center">
@@ -131,16 +150,26 @@ export default function CheckoutReturnPage() {
                     <h1 className="text-2xl font-bold text-gray-900 mb-2">
                         Payment Successful!
                     </h1>
-                    <p className="text-gray-600 mb-6">
-                        Thank you for your purchase. Your account has been
-                        upgraded.
+                    <p className="text-gray-600 mb-6 max-w-sm mx-auto">
+                        {isNewUser
+                            ? "Thank you for your purchase. Next, let's complete your account setup to activate your subscription."
+                            : "Thank you for your purchase. Your account has been upgraded."}
                     </p>
-                    <Link
-                        href="/dashboard"
-                        className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700"
-                    >
-                        Go to Dashboard
-                    </Link>
+                    {isNewUser ? (
+                        <Link
+                            href={`/auth?session_id=${sessionId}${customerEmail ? `&email=${encodeURIComponent(customerEmail)}` : ""}`}
+                            className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-lg font-bold rounded-xl text-white bg-purple-600 hover:bg-purple-700 shadow-lg shadow-purple-200 transition-all hover:scale-105"
+                        >
+                            Complete Account Setup
+                        </Link>
+                    ) : (
+                        <Link
+                            href="/dashboard"
+                            className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-lg font-bold rounded-xl text-white bg-purple-600 hover:bg-purple-700 shadow-lg shadow-purple-200 transition-all hover:scale-105"
+                        >
+                            Go to Dashboard
+                        </Link>
+                    )}
                 </div>
             </main>
         );

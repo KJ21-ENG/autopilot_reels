@@ -46,7 +46,9 @@ function AuthPageContent() {
         Boolean(stripeSessionId) || resumeState.state === "ready";
     const supabase = useMemo(() => getSupabaseBrowser(), []);
 
-    const [email, setEmail] = useState(queryNoAccountEmail);
+    const [email, setEmail] = useState(
+        searchParams.get("email")?.trim() ?? queryNoAccountEmail,
+    );
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [password, setPassword] = useState("");
