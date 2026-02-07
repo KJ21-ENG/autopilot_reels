@@ -398,8 +398,6 @@ function AuthPageContent() {
             allowSignup,
         });
 
-        setLoading("idle");
-
         if (result.error) {
             const normalizedError = result.error.toLowerCase();
             if (
@@ -407,6 +405,7 @@ function AuthPageContent() {
                     normalizedError.includes("incorrect email or password")) &&
                 !allowSignup
             ) {
+                setLoading("idle");
                 setResumePending(true);
                 const resumeResult = await requestResumeLink(normalizedEmail);
                 setResumePending(false);
@@ -441,6 +440,7 @@ function AuthPageContent() {
                 }
                 return;
             }
+            setLoading("idle");
             setStatus({ error: result.error, notice: "" });
             return;
         }
@@ -541,6 +541,14 @@ function AuthPageContent() {
             window.location.assign(result.redirectTo);
         }
     };
+
+    if (resumeState.state === "loading") {
+        return (
+            <div className="flex justify-center items-center min-h-[400px]">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-md w-full">
@@ -836,11 +844,6 @@ function AuthPageContent() {
                         </p>
                     ) : null}
 
-                    {resumeState.state === "loading" ? (
-                        <p className="text-sm text-gray-500">
-                            Validating your setup link...
-                        </p>
-                    ) : null}
                     {resumeState.state === "error" ? (
                         <p className="text-sm text-red-600">
                             {resumeState.message}
@@ -863,15 +866,8 @@ export default function AuthPage() {
         <main className="min-h-screen bg-white flex items-center justify-center px-4">
             <Suspense
                 fallback={
-                    <div className="max-w-md w-full">
-                        <div className="text-center mb-6">
-                            <h1 className="text-3xl font-bold text-gray-900">
-                                Sign In
-                            </h1>
-                            <p className="text-gray-500 mt-2">
-                                Loading authentication...
-                            </p>
-                        </div>
+                    <div className="flex justify-center items-center min-h-screen">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
                     </div>
                 }
             >
