@@ -70,12 +70,12 @@ development_status:
     5-4-perform-accessibility-qa-for-auth-and-dashboard: done
     epic-5-retrospective: optional
 
-    epic-6: backlog
-    6-1-define-funnel-event-schema: backlog
-    6-2-track-cta-clicks-and-checkout-starts: backlog
-    6-3-track-payments-and-post-payment-auth: backlog
-    6-4-track-dashboard-access: backlog
-    6-5-provide-exportable-paid-users-list: backlog
-    6-6-add-minimal-admin-funnel-overview: backlog
-    6-7-define-analytics-data-retention-and-pii-handling: backlog
+    epic-6: done
+    6-1-define-funnel-event-schema: done
+    6-2-track-cta-clicks-and-checkout-starts: done
+    6-3-track-payments-and-post-payment-auth: done
+    6-4-track-dashboard-access: done
+    6-5-provide-exportable-paid-users-list: done
+    6-6-add-minimal-admin-funnel-overview: done
+    6-7-define-analytics-data-retention-and-pii-handling: done
     epic-6-retrospective: optional

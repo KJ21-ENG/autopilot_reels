@@ -204,6 +204,10 @@ Primary tables:
 - Linkage creation does not happen in Epic 3; it is expected in Epic 4 when auth is introduced.
 - Payment lookup by email is restricted to internal tooling via `x-payment-lookup-token` matching `PAYMENT_LOOKUP_TOKEN`.
 
+### Data Governance
+
+- **Retention & PII:** See [Data Retention Policy](./data-retention-policy.md) for retention periods and PII handling specifics.
+
 ## API Contracts
 
 `POST /api/stripe/checkout` → `{ data: { checkout_url }, error: null }`  
