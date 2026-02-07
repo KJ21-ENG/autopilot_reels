@@ -89,6 +89,19 @@ function CheckoutContent() {
 
     const hasSelectedPlan = Boolean(payload.plan);
 
+    // Listen for retry requests from other tabs (e.g. from return page)
+    useEffect(() => {
+        const handleStorageChange = (e: StorageEvent) => {
+            if (e.key === "stripe_checkout_retry_requested") {
+                // Return to plan selector
+                window.location.href = "/checkout";
+            }
+        };
+
+        window.addEventListener("storage", handleStorageChange);
+        return () => window.removeEventListener("storage", handleStorageChange);
+    }, []);
+
     useEffect(() => {
         if (!hasSelectedPlan) {
             setClientSecret(null);

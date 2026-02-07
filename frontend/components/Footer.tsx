@@ -34,7 +34,7 @@ export default function Footer() {
                         <ul className="space-y-3">
                             <li>
                                 <Link
-                                    href="#how-it-works"
+                                    href="/#how-it-works"
                                     className="text-gray-400 hover:text-white text-sm transition-colors"
                                 >
                                     How it works
@@ -42,7 +42,7 @@ export default function Footer() {
                             </li>
                             <li>
                                 <Link
-                                    href="#faq"
+                                    href="/#faq"
                                     className="text-gray-400 hover:text-white text-sm transition-colors"
                                 >
                                     FAQ

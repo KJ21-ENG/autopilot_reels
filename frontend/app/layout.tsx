@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
     title: "AutopilotReels",
     description:
-        "AutopilotReels is a payment-first demand-validation experience for faceless video creators. Fast checkout, premium landing experience, and seamless onboarding.",
+        "AutopilotReels is an AI-powered platform that automatically generates and publishes engaging videos for your brand, so you can grow your presence on autopilot.",
 };
 
 export default function RootLayout({
