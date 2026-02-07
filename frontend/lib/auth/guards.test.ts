@@ -22,6 +22,7 @@ describe("getAuthStateFromCookies", () => {
             isKnown: false,
             hasSession: false,
             hasPaid: false,
+            isAdmin: false,
         });
     });
 
@@ -39,7 +40,12 @@ describe("getProtectedRouteDecision", () => {
     it("denies access when auth state is unknown", () => {
         const decision = getProtectedRouteDecision({
             route: "/dashboard",
-            auth: { isKnown: false, hasSession: false, hasPaid: false },
+            auth: {
+                isKnown: false,
+                hasSession: false,
+                hasPaid: false,
+                isAdmin: false,
+            },
         });
 
         expect(decision.allowed).toBe(false);
@@ -50,7 +56,12 @@ describe("getProtectedRouteDecision", () => {
     it("allows access when session and payment are present", () => {
         const decision = getProtectedRouteDecision({
             route: "/dashboard",
-            auth: { isKnown: true, hasSession: true, hasPaid: true },
+            auth: {
+                isKnown: true,
+                hasSession: true,
+                hasPaid: true,
+                isAdmin: false,
+            },
         });
 
         expect(decision.allowed).toBe(true);
@@ -86,6 +97,10 @@ describe("resolveVerifiedAuthState", () => {
                                                         data: null,
                                                         error: null,
                                                     }) as any,
+                                                single: async () => ({
+                                                    data: null,
+                                                    error: null,
+                                                }),
                                             }) as any,
                                     }) as any,
                             }) as any,
@@ -97,6 +112,7 @@ describe("resolveVerifiedAuthState", () => {
             isKnown: false,
             hasSession: false,
             hasPaid: false,
+            isAdmin: false,
         });
     });
 
@@ -115,20 +131,35 @@ describe("resolveVerifiedAuthState", () => {
                                     error: null,
                                 }) as any,
                         } as any,
-                        from: () =>
-                            ({
-                                select: () =>
-                                    ({
-                                        eq: () =>
-                                            ({
-                                                limit: async () =>
-                                                    ({
-                                                        data: [{ id: "upl-1" }],
-                                                        error: null,
-                                                    }) as any,
-                                            }) as any,
-                                    }) as any,
-                            }) as any,
+                        from: (table: string) => {
+                            if (table === "user_payment_links") {
+                                return {
+                                    select: () => ({
+                                        eq: () => ({
+                                            limit: async () => ({
+                                                data: [{ id: "upl-1" }],
+                                                error: null,
+                                            }),
+                                        }),
+                                    }),
+                                };
+                            }
+                            if (table === "user_roles") {
+                                return {
+                                    select: () => ({
+                                        eq: () => ({
+                                            eq: () => ({
+                                                single: async () => ({
+                                                    data: null,
+                                                    error: null,
+                                                }),
+                                            }),
+                                        }),
+                                    }),
+                                };
+                            }
+                            return {};
+                        },
                     }) as any,
             },
         );
@@ -137,6 +168,7 @@ describe("resolveVerifiedAuthState", () => {
             isKnown: true,
             hasSession: true,
             hasPaid: true,
+            isAdmin: false,
             userId: "user-1",
         });
     });

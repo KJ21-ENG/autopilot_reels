@@ -16,21 +16,58 @@ const mockSupabase = {
             getUserById: vi.fn(),
         },
     },
-    from: vi.fn((_table: string) => {
-        void _table;
-        return {
-            select: vi.fn().mockReturnThis(),
-            eq: vi.fn().mockReturnThis(),
-            in: vi.fn().mockReturnThis(),
-            limit: vi.fn().mockReturnThis(),
-            order: vi.fn().mockReturnThis(),
-        };
-    }),
+    from: vi.fn(),
 };
 
 vi.mock("@supabase/supabase-js", () => ({
-    createClient: () => mockSupabase,
+    createClient: vi.fn(() => mockSupabase),
 }));
+
+const createMockFrom = (options: {
+    isAdmin: boolean;
+    hasPaid: boolean;
+    payments?: any[];
+}) => {
+    return (table: string) => {
+        if (table === "user_roles") {
+            const chain: any = {};
+            chain.select = vi.fn().mockReturnValue(chain);
+            chain.eq = vi.fn().mockReturnValue(chain);
+            chain.single = vi.fn().mockResolvedValue({
+                data: options.isAdmin ? { role: "admin" } : null,
+                error: null,
+            });
+            return chain;
+        }
+        if (table === "user_payment_links") {
+            const chain: any = {};
+            chain.select = vi.fn().mockReturnValue(chain);
+            chain.eq = vi.fn().mockReturnValue(chain);
+            chain.limit = vi.fn().mockResolvedValue({
+                data: options.hasPaid ? [{ id: "link-1" }] : [],
+                error: null,
+            });
+            return chain;
+        }
+        if (table === "payments") {
+            const chain: any = {};
+            chain.select = vi.fn().mockReturnValue(chain);
+            chain.in = vi.fn().mockReturnValue(chain);
+            chain.order = vi.fn().mockResolvedValue({
+                data: options.payments || [],
+                error: null,
+            });
+            return chain;
+        }
+        return {
+            select: vi.fn().mockReturnThis(),
+            eq: vi.fn().mockReturnThis(),
+            limit: vi.fn().mockReturnThis(),
+            single: vi.fn().mockReturnThis(),
+            csv: vi.fn(),
+        };
+    };
+};
 
 describe("GET /api/admin/export-users", () => {
     beforeEach(() => {
@@ -58,30 +95,10 @@ describe("GET /api/admin/export-users", () => {
             error: null,
         });
 
-        // 2. Mock payment verification (needed for resolveVerifiedAuthState)
-        mockSupabase.from.mockImplementation((table: string) => {
-            if (table === "user_payment_links") {
-                return {
-                    select: vi.fn().mockReturnThis(),
-                    eq: vi.fn().mockReturnThis(),
-                    limit: vi.fn().mockResolvedValue({
-                        data: [{ id: "link-1" }],
-                        error: null,
-                    }),
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                } as any;
-            }
-            return {
-                select: vi.fn().mockReturnThis(), // Fallback
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            } as any;
-        });
-
-        // 3. Mock admin.getUserById to return a non-admin email
-        mockSupabase.auth.admin.getUserById.mockResolvedValue({
-            data: { user: { id: "user-123", email: "user@example.com" } },
-            error: null,
-        });
+        // 2. Mock non-admin
+        mockSupabase.from.mockImplementation(
+            createMockFrom({ isAdmin: false, hasPaid: true }),
+        );
 
         const response = await GET();
         expect(response.status).toBe(403);
@@ -94,42 +111,23 @@ describe("GET /api/admin/export-users", () => {
             error: null,
         });
 
-        // 2. Mock payment verification
-        mockSupabase.from.mockImplementation((table: string) => {
-            if (table === "user_payment_links") {
-                return {
-                    select: vi.fn().mockReturnThis(),
-                    eq: vi.fn().mockReturnThis(),
-                    limit: vi.fn().mockResolvedValue({
-                        data: [{ id: "link-1" }],
-                        error: null,
-                    }),
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                } as any;
-            }
-            if (table === "payments") {
-                return {
-                    select: vi.fn().mockReturnThis(),
-                    in: vi.fn().mockReturnThis(),
-                    order: vi.fn().mockResolvedValue({
-                        data: [
-                            {
-                                created_at: "2023-01-01",
-                                price_id: "pro_plan",
-                                email: "customer@example.com",
-                                amount: 1000,
-                                currency: "usd",
-                                status: "paid",
-                            },
-                        ],
-                        error: null,
-                    }),
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                } as any;
-            }
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            return { select: vi.fn().mockReturnThis() } as any;
-        });
+        // 2. Mock admin and data
+        mockSupabase.from.mockImplementation(
+            createMockFrom({
+                isAdmin: true,
+                hasPaid: true,
+                payments: [
+                    {
+                        created_at: "2023-01-01",
+                        price_id: "pro_plan",
+                        email: "customer@example.com",
+                        amount: 1000,
+                        currency: "usd",
+                        status: "paid",
+                    },
+                ],
+            }),
+        );
 
         // 3. Mock admin.getUserById to return the admin email
         mockSupabase.auth.admin.getUserById.mockResolvedValue({

@@ -9,31 +9,88 @@ vi.mock("@/lib/supabase/server", () => ({
 }));
 
 describe("getFunnelStats", () => {
-    const mockFrom = vi.fn();
-    const mockSelect = vi.fn();
-    const mockEq = vi.fn();
+    const mockEventsEq = vi.fn();
+    const mockRevenueEq = vi.fn();
+    const mockRecentLimit = vi.fn();
+    const mockUsersSelect = vi.fn();
+
     const mockSupabase = {
-        from: mockFrom,
+        from: vi.fn((table: string) => {
+            if (table === "events") {
+                return {
+                    select: () => ({
+                        eq: mockEventsEq,
+                    }),
+                };
+            }
+            if (table === "payments") {
+                return {
+                    select: (cols: string) => {
+                        // Revenue query: .select("amount").eq(...)
+                        if (cols === "amount") {
+                            return {
+                                eq: mockRevenueEq,
+                            };
+                        }
+                        // Recent payments: .select("*").order(...).limit(...)
+                        return {
+                            order: () => ({
+                                limit: mockRecentLimit,
+                            }),
+                        };
+                    },
+                };
+            }
+            if (table === "user_payment_links") {
+                // User count: .select("id", { count: "exact", head: true })
+                // This is awaited directly
+                return {
+                    select: mockUsersSelect,
+                };
+            }
+            return {};
+        }),
     };
 
     beforeEach(() => {
         vi.clearAllMocks();
         (getSupabaseServer as Mock).mockReturnValue(mockSupabase);
-
-        // Setup chain mocks return values
-        mockFrom.mockReturnValue({ select: mockSelect });
-        mockSelect.mockReturnValue({ eq: mockEq });
     });
 
     it("should return correct counts when fetching succeeds", async () => {
-        // Setup mock responses for each call order matching the Promise.all in implementation
-        // order: landingView, ctaClick, checkoutStart, paymentSuccess, signupComplete
-        mockEq
+        // 1-5. Events (Funnel)
+        mockEventsEq
             .mockResolvedValueOnce({ count: 100, error: null }) // landingView
             .mockResolvedValueOnce({ count: 50, error: null }) // ctaClick
             .mockResolvedValueOnce({ count: 20, error: null }) // checkoutStart
             .mockResolvedValueOnce({ count: 10, error: null }) // paymentSuccess
             .mockResolvedValueOnce({ count: 5, error: null }); // signupComplete
+
+        // 6. Revenue
+        mockRevenueEq.mockResolvedValue({
+            data: [{ amount: 1000 }, { amount: 2000 }],
+            error: null,
+        });
+
+        // 7. Users
+        // Note: select is awaited, so it returns the result
+        mockUsersSelect.mockResolvedValue({ count: 42, error: null });
+
+        // 8. Recent Payments
+        const recentPaymentsMock = [
+            {
+                id: "p1",
+                email: "test@example.com",
+                amount: 1000,
+                currency: "usd",
+                status: "succeeded",
+                created_at: "2023-01-01",
+            },
+        ];
+        mockRecentLimit.mockResolvedValue({
+            data: recentPaymentsMock,
+            error: null,
+        });
 
         const stats = await getFunnelStats();
 
@@ -43,10 +100,13 @@ describe("getFunnelStats", () => {
             checkoutStarts: 20,
             payments: 10,
             signups: 5,
+            totalRevenue: 3000,
+            totalUsers: 42,
+            recentPayments: recentPaymentsMock,
         });
 
-        expect(mockFrom).toHaveBeenCalledTimes(5);
-        expect(mockEq).toHaveBeenCalledWith(
+        expect(mockEventsEq).toHaveBeenCalledTimes(5);
+        expect(mockEventsEq).toHaveBeenCalledWith(
             "event_name",
             ANALYTICS_EVENT_NAMES.landingView,
         );
@@ -54,7 +114,22 @@ describe("getFunnelStats", () => {
 
     it("should handle errors gracefully and return 0", async () => {
         // Return error for all calls
-        mockEq.mockResolvedValue({ count: null, error: { message: "Error" } });
+        mockEventsEq.mockResolvedValue({
+            count: null,
+            error: { message: "Error" },
+        });
+        mockRevenueEq.mockResolvedValue({
+            data: null,
+            error: { message: "Error" },
+        });
+        mockUsersSelect.mockResolvedValue({
+            count: null,
+            error: { message: "Error" },
+        });
+        mockRecentLimit.mockResolvedValue({
+            data: null,
+            error: { message: "Error" },
+        });
 
         const stats = await getFunnelStats();
 
@@ -64,6 +139,9 @@ describe("getFunnelStats", () => {
             checkoutStarts: 0,
             payments: 0,
             signups: 0,
+            totalRevenue: 0,
+            totalUsers: 0,
+            recentPayments: [],
         });
     });
 });

@@ -7,6 +7,7 @@ type SupabaseMockOptions = {
     links?: Array<{ id: string }> | null;
     userError?: boolean;
     linksError?: boolean;
+    userRole?: { id: string; user_id: string; role: string } | null;
 };
 
 const renderDashboardLayout = async (options: SupabaseMockOptions = {}) => {
@@ -32,18 +33,52 @@ const renderDashboardLayout = async (options: SupabaseMockOptions = {}) => {
                     error: options.userError ? { message: "error" } : null,
                 }),
             },
-            from: () => ({
-                select: () => ({
-                    eq: () => ({
-                        limit: async () => ({
-                            data: options.links ?? [],
-                            error: options.linksError
-                                ? { message: "error" }
-                                : null,
+            from: (table: string) => {
+                if (table === "user_roles") {
+                    let roleFilter: string | null = null;
+                    const chain = {
+                        eq: (col: string, val: string) => {
+                            if (col === "role") roleFilter = val;
+                            return chain;
+                        },
+                        single: async () => {
+                            // If filtering for admin, and the option provided is NOT admin, return null.
+                            // The test passes { role: "unpaid" }.
+                            // Code queries .eq("role", "admin").
+                            // So if roleFilter is "admin" and options.userRole.role is not "admin", should return null.
+                            if (
+                                roleFilter === "admin" &&
+                                options.userRole?.role !== "admin"
+                            ) {
+                                return {
+                                    data: null,
+                                    error: {
+                                        message: "No rows found",
+                                        code: "PGRST116",
+                                    },
+                                };
+                            }
+                            return {
+                                data: options.userRole ?? null,
+                                error: null,
+                            };
+                        },
+                    };
+                    return { select: () => chain };
+                }
+                return {
+                    select: () => ({
+                        eq: () => ({
+                            limit: async () => ({
+                                data: options.links ?? [],
+                                error: options.linksError
+                                    ? { message: "error" }
+                                    : null,
+                            }),
                         }),
                     }),
-                }),
-            }),
+                };
+            },
         }),
     }));
 
@@ -76,6 +111,7 @@ describe("dashboard layout access control", () => {
             sessionToken: "token-2",
             userId: "user-2",
             links: [],
+            userRole: { id: "ur-2", user_id: "user-2", role: "unpaid" },
         });
 
         expect(markup).toContain("Dashboard Access Required");
