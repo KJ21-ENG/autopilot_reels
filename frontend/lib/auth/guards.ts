@@ -4,6 +4,7 @@ export type AuthState = {
     isKnown: boolean;
     hasSession: boolean;
     hasPaid: boolean;
+    isAdmin: boolean;
     userId?: string;
 };
 
@@ -33,6 +34,7 @@ export function getAuthStateFromCookies(cookies: CookieStoreLike): AuthState {
         isKnown,
         hasSession,
         hasPaid,
+        isAdmin: false, // Cookie-based state is optimistic and lacks role detail
     };
 }
 
@@ -45,7 +47,12 @@ export async function resolveVerifiedAuthState(
 ): Promise<AuthState> {
     const accessToken = cookies.get(SESSION_COOKIE)?.value?.trim();
     if (!accessToken) {
-        return { isKnown: false, hasSession: false, hasPaid: false };
+        return {
+            isKnown: false,
+            hasSession: false,
+            hasPaid: false,
+            isAdmin: false,
+        };
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -55,13 +62,23 @@ export async function resolveVerifiedAuthState(
         supabase = deps.getSupabaseServer();
     } catch (error) {
         console.warn("Unable to initialize Supabase for auth guard.", error);
-        return { isKnown: false, hasSession: false, hasPaid: false };
+        return {
+            isKnown: false,
+            hasSession: false,
+            hasPaid: false,
+            isAdmin: false,
+        };
     }
 
     const { data: userData, error: userError } =
         await supabase.auth.getUser(accessToken);
     if (userError || !userData.user?.id) {
-        return { isKnown: false, hasSession: false, hasPaid: false };
+        return {
+            isKnown: false,
+            hasSession: false,
+            hasPaid: false,
+            isAdmin: false,
+        };
     }
 
     const { data: links, error: linksError } = await supabase
@@ -78,10 +95,22 @@ export async function resolveVerifiedAuthState(
     }
 
     const hasPaid = Boolean(links && links.length > 0);
+
+    // 2. Check for Admin role
+    const { data: roleData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userData.user.id)
+        .eq("role", "admin")
+        .single();
+
+    const isAdmin = Boolean(roleData);
+
     return {
         isKnown: true,
         hasSession: true,
         hasPaid,
+        isAdmin,
         userId: userData.user.id,
     };
 }
@@ -116,7 +145,7 @@ export function getProtectedRouteDecision({
         };
     }
 
-    if (!auth.hasPaid) {
+    if (!auth.hasPaid && !auth.isAdmin) {
         return {
             allowed: false,
             reason: "unpaid",
@@ -148,8 +177,17 @@ export function getGuestRouteDecision({
         };
     }
 
-    // If they are signed in, we generally want to redirect them to the dashboard
-    // UNLESS they are on /checkout and haven't paid yet
+    // Admins can browse guest routes like the landing page or checkout
+    if (auth.isAdmin && (route === "/" || route === "/checkout")) {
+        return {
+            allowed: true,
+            reason: "authorized",
+            message: "Admins can browse guest routes.",
+        };
+    }
+
+    // Normal users who are signed in:
+    // If they are on /checkout and haven't paid yet, they are allowed to stay
     if (route === "/checkout" && !auth.hasPaid) {
         return {
             allowed: true,
@@ -158,10 +196,18 @@ export function getGuestRouteDecision({
         };
     }
 
+    // Otherwise, redirect them away from guest routes
+    let redirectTo = "/dashboard/series";
+    if (auth.isAdmin) {
+        redirectTo = "/admin";
+    } else if (!auth.hasPaid) {
+        redirectTo = "/checkout";
+    }
+
     return {
         allowed: false,
-        reason: "authorized", // They are authorized, but not allowed on this guest route
-        redirectTo: auth.hasPaid ? "/dashboard/series" : "/checkout",
+        reason: "authorized",
+        redirectTo,
         message: "Already signed in. Redirecting to your dashboard.",
     };
 }

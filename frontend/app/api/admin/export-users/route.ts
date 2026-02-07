@@ -27,23 +27,14 @@ export async function GET() {
     }
 
     // Verify Admin Access
-    // We check the user's email against a whitelist in dependent on getting the user email
-    // resolving verified auth state doesn't return email, so we need to fetch it.
     const supabase = getSupabaseServer();
-    const {
-        data: { user },
-        error: userError,
-    } = await supabase.auth.admin.getUserById(authState.userId);
+    const { data: roleData, error: roleError } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", authState.userId)
+        .single();
 
-    if (userError || !user || !user.email) {
-        return new NextResponse("Unauthorized: Cannot resolve user email", {
-            status: 401,
-        });
-    }
-
-    const adminEmails =
-        process.env.ADMIN_EMAILS?.split(",").map(e => e.trim()) || [];
-    if (!adminEmails.includes(user.email)) {
+    if (roleError || roleData?.role !== "admin") {
         return new NextResponse("Forbidden: Not an admin", { status: 403 });
     }
 
