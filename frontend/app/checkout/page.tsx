@@ -315,8 +315,8 @@ function CheckoutContent() {
     return (
         <main className="min-h-screen bg-white flex flex-col md:flex-row">
             {/* Left Side: Plan Details & Branding */}
-            <div className="w-full md:w-[45%] lg:w-[42%] bg-gray-50 border-r border-gray-100 p-8 md:p-12 lg:p-16 flex flex-col items-end">
-                <div className="max-w-md w-full flex flex-col h-full">
+            <div className="w-full md:w-[45%] lg:w-[42%] bg-gray-50 border-r border-gray-100 p-8 md:p-12 lg:p-16 flex flex-col items-center justify-center">
+                <div className="max-w-md w-full flex flex-col">
                     {/* Brand */}
                     <div className="mb-12">
                         <Link
@@ -359,62 +359,60 @@ function CheckoutContent() {
                     </Link>
 
                     {/* Order Summary */}
-                    <div className="flex-grow">
-                        <div className="mb-10">
-                            <p className="text-gray-400 text-sm font-semibold uppercase tracking-wider mb-2">
-                                {payload.billing} Subscription
-                            </p>
-                            <h1 className="text-5xl font-extrabold text-gray-900 tracking-tight">
-                                ${price}
-                                <span className="text-2xl font-normal text-gray-400 ml-1">
-                                    /mo
-                                </span>
-                            </h1>
-                        </div>
+                    <div className="mb-10 text-left">
+                        <p className="text-gray-400 text-sm font-semibold uppercase tracking-wider mb-2">
+                            {payload.billing} Subscription
+                        </p>
+                        <h1 className="text-5xl font-extrabold text-gray-900 tracking-tight">
+                            ${price}
+                            <span className="text-2xl font-normal text-gray-400 ml-1">
+                                /mo
+                            </span>
+                        </h1>
+                    </div>
 
-                        <div className="space-y-8">
-                            <div className="flex items-start gap-4 p-5 bg-white rounded-2xl border border-gray-100 shadow-sm">
-                                <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                                    <svg
-                                        className="w-6 h-6 text-purple-600"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M5 13l4 4L19 7"
-                                        />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-gray-900 text-lg">
-                                        {selectedPlan?.name} Plan
-                                    </h3>
-                                    <p className="text-sm text-gray-500">
-                                        {selectedPlan?.description}
-                                    </p>
-                                </div>
+                    <div className="space-y-8">
+                        <div className="flex items-start gap-4 p-5 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                            <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <svg
+                                    className="w-6 h-6 text-purple-600"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M5 13l4 4L19 7"
+                                    />
+                                </svg>
                             </div>
-
-                            <ul className="space-y-4">
-                                {selectedPlan?.features.map(feature => (
-                                    <li
-                                        key={feature}
-                                        className="flex items-center gap-3 text-gray-600 text-sm"
-                                    >
-                                        <div className="w-1.5 h-1.5 rounded-full bg-purple-600 flex-shrink-0" />
-                                        {feature}
-                                    </li>
-                                ))}
-                            </ul>
+                            <div>
+                                <h3 className="font-bold text-gray-900 text-lg">
+                                    {selectedPlan?.name} Plan
+                                </h3>
+                                <p className="text-sm text-gray-500">
+                                    {selectedPlan?.description}
+                                </p>
+                            </div>
                         </div>
+
+                        <ul className="space-y-4">
+                            {selectedPlan?.features.map(feature => (
+                                <li
+                                    key={feature}
+                                    className="flex items-center gap-3 text-gray-600 text-sm"
+                                >
+                                    <div className="w-1.5 h-1.5 rounded-full bg-purple-600 flex-shrink-0" />
+                                    {feature}
+                                </li>
+                            ))}
+                        </ul>
                     </div>
 
                     {/* Footer / Trust */}
-                    <div className="mt-12 pt-8">
+                    <div className="mt-16 border-t border-gray-200 pt-8">
                         <div className="flex items-center gap-2 text-gray-300 text-[10px] font-bold uppercase tracking-[0.2em]">
                             <svg
                                 className="w-3.5 h-3.5"
@@ -434,8 +432,8 @@ function CheckoutContent() {
             </div>
 
             {/* Right Side: Checkout Form */}
-            <div className="w-full md:w-[55%] lg:w-[58%] p-8 md:p-12 lg:p-20 flex flex-col bg-white overflow-y-auto">
-                <div className="max-w-[480px] w-full mx-auto md:mx-0">
+            <div className="w-full md:w-[55%] lg:w-[58%] p-8 md:p-12 lg:p-20 flex flex-col justify-center bg-white overflow-y-auto">
+                <div className="max-w-[480px] w-full mx-auto">
                     {clientSecret ? (
                         <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
                             <EmbeddedCheckoutProvider
@@ -447,7 +445,7 @@ function CheckoutContent() {
                             </EmbeddedCheckoutProvider>
                         </div>
                     ) : error ? (
-                        <div className="p-8 text-center bg-red-50 rounded-2xl border border-red-100 mt-20">
+                        <div className="p-8 text-center bg-red-50 rounded-2xl border border-red-100">
                             <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <svg
                                     className="w-6 h-6"
