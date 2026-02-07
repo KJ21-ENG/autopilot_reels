@@ -311,6 +311,7 @@ export default function StudioPreview() {
                                                             alt={video.title}
                                                             fill
                                                             sizes="(max-width: 640px) 96px, 112px"
+                                                            priority={i === 0}
                                                             className="object-cover group-hover:scale-105 transition-transform duration-500"
                                                         />
                                                         {/* Play button overlay - always visible */}
