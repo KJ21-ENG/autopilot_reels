@@ -229,7 +229,9 @@ export default function Hero() {
                                             alt={video.title}
                                             fill
                                             sizes="(max-width: 640px) 144px, (max-width: 768px) 160px, 176px"
-                                            priority={index < 4} // Loads the first few images eagerly to fix LCP warning
+                                            priority={
+                                                index % videoExamples.length < 4
+                                            } // Loads the first few images eagerly to fix LCP warning
                                             className="object-cover"
                                         />
                                         {/* Overlay gradient */}

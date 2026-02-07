@@ -307,36 +307,74 @@ function CheckoutContent() {
 
     // Render Embedded Checkout
     return (
-        <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
-            <div className="w-full max-w-4xl mx-auto min-h-[600px]">
-                <div className="mb-8">
-                    <Link
-                        href="/checkout"
-                        className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1 w-fit"
-                    >
-                        ← Change Plan
-                    </Link>
+        <main className="min-h-screen bg-gray-50 flex flex-col p-4">
+            {/* Branded Header */}
+            <header className="max-w-6xl w-full mx-auto flex items-center justify-between py-6 mb-8">
+                <Link href="/" className="flex items-center gap-2 group">
+                    <div className="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-200 group-hover:scale-105 transition-transform">
+                        <svg
+                            className="w-6 h-6 text-white"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                        >
+                            <path d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm0 2v12h16V6H4zm4 3l6 3-6 3V9z" />
+                        </svg>
+                    </div>
+                    <span className="text-xl font-bold text-gray-900 tracking-tight">
+                        AutopilotReels
+                    </span>
+                </Link>
+                <Link
+                    href="/checkout"
+                    className="text-sm font-medium text-purple-600 hover:text-purple-700 bg-purple-50 px-4 py-2 rounded-full transition-colors"
+                >
+                    Change Plan
+                </Link>
+            </header>
+
+            <div className="w-full max-w-4xl mx-auto min-h-[600px] flex-grow">
+                <div className="mb-8 text-center">
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                        Complete your subscription
+                    </h1>
+                    <p className="text-gray-500">
+                        Secure checkout powered by Stripe
+                    </p>
+                </div>
+
+                <div className="bg-white rounded-2xl p-6 mb-8 border border-gray-100 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <p className="text-xs font-semibold text-purple-600 uppercase tracking-wider mb-1">
+                            Selected Plan
+                        </p>
+                        <h2 className="text-xl font-bold text-gray-900">
+                            {payload.plan} ({payload.billing})
+                        </h2>
+                    </div>
+                    <div className="text-right">
+                        <p className="text-2xl font-bold text-gray-900">
+                            $
+                            {payload.billing === "yearly"
+                                ? plans.find(p => p.name === payload.plan)
+                                      ?.yearlyPrice
+                                : plans.find(p => p.name === payload.plan)
+                                      ?.monthlyPrice}
+                            <span className="text-sm text-gray-500 font-normal">
+                                /mo
+                            </span>
+                        </p>
+                        {payload.billing === "yearly" && (
+                            <p className="text-xs text-green-600 font-medium">
+                                Billed annually
+                            </p>
+                        )}
+                    </div>
                 </div>
 
                 {clientSecret ? (
                     <EmbeddedCheckoutProvider
                         stripe={stripePromise}
-                        options={
-                            {
-                                clientSecret,
-                                appearance: {
-                                    theme: "stripe",
-                                    variables: {
-                                        colorPrimary: "#9333ea", // purple-600
-                                        colorBackground: "#ffffff",
-                                        colorText: "#1f2937", // gray-900
-                                        fontFamily:
-                                            'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-                                        borderRadius: "12px",
-                                    },
-                                },
-                            } as any
-                        }
+                        options={{ clientSecret }}
                     >
                         <EmbeddedCheckout className="h-full w-full" />
                     </EmbeddedCheckoutProvider>

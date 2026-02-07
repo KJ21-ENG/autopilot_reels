@@ -144,7 +144,8 @@ export default function StudioPreview() {
                                             <Image
                                                 src="/images/user_avatar.png"
                                                 alt="User"
-                                                fill
+                                                width={32}
+                                                height={32}
                                                 className="object-cover"
                                             />
                                         </div>
@@ -309,6 +310,7 @@ export default function StudioPreview() {
                                                             src={video.image}
                                                             alt={video.title}
                                                             fill
+                                                            sizes="(max-width: 640px) 96px, 112px"
                                                             className="object-cover group-hover:scale-105 transition-transform duration-500"
                                                         />
                                                         {/* Play button overlay - always visible */}

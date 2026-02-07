@@ -100,22 +100,7 @@ export default function CheckoutReturnPage() {
                     <div className="w-full max-w-4xl mx-auto min-h-[600px]">
                         <EmbeddedCheckoutProvider
                             stripe={stripePromise}
-                            options={
-                                {
-                                    clientSecret,
-                                    appearance: {
-                                        theme: "stripe",
-                                        variables: {
-                                            colorPrimary: "#9333ea", // purple-600
-                                            colorBackground: "#ffffff",
-                                            colorText: "#1f2937", // gray-900
-                                            fontFamily:
-                                                'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-                                            borderRadius: "12px",
-                                        },
-                                    },
-                                } as any
-                            }
+                            options={{ clientSecret }}
                         >
                             <EmbeddedCheckout className="h-full w-full" />
                         </EmbeddedCheckoutProvider>

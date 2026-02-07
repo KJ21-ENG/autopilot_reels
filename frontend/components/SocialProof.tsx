@@ -109,6 +109,7 @@ export default function SocialProof() {
                                 src={video.image}
                                 alt={video.title}
                                 fill
+                                sizes="(max-width: 640px) 144px, (max-width: 768px) 160px, 176px"
                                 className="object-cover scale-[1.15]"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
@@ -149,7 +150,8 @@ export default function SocialProof() {
                             <Image
                                 src={currentChannel.avatar}
                                 alt={currentChannel.name}
-                                fill
+                                width={40}
+                                height={40}
                                 className="object-cover"
                             />
                         </div>
