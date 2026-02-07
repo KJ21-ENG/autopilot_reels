@@ -83,11 +83,6 @@ function CheckoutContent() {
 
     const payload = useMemo(() => {
         const plan = searchParams.get("plan") ?? undefined;
-        // If the user hasn't selected a plan, we can't create a session yet.
-        // But if they have, we use the CURRENT state for billing, not just the URL param.
-        // However, the original code used URL params to drive everything.
-        // Let's stick to using state for the UI toggle, and pass that to the API.
-
         const source = searchParams.get("source") ?? "checkout";
         return { plan, billing: billingMode, source };
     }, [searchParams, billingMode]);
@@ -97,6 +92,7 @@ function CheckoutContent() {
     useEffect(() => {
         if (!hasSelectedPlan) {
             setClientSecret(null);
+            setError(null);
             return;
         }
 
@@ -315,8 +311,8 @@ function CheckoutContent() {
     return (
         <main className="min-h-screen bg-white flex flex-col md:flex-row">
             {/* Left Side: Plan Details & Branding */}
-            <div className="w-full md:w-[45%] lg:w-[42%] bg-white p-8 md:p-12 lg:p-16 flex flex-col items-end justify-center">
-                <div className="max-w-md w-full flex flex-col">
+            <div className="w-full md:w-1/2 bg-white p-8 md:p-12 lg:p-16 flex flex-col items-end justify-center">
+                <div className="max-w-[480px] w-full flex flex-col">
                     {/* Brand */}
                     <div className="mb-12">
                         <Link
@@ -432,7 +428,7 @@ function CheckoutContent() {
             </div>
 
             {/* Right Side: Checkout Form */}
-            <div className="w-full md:w-[55%] lg:w-[58%] p-8 md:p-12 lg:p-20 flex flex-col justify-center bg-white overflow-y-auto items-start">
+            <div className="w-full md:w-1/2 p-8 md:p-12 lg:p-16 flex flex-col justify-center bg-white overflow-y-auto items-start">
                 <div className="max-w-[480px] w-full">
                     {clientSecret ? (
                         <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
