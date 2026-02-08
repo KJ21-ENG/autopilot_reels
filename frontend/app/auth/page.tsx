@@ -124,12 +124,9 @@ function AuthPageContent() {
                 };
             }
             if (status === "link_generated") {
-                const missing = payload.data?.missing?.length
-                    ? ` Missing: ${payload.data.missing.join(", ")}.`
-                    : "";
                 return {
                     ok: true,
-                    message: `We generated your setup link. Check your server logs to continue.${missing}`,
+                    message: "No account found with this email. Please sign up first.",
                     code: "link_generated" as const,
                 };
             }
@@ -552,25 +549,100 @@ function AuthPageContent() {
 
     return (
         <div className="max-w-md w-full">
+            {/* Logo */}
+            <div className="flex justify-center mb-6">
+                <Link href="/" className="flex items-center gap-2">
+                    <svg
+                        className="w-8 h-8 text-purple-600"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                    >
+                        <path d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm0 2v12h16V6H4zm4 3l6 3-6 3V9z" />
+                    </svg>
+                    <span className="text-2xl font-semibold text-gray-900">
+                        AutopilotReels
+                    </span>
+                </Link>
+            </div>
+
             <div className="text-center mb-6">
                 <h1 className="text-3xl font-bold text-gray-900">
                     {view === "forgot_password"
                         ? "Reset Password"
                         : allowSignup
-                          ? "Complete Your Account"
-                          : "Sign In"}
+                            ? "Complete Your Account"
+                            : "Sign In"}
                 </h1>
                 <p className="text-gray-500 mt-2">
                     {view === "forgot_password"
                         ? "Enter your email to receive a reset link."
                         : allowSignup
-                          ? "Set up your account to activate your paid access."
-                          : "Sign in to access your dashboard."}
+                            ? "Set up your account to activate your paid access."
+                            : ""}
                 </p>
             </div>
 
+
             <div className="bg-gray-50 border border-gray-100 rounded-2xl p-6 shadow-sm">
                 <div className="space-y-4">
+                    {view === "default" && (
+                        <>
+                            <div className="relative">
+                                <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-gradient-to-r from-purple-600 to-pink-500 text-white text-xs font-bold px-3 py-0.5 rounded-full shadow-md z-10">
+                                    ⚡ Recommended
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={handleGoogle}
+                                    disabled={loading !== "idle" || resumePending}
+                                    className="w-full rounded-xl border-2 border-purple-300 bg-gradient-to-r from-purple-50 to-pink-50 px-4 py-4 text-lg font-bold text-gray-800 hover:from-purple-100 hover:to-pink-100 hover:border-purple-400 hover:shadow-[0_0_20px_rgba(147,51,234,0.3)] disabled:cursor-not-allowed disabled:opacity-60 inline-flex items-center justify-center gap-3 transition-all shadow-lg"
+                                >
+                                    {loading === "google" ? (
+                                        "Connecting..."
+                                    ) : (
+                                        <>
+                                            <svg
+                                                aria-hidden="true"
+                                                focusable="false"
+                                                className="h-6 w-6"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    fill="#4285F4"
+                                                    d="M23.49 12.27c0-.79-.07-1.55-.2-2.27H12v4.3h6.45a5.52 5.52 0 01-2.4 3.62v3h3.88c2.28-2.1 3.56-5.2 3.56-8.65z"
+                                                />
+                                                <path
+                                                    fill="#34A853"
+                                                    d="M12 24c3.24 0 5.95-1.07 7.94-2.9l-3.88-3A7.18 7.18 0 0112 19.2a7.2 7.2 0 01-6.76-4.98H1.23v3.13A12 12 0 0012 24z"
+                                                />
+                                                <path
+                                                    fill="#FBBC05"
+                                                    d="M5.24 14.22A7.2 7.2 0 015 12c0-.77.14-1.5.24-2.22V6.65H1.23A12 12 0 000 12c0 1.93.46 3.76 1.23 5.35l4.01-3.13z"
+                                                />
+                                                <path
+                                                    fill="#EA4335"
+                                                    d="M12 4.8c1.76 0 3.33.6 4.56 1.8l3.42-3.42C17.94 1.1 15.23 0 12 0A12 12 0 001.23 6.65l4.01 3.13A7.2 7.2 0 0112 4.8z"
+                                                />
+                                            </svg>
+                                            Continue with Google
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+
+                            <div className="relative my-2">
+                                <div className="absolute inset-0 flex items-center">
+                                    <div className="w-full border-t border-gray-200" />
+                                </div>
+                                <div className="relative flex justify-center text-xs uppercase">
+                                    <span className="bg-gray-50 px-2 text-gray-400">
+                                        Or continue with email
+                                    </span>
+                                </div>
+                            </div>
+                        </>
+                    )}
+
                     <label className="block" htmlFor="email">
                         <span className="text-sm font-medium text-gray-700">
                             Email
@@ -587,11 +659,10 @@ function AuthPageContent() {
                             placeholder="you@example.com"
                             disabled={allowSignup}
                             aria-disabled={allowSignup}
-                            className={`mt-1 w-full rounded-lg border px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500 ${
-                                allowSignup
-                                    ? "border-gray-200 bg-gray-100 cursor-not-allowed"
-                                    : "border-gray-200 bg-white"
-                            }`}
+                            className={`mt-1 w-full rounded-lg border px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500 ${allowSignup
+                                ? "border-gray-200 bg-gray-100 cursor-not-allowed"
+                                : "border-gray-200 bg-white"
+                                }`}
                             autoComplete="email"
                         />
                     </label>
@@ -717,17 +788,16 @@ function AuthPageContent() {
                                 handleEmail(allowSignup ? "sign-up" : "sign-in")
                             }
                             disabled={loading !== "idle" || resumePending}
-                            className={`w-full rounded-lg px-4 py-2 font-semibold disabled:cursor-not-allowed disabled:opacity-60 ${
-                                allowSignup
-                                    ? "bg-purple-600 text-white hover:bg-purple-700"
-                                    : "bg-white text-purple-700 border border-purple-200 hover:border-purple-300"
-                            }`}
+                            className={`w-full rounded-lg px-4 py-2 font-semibold disabled:cursor-not-allowed disabled:opacity-60 ${allowSignup
+                                ? "bg-purple-600 text-white hover:bg-purple-700"
+                                : "bg-white text-purple-700 border border-purple-200 hover:border-purple-300"
+                                }`}
                         >
                             {loading === "email" || resumePending
                                 ? "Working..."
                                 : allowSignup
-                                  ? "Create account"
-                                  : "Sign in"}
+                                    ? "Create account"
+                                    : "Sign in"}
                         </button>
                     )}
 
@@ -755,58 +825,6 @@ function AuthPageContent() {
                         </p>
                     ) : null}
 
-                    {view === "default" && (
-                        <div className="relative my-4">
-                            <div className="absolute inset-0 flex items-center">
-                                <div className="w-full border-t border-gray-200" />
-                            </div>
-                            <div className="relative flex justify-center text-xs uppercase">
-                                <span className="bg-gray-50 px-2 text-gray-400">
-                                    Or
-                                </span>
-                            </div>
-                        </div>
-                    )}
-
-                    {view === "default" && (
-                        <button
-                            type="button"
-                            onClick={handleGoogle}
-                            disabled={loading !== "idle" || resumePending}
-                            className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2 font-semibold text-gray-800 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 inline-flex items-center justify-center gap-2"
-                        >
-                            {loading === "google" ? (
-                                "Connecting..."
-                            ) : (
-                                <>
-                                    <svg
-                                        aria-hidden="true"
-                                        focusable="false"
-                                        className="h-4 w-4"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            fill="#4285F4"
-                                            d="M23.49 12.27c0-.79-.07-1.55-.2-2.27H12v4.3h6.45a5.52 5.52 0 01-2.4 3.62v3h3.88c2.28-2.1 3.56-5.2 3.56-8.65z"
-                                        />
-                                        <path
-                                            fill="#34A853"
-                                            d="M12 24c3.24 0 5.95-1.07 7.94-2.9l-3.88-3A7.18 7.18 0 0112 19.2a7.2 7.2 0 01-6.76-4.98H1.23v3.13A12 12 0 0012 24z"
-                                        />
-                                        <path
-                                            fill="#FBBC05"
-                                            d="M5.24 14.22A7.2 7.2 0 015 12c0-.77.14-1.5.24-2.22V6.65H1.23A12 12 0 000 12c0 1.93.46 3.76 1.23 5.35l4.01-3.13z"
-                                        />
-                                        <path
-                                            fill="#EA4335"
-                                            d="M12 4.8c1.76 0 3.33.6 4.56 1.8l3.42-3.42C17.94 1.1 15.23 0 12 0A12 12 0 001.23 6.65l4.01 3.13A7.2 7.2 0 0112 4.8z"
-                                        />
-                                    </svg>
-                                    Continue with Google
-                                </>
-                            )}
-                        </button>
-                    )}
 
                     <div aria-live="polite" className="min-h-[1.25rem]">
                         {activeError && (
@@ -852,11 +870,17 @@ function AuthPageContent() {
                 </div>
             </div>
 
-            {!allowSignup ? (
-                <p className="text-xs text-gray-400 mt-2 text-center">
-                    New account creation is only available right after checkout.
+            {!allowSignup && view === "default" && (
+                <p className="text-sm text-gray-500 mt-4 text-center">
+                    Don&apos;t have an account?{" "}
+                    <Link
+                        href="/checkout"
+                        className="text-purple-600 hover:text-purple-700 font-semibold transition-all hover:drop-shadow-[0_0_8px_rgba(147,51,234,0.6)]"
+                    >
+                        Sign up
+                    </Link>
                 </p>
-            ) : null}
+            )}
         </div>
     );
 }

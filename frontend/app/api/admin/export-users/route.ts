@@ -61,7 +61,7 @@ export async function GET() {
             payment.created_at,
             payment.price_id,
             payment.email || "N/A", // Payment email might differ from auth email, but it's what we want for revenue tracking
-            payment.amount,
+            (payment.amount / 100).toFixed(2), // Convert cents to dollars
             payment.currency,
         ].map(field => {
             // Escape quotes and wrap in quotes if necessary

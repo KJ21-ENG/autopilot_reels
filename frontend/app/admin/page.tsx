@@ -7,6 +7,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { SESSION_COOKIE } from "@/lib/auth/guards";
 import { AdminLogoutButton } from "./AdminLogoutButton";
+import { FunnelBreakdown } from "./FunnelBreakdown";
 
 // Dynamic forcing required for admin dashboard to prevent caching of stats
 export const dynamic = "force-dynamic";
@@ -15,29 +16,53 @@ function StatCard({
     label,
     value,
     icon,
+    tooltip,
 }: {
     label: string;
     value: number;
     icon: React.ReactNode;
+    tooltip?: { text: string; example: string };
 }) {
     return (
-        <div className="relative overflow-hidden p-6 bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow group">
+        <div className="relative p-6 bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow group">
             <div className="flex justify-between items-start z-10 relative">
                 <div>
-                    <h3 className="text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wider">
+                    <h3 className="text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wider flex items-center gap-1">
                         {label}
+                        {tooltip && (
+                            <span className="relative group/tip inline-flex">
+                                <svg
+                                    className="w-3.5 h-3.5 text-gray-400 cursor-help"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
+                                </svg>
+                                <span className="absolute left-0 top-full mt-2 hidden group-hover/tip:block z-50 w-56 p-2.5 bg-gray-900 text-white text-xs rounded-lg shadow-xl normal-case tracking-normal">
+                                    <span className="font-medium block mb-1">{tooltip.text}</span>
+                                    <span className="text-gray-300 italic block">Example: {tooltip.example}</span>
+                                    <span className="absolute left-2 -top-1 w-2 h-2 bg-gray-900 rotate-45" />
+                                </span>
+                            </span>
+                        )}
                     </h3>
                     <div className="text-3xl font-bold text-gray-900 group-hover:text-purple-600 transition-colors">
                         {typeof value === "number"
                             ? label.toLowerCase().includes("revenue")
                                 ? value.toLocaleString(undefined, {
-                                      style: "currency",
-                                      currency: "USD",
-                                  })
+                                    style: "currency",
+                                    currency: "USD",
+                                })
                                 : label.toLowerCase().includes("rate") ||
                                     label.toLowerCase().includes("conversion")
-                                  ? value.toFixed(1) + "%"
-                                  : value.toLocaleString()
+                                    ? value.toFixed(1) + "%"
+                                    : value.toLocaleString()
                             : value}
                     </div>
                 </div>
@@ -221,25 +246,18 @@ export default async function AdminPage() {
                             className="flex items-center gap-2 group"
                             aria-label="AutopilotReels Home"
                         >
-                            <div className="p-2 bg-purple-600 rounded-lg group-hover:bg-purple-700 transition-colors shadow-sm">
-                                <svg
-                                    className="w-6 h-6 text-white"
-                                    viewBox="0 0 24 24"
-                                    fill="currentColor"
-                                    aria-hidden="true"
-                                    focusable="false"
-                                >
-                                    <path d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm0 2v12h16V6H4zm4 3l6 3-6 3V9z" />
-                                </svg>
-                            </div>
-                            <div className="flex flex-col">
-                                <span className="text-xl font-bold text-gray-900 leading-tight">
-                                    AutopilotReels
-                                </span>
-                                <span className="text-xs font-semibold text-purple-600 uppercase tracking-widest leading-none">
-                                    Admin
-                                </span>
-                            </div>
+                            <svg
+                                className="w-8 h-8 text-purple-600"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                                aria-hidden="true"
+                                focusable="false"
+                            >
+                                <path d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm0 2v12h16V6H4zm4 3l6 3-6 3V9z" />
+                            </svg>
+                            <span className="text-2xl font-semibold text-gray-900">
+                                AutopilotReels
+                            </span>
                         </Link>
                     </div>
                     <div className="flex items-center gap-3">
@@ -256,11 +274,19 @@ export default async function AdminPage() {
                             label="Total Revenue"
                             value={stats.totalRevenue / 100}
                             icon={Icons.Revenue}
+                            tooltip={{
+                                text: "Total money earned from all successful payments.",
+                                example: "If you have 10 users who paid $39 each, revenue is $390.",
+                            }}
                         />
                         <StatCard
                             label="Paid Users"
                             value={stats.totalUsers}
                             icon={Icons.Users}
+                            tooltip={{
+                                text: "Number of unique users who have completed payment.",
+                                example: "If 50 people signed up and 10 paid, you have 10 paid users.",
+                            }}
                         />
                         <StatCard
                             label="Conversion (V to P)"
@@ -270,11 +296,19 @@ export default async function AdminPage() {
                                     : 0
                             }
                             icon={Icons.Conversion}
+                            tooltip={{
+                                text: "Visitor to Payment rate: % of visitors who completed payment.",
+                                example: "100 visitors and 5 payments = 5% conversion rate.",
+                            }}
                         />
                         <StatCard
                             label="Visits"
                             value={stats.visits}
                             icon={Icons.Visits}
+                            tooltip={{
+                                text: "Total number of landing page views tracked.",
+                                example: "Each time someone opens your homepage, it counts as 1 visit.",
+                            }}
                         />
                     </div>
                 </section>
@@ -348,52 +382,12 @@ export default async function AdminPage() {
                         </h2>
                         <ExportUsersCard />
 
-                        <div className="mt-8 p-6 bg-purple-50 rounded-xl border border-purple-100">
-                            <h3 className="text-purple-900 font-semibold mb-2">
-                                Funnel Breakdown
-                            </h3>
-                            <ul className="space-y-3 text-sm">
-                                <li className="flex justify-between items-center text-purple-700">
-                                    <span>CTA Click Rate</span>
-                                    <span className="font-bold">
-                                        {stats.visits > 0
-                                            ? (
-                                                  (stats.ctaClicks /
-                                                      stats.visits) *
-                                                  100
-                                              ).toFixed(1)
-                                            : 0}
-                                        %
-                                    </span>
-                                </li>
-                                <li className="flex justify-between items-center text-purple-700">
-                                    <span>Checkout Start Rate</span>
-                                    <span className="font-bold">
-                                        {stats.ctaClicks > 0
-                                            ? (
-                                                  (stats.checkoutStarts /
-                                                      stats.ctaClicks) *
-                                                  100
-                                              ).toFixed(1)
-                                            : 0}
-                                        %
-                                    </span>
-                                </li>
-                                <li className="flex justify-between items-center text-purple-700">
-                                    <span>Payment Completion</span>
-                                    <span className="font-bold">
-                                        {stats.checkoutStarts > 0
-                                            ? (
-                                                  (stats.payments /
-                                                      stats.checkoutStarts) *
-                                                  100
-                                              ).toFixed(1)
-                                            : 0}
-                                        %
-                                    </span>
-                                </li>
-                            </ul>
-                        </div>
+                        <FunnelBreakdown
+                            visits={stats.visits}
+                            ctaClicks={stats.ctaClicks}
+                            checkoutStarts={stats.checkoutStarts}
+                            payments={stats.payments}
+                        />
                     </div>
                 </section>
             </div>

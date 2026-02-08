@@ -85,11 +85,8 @@ function CheckoutSuccessContent() {
                         });
                         break;
                     case "link_generated":
-                        setEmailStatus({
-                            state: "sent",
-                            message:
-                                "Setup link generated. Check server logs if you want to finish later.",
-                        });
+                        // Email not configured - don't show any message
+                        setEmailStatus({ state: "idle" });
                         break;
                     case "already_linked":
                         setEmailStatus({

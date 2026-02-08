@@ -3,9 +3,9 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 // import { loadStripe } from "@stripe/stripe-js";
-import {} from // EmbeddedCheckoutProvider,
-// EmbeddedCheckout,
-"@stripe/react-stripe-js";
+import { } from // EmbeddedCheckoutProvider,
+    // EmbeddedCheckout,
+    "@stripe/react-stripe-js";
 import Link from "next/link";
 import PrimaryLinkButton from "../../../components/PrimaryLinkButton";
 
@@ -136,11 +136,8 @@ function CheckoutReturnContent() {
                         });
                         break;
                     case "link_generated":
-                        setEmailStatus({
-                            state: "sent",
-                            message:
-                                "Setup link generated (check server logs).",
-                        });
+                        // Email not configured - don't show any message, just let user proceed
+                        setEmailStatus({ state: "idle", message: "" });
                         break;
                     case "already_linked":
                         setEmailStatus({
