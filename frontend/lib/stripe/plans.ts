@@ -1,18 +1,18 @@
 export const STRIPE_PLANS = {
     Starter: {
-        monthly: "price_1Sy7QZDtHMbPRbCHFW2Pyxq8",
-        yearly: "price_1Sy7QaDtHMbPRbCH3ZFljcLb",
-        productId: "prod_TvzPEtCINh4M0L",
+        monthly: process.env.NEXT_PUBLIC_STRIPE_STARTER_MONTHLY_PRICE_ID || "price_1SyJyAAIyspwZEkIZ8DrkaaY",
+        yearly: process.env.NEXT_PUBLIC_STRIPE_STARTER_YEARLY_PRICE_ID || "price_1SyJyBAIyspwZEkIaoUfQlKf",
+        productId: process.env.NEXT_PUBLIC_STRIPE_STARTER_PRODUCT_ID || "prod_TwCMItcK7xMREn",
     },
     Creator: {
-        monthly: "price_1Sy7QdDtHMbPRbCHJLEhPU9e",
-        yearly: "price_1Sy7QeDtHMbPRbCH6kYPAPAR",
-        productId: "prod_TvzP1YPXubfvkO",
+        monthly: process.env.NEXT_PUBLIC_STRIPE_CREATOR_MONTHLY_PRICE_ID || "price_1SyJyDAIyspwZEkIFivZ7DQS",
+        yearly: process.env.NEXT_PUBLIC_STRIPE_CREATOR_YEARLY_PRICE_ID || "price_1SyJyFAIyspwZEkI9uwlltZI",
+        productId: process.env.NEXT_PUBLIC_STRIPE_CREATOR_PRODUCT_ID || "prod_TwCMdE5bjkOPQz",
     },
     Pro: {
-        monthly: "price_1Sy7QgDtHMbPRbCHdqtfZJyG",
-        yearly: "price_1Sy7QiDtHMbPRbCHUuaUHZpX",
-        productId: "prod_TvzPdD19YhyTzS",
+        monthly: process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY_PRICE_ID || "price_1SyJyHAIyspwZEkIyQf2cxn8",
+        yearly: process.env.NEXT_PUBLIC_STRIPE_PRO_YEARLY_PRICE_ID || "price_1SyJyIAIyspwZEkIbthcbTln",
+        productId: process.env.NEXT_PUBLIC_STRIPE_PRO_PRODUCT_ID || "prod_TwCNMSTX3CBLfW",
     },
 } as const;
 
