@@ -133,6 +133,7 @@ export async function POST(request: Request) {
         const session = await stripe.checkout.sessions.create({
             ui_mode: "embedded",
             mode: "subscription",
+            allow_promotion_codes: true,
             line_items: [{ price: priceId, quantity: 1 }],
             return_url: `${baseUrl}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
             customer_email: user?.email,
@@ -142,13 +143,13 @@ export async function POST(request: Request) {
                 source: payload.source ?? "unknown",
                 price_id: priceId,
                 product_id: productId,
-                user_id: user?.id ?? null,
+                ...(user?.id ? { user_id: user.id } : {}),
             },
         });
 
         // Record checkout_start event
         try {
-            const supabase = getSupabaseServer();
+            // Reuse existing supabase instance
             await supabase.from("events").insert({
                 event_name: ANALYTICS_EVENT_NAMES.checkoutStart,
                 metadata: {

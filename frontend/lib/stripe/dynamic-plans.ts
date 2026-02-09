@@ -29,13 +29,13 @@ export async function getStripePlans(): Promise<Map<string, PlanPrices>> {
     // Fetch all active products
     const products = await stripe.products.list({
         active: true,
-        limit: 10,
+        limit: 100,
     });
 
     // Fetch all active prices
     const prices = await stripe.prices.list({
         active: true,
-        limit: 50,
+        limit: 100,
     });
 
     // Build a map of product ID to prices
@@ -68,26 +68,20 @@ export async function getStripePlans(): Promise<Map<string, PlanPrices>> {
         pricesByProduct.set(productId, existing);
     }
 
-    // Build plans map keyed by normalized plan name
+    // Build plans map keyed by normalized plan name (lowercase)
     const plans = new Map<string, PlanPrices>();
 
     for (const product of products.data) {
         const productPrices = pricesByProduct.get(product.id);
         if (!productPrices?.monthly && !productPrices?.yearly) continue;
 
-        // Normalize plan name: "Starter Plan" -> "Starter", "Creator Plan" -> "Creator"
+        // Normalize plan name: "Starter Plan" -> "starter", "Creator Plan" -> "creator"
         const normalizedName = product.name
             .replace(/ Plan$/i, "")
-            .trim();
+            .trim()
+            .toLowerCase();
 
         plans.set(normalizedName, {
-            monthly: productPrices?.monthly?.id || null,
-            yearly: productPrices?.yearly?.id || null,
-            productId: product.id,
-        });
-
-        // Also add with full name as fallback
-        plans.set(product.name, {
             monthly: productPrices?.monthly?.id || null,
             yearly: productPrices?.yearly?.id || null,
             productId: product.id,
@@ -111,7 +105,8 @@ export async function getDynamicPriceId(
 ): Promise<string | null> {
     try {
         const plans = await getStripePlans();
-        const plan = plans.get(planName) || plans.get(`${planName} Plan`);
+        const normalized = planName.replace(/ Plan$/i, "").trim().toLowerCase();
+        const plan = plans.get(normalized);
         if (plan) {
             return plan[billing];
         }
@@ -133,12 +128,16 @@ export async function getDynamicProductId(
 ): Promise<string | null> {
     try {
         const plans = await getStripePlans();
-        const plan = plans.get(planName) || plans.get(`${planName} Plan`);
+        const normalized = planName.replace(/ Plan$/i, "").trim().toLowerCase();
+        const plan = plans.get(normalized);
         if (plan) {
             return plan.productId;
         }
     } catch (error) {
-        console.warn("Failed to fetch dynamic product ID, using fallback.", error);
+        console.warn(
+            "Failed to fetch dynamic product ID, using fallback.",
+            error,
+        );
     }
 
     // Fallback to env vars

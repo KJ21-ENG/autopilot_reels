@@ -56,13 +56,13 @@ export async function GET(): Promise<Response> {
         // Fetch all active products
         const products = await stripe.products.list({
             active: true,
-            limit: 10,
+            limit: 100,
         });
 
         // Fetch all active prices
         const prices = await stripe.prices.list({
             active: true,
-            limit: 50,
+            limit: 100,
             expand: ["data.product"],
         });
 
