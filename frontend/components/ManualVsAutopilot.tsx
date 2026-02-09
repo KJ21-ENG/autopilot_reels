@@ -1,7 +1,28 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ANALYTICS_EVENT_NAMES, emitAnalyticsEvent } from "@/lib/analytics";
+import type { StripeProductsResponse } from "@/app/api/stripe/products/route";
+
+// Currency symbol helper
+function getCurrencySymbol(currency: string): string {
+    const symbols: Record<string, string> = {
+        usd: "$",
+        gbp: "£",
+        eur: "€",
+        cad: "CA$",
+        aud: "A$",
+        jpy: "¥",
+        inr: "₹",
+    };
+    return symbols[currency.toLowerCase()] || currency.toUpperCase() + " ";
+}
+
+// Get monthly equivalent price for yearly plans
+function getMonthlyEquivalent(yearlyAmountInCents: number): number {
+    return Math.round(yearlyAmountInCents / 12);
+}
 // SVG Icons as components for consistency
 const SearchIcon = () => (
     <svg
@@ -348,6 +369,45 @@ const autopilotSteps = [
 ];
 
 export default function ManualVsAutopilot() {
+    const [startingPrice, setStartingPrice] = useState("$29");
+
+    // Fetch the lowest yearly price from Stripe
+    useEffect(() => {
+        const fetchStartingPrice = async () => {
+            try {
+                const response = await fetch("/api/stripe/products");
+                const data = (await response.json()) as StripeProductsResponse;
+
+                if (data.data?.plans && data.data.plans.length > 0) {
+                    // Find the cheapest yearly plan (per month)
+                    let cheapestMonthly = Infinity;
+                    let currency = "usd";
+
+                    for (const plan of data.data.plans) {
+                        if (plan.yearlyPrice) {
+                            const monthlyEquiv = getMonthlyEquivalent(
+                                plan.yearlyPrice.amount,
+                            );
+                            if (monthlyEquiv < cheapestMonthly) {
+                                cheapestMonthly = monthlyEquiv;
+                                currency = plan.yearlyPrice.currency;
+                            }
+                        }
+                    }
+
+                    if (cheapestMonthly < Infinity) {
+                        const symbol = getCurrencySymbol(currency);
+                        setStartingPrice(`${symbol}${cheapestMonthly / 100}`);
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to fetch starting price:", err);
+            }
+        };
+
+        void fetchStartingPrice();
+    }, []);
+
     return (
         <section className="py-20 px-4 bg-white">
             <div className="max-w-6xl mx-auto">
@@ -453,18 +513,16 @@ export default function ManualVsAutopilot() {
                                 {autopilotSteps.map(item => (
                                     <div
                                         key={item.step}
-                                        className={`flex items-center gap-3 rounded-lg p-3 border ${
-                                            item.highlight
-                                                ? "bg-purple-100 border-purple-200"
-                                                : "bg-white border-gray-100"
-                                        }`}
+                                        className={`flex items-center gap-3 rounded-lg p-3 border ${item.highlight
+                                            ? "bg-purple-100 border-purple-200"
+                                            : "bg-white border-gray-100"
+                                            }`}
                                     >
                                         <div
-                                            className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                                                item.highlight
-                                                    ? "bg-purple-200"
-                                                    : "bg-purple-50"
-                                            }`}
+                                            className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${item.highlight
+                                                ? "bg-purple-200"
+                                                : "bg-purple-50"
+                                                }`}
                                         >
                                             {item.icon}
                                         </div>
@@ -474,11 +532,10 @@ export default function ManualVsAutopilot() {
                                             </p>
                                         </div>
                                         <span
-                                            className={`text-xs font-medium whitespace-nowrap px-2 py-1 rounded-full ${
-                                                item.highlight
-                                                    ? "text-purple-700 bg-purple-200"
-                                                    : "text-green-600 bg-green-50"
-                                            }`}
+                                            className={`text-xs font-medium whitespace-nowrap px-2 py-1 rounded-full ${item.highlight
+                                                ? "text-purple-700 bg-purple-200"
+                                                : "text-green-600 bg-green-50"
+                                                }`}
                                         >
                                             {item.time}
                                         </span>
@@ -579,7 +636,7 @@ export default function ManualVsAutopilot() {
                                     Starting at
                                 </span>
                                 <span className="text-purple-600 font-bold text-lg">
-                                    $29/month
+                                    {startingPrice}/month
                                 </span>
                             </div>
                         </div>

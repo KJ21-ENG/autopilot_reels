@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { ANALYTICS_EVENT_NAMES } from "../../../../lib/analytics";
 import { getSupabaseServer } from "../../../../lib/supabase/server";
 import { getStripeServer } from "../../../../lib/stripe/server";
-import { getPriceId, getProductId } from "../../../../lib/stripe/plans";
+import { getDynamicPriceId, getDynamicProductId } from "../../../../lib/stripe/dynamic-plans";
 
 type CheckoutRequest = {
     plan?: string;
@@ -71,11 +71,11 @@ export async function POST(request: Request) {
         console.warn("Invalid checkout request payload.", error);
     }
 
-    const priceId = getPriceId(
+    const priceId = await getDynamicPriceId(
         payload.plan ?? "Starter",
         payload.billing ?? "monthly",
     );
-    const productId = getProductId(payload.plan ?? "Starter");
+    const productId = await getDynamicProductId(payload.plan ?? "Starter");
 
     if (!priceId || !productId) {
         console.error("Invalid plan configuration.", payload);

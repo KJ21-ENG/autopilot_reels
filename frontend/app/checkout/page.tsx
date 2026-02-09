@@ -10,6 +10,10 @@ import {
 } from "@stripe/react-stripe-js";
 
 import { ANALYTICS_EVENT_NAMES, emitAnalyticsEvent } from "@/lib/analytics";
+import type {
+    StripePlan,
+    StripeProductsResponse,
+} from "@/app/api/stripe/products/route";
 
 // Initialize Stripe outside of component
 const stripePromise = loadStripe(
@@ -20,14 +24,48 @@ type CheckoutResponse =
     | { data: { client_secret: string }; error: null }
     | { data: null; error: { code: string; message: string } };
 
-const plans = [
+// Currency symbol helper
+function getCurrencySymbol(currency: string): string {
+    const symbols: Record<string, string> = {
+        usd: "$",
+        gbp: "£",
+        eur: "€",
+        cad: "CA$",
+        aud: "A$",
+        jpy: "¥",
+        inr: "₹",
+    };
+    return symbols[currency.toLowerCase()] || currency.toUpperCase() + " ";
+}
+
+// Format price from cents to display
+function formatPrice(amountInCents: number, currency: string): string {
+    const symbol = getCurrencySymbol(currency);
+    const amount = amountInCents / 100;
+    // For currencies like JPY that don't use decimals
+    if (currency.toLowerCase() === "jpy") {
+        return `${symbol}${Math.round(amount)}`;
+    }
+    // Show whole number if it's a round amount
+    if (amount % 1 === 0) {
+        return `${symbol}${amount}`;
+    }
+    return `${symbol}${amount.toFixed(2)}`;
+}
+
+// Get monthly equivalent price for yearly plans
+function getMonthlyEquivalent(yearlyAmountInCents: number): number {
+    return Math.round(yearlyAmountInCents / 12);
+}
+
+// Fallback plans if Stripe fetch fails
+const fallbackPlans: StripePlan[] = [
     {
-        name: "Starter",
-        monthlyPrice: 19,
-        yearlyPrice: 15,
+        id: "starter",
+        name: "Starter Plan",
         description: "Perfect for getting started",
-        cta: "Get Starter",
         highlighted: false,
+        badge: null,
         features: [
             "30 videos per month",
             "720p video quality",
@@ -35,13 +73,13 @@ const plans = [
             "1 social account",
             "Email support",
         ],
+        monthlyPrice: { id: "", amount: 1900, currency: "usd" },
+        yearlyPrice: { id: "", amount: 18000, currency: "usd" },
     },
     {
-        name: "Creator",
-        monthlyPrice: 39,
-        yearlyPrice: 29,
+        id: "creator",
+        name: "Creator Plan",
         description: "Most popular for growing creators",
-        cta: "Get Creator",
         highlighted: true,
         badge: "Most Popular",
         features: [
@@ -52,14 +90,15 @@ const plans = [
             "Auto-posting enabled",
             "Priority support",
         ],
+        monthlyPrice: { id: "", amount: 3900, currency: "usd" },
+        yearlyPrice: { id: "", amount: 34800, currency: "usd" },
     },
     {
-        name: "Pro",
-        monthlyPrice: 79,
-        yearlyPrice: 59,
+        id: "pro",
+        name: "Pro Plan",
         description: "For serious content creators",
-        cta: "Get Pro",
         highlighted: false,
+        badge: null,
         features: [
             "Unlimited videos",
             "4K video quality",
@@ -69,6 +108,8 @@ const plans = [
             "Dedicated support",
             "API access",
         ],
+        monthlyPrice: { id: "", amount: 7900, currency: "usd" },
+        yearlyPrice: { id: "", amount: 70800, currency: "usd" },
     },
 ];
 
@@ -76,10 +117,37 @@ function CheckoutContent() {
     const searchParams = useSearchParams();
     const [clientSecret, setClientSecret] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [plans, setPlans] = useState<StripePlan[]>([]);
+    const [plansLoading, setPlansLoading] = useState(true);
+
     // Initialize state with search params if available, else default to monthly
     const [billingMode, setBillingMode] = useState<"monthly" | "yearly">(() => {
         return searchParams.get("billing") === "yearly" ? "yearly" : "monthly";
     });
+
+    // Fetch plans from Stripe
+    useEffect(() => {
+        const fetchPlans = async () => {
+            try {
+                const response = await fetch("/api/stripe/products");
+                const data = (await response.json()) as StripeProductsResponse;
+
+                if (data.data?.plans && data.data.plans.length > 0) {
+                    setPlans(data.data.plans);
+                } else {
+                    console.warn("No plans from Stripe, using fallback");
+                    setPlans(fallbackPlans);
+                }
+            } catch (err) {
+                console.error("Failed to fetch plans:", err);
+                setPlans(fallbackPlans);
+            } finally {
+                setPlansLoading(false);
+            }
+        };
+
+        void fetchPlans();
+    }, []);
 
     const payload = useMemo(() => {
         const plan = searchParams.get("plan") ?? undefined;
@@ -149,8 +217,31 @@ function CheckoutContent() {
         };
     }, [payload, hasSelectedPlan]);
 
+    // Loading state while fetching plans
+    if (plansLoading) {
+        return (
+            <main className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                    <p className="text-gray-500">Loading pricing...</p>
+                </div>
+            </main>
+        );
+    }
+
     // If no plan selected, show plan selector
     if (!hasSelectedPlan) {
+        // Calculate savings percentage based on actual prices
+        const savingsPercent =
+            plans[0]?.monthlyPrice && plans[0]?.yearlyPrice
+                ? Math.round(
+                    100 -
+                    (getMonthlyEquivalent(plans[0].yearlyPrice.amount) /
+                        plans[0].monthlyPrice.amount) *
+                    100,
+                )
+                : 25;
+
         return (
             <main className="min-h-screen bg-gray-50 px-4 pt-8 pb-6 md:pt-10 md:pb-8 flex justify-center">
                 <section className="w-full max-w-6xl">
@@ -207,7 +298,7 @@ function CheckoutContent() {
                                 >
                                     Yearly
                                     <span className="ml-1 text-xs text-green-500 font-semibold">
-                                        Save 25%
+                                        Save {savingsPercent}%
                                     </span>
                                 </button>
                             </div>
@@ -215,108 +306,145 @@ function CheckoutContent() {
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-6">
-                        {plans.map(plan => (
-                            <div
-                                key={plan.name}
-                                className={`relative rounded-2xl p-8 transition-all flex flex-col h-full ${plan.highlighted
-                                        ? "bg-white border-2 border-purple-500 shadow-xl scale-105 z-10"
-                                        : "bg-white border border-gray-200 shadow-sm"
-                                    }`}
-                            >
-                                {plan.badge ? (
-                                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                                        <span className="bg-purple-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
-                                            {plan.badge}
-                                        </span>
-                                    </div>
-                                ) : null}
+                        {plans.map((plan) => {
+                            const priceData =
+                                billingMode === "yearly"
+                                    ? plan.yearlyPrice
+                                    : plan.monthlyPrice;
+                            const currency = priceData?.currency || "usd";
+                            const displayAmount =
+                                billingMode === "yearly" && priceData
+                                    ? getMonthlyEquivalent(priceData.amount)
+                                    : priceData?.amount || 0;
+                            const yearlyTotal =
+                                plan.yearlyPrice?.amount
+                                    ? plan.yearlyPrice.amount / 100
+                                    : 0;
 
-                                <h2 className="text-xl font-bold text-gray-900 mb-1">
-                                    {plan.name}
-                                </h2>
-                                <p className="text-gray-500 text-sm mb-4">
-                                    {plan.description}
-                                </p>
+                            // Clean plan name for URL (remove "Plan" suffix)
+                            const planNameForUrl = plan.name
+                                .replace(/ Plan$/i, "")
+                                .trim();
 
-                                <div className="mb-6">
-                                    <span className="text-4xl font-bold text-gray-900">
-                                        $
-                                        {billingMode === "yearly"
-                                            ? plan.yearlyPrice
-                                            : plan.monthlyPrice}
-                                    </span>
-                                    <span className="text-gray-500">
-                                        /month
-                                    </span>
-                                    {billingMode === "yearly" ? (
-                                        <p className="text-sm text-green-600 mt-1">
-                                            Billed ${plan.yearlyPrice * 12}/year
-                                        </p>
-                                    ) : null}
-                                </div>
-
-                                <ul className="space-y-3 mb-8 flex-grow">
-                                    {plan.features.map(feature => (
-                                        <li
-                                            key={feature}
-                                            className="flex items-center gap-2 text-gray-600 text-sm"
-                                        >
-                                            <svg
-                                                className="w-5 h-5 text-purple-600 flex-shrink-0"
-                                                fill="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                                            </svg>
-                                            {feature}
-                                        </li>
-                                    ))}
-                                </ul>
-
-                                <Link
-                                    href={`/checkout?plan=${encodeURIComponent(
-                                        plan.name,
-                                    )}&billing=${billingMode}&source=${encodeURIComponent(
-                                        payload.source ?? "checkout",
-                                    )}`}
-                                    onClick={() => {
-                                        void emitAnalyticsEvent(
-                                            {
-                                                event_name:
-                                                    ANALYTICS_EVENT_NAMES.ctaClick,
-                                                metadata: {
-                                                    location: "checkout",
-                                                    plan: plan.name,
-                                                },
-                                            },
-                                            {
-                                                useBeacon: true,
-                                                beaconOnly: true,
-                                            },
-                                        );
-                                    }}
-                                    className={`block text-center w-full py-3 rounded-lg font-semibold transition-all mt-auto ${plan.highlighted
-                                            ? "bg-purple-600 hover:bg-purple-700 text-white"
-                                            : "bg-gray-100 hover:bg-gray-200 text-gray-900"
+                            return (
+                                <div
+                                    key={plan.id}
+                                    className={`relative rounded-2xl p-8 transition-all flex flex-col h-full ${plan.highlighted
+                                            ? "bg-white border-2 border-purple-500 shadow-xl scale-105 z-10"
+                                            : "bg-white border border-gray-200 shadow-sm"
                                         }`}
                                 >
-                                    {plan.cta}
-                                </Link>
-                            </div>
-                        ))}
+                                    {plan.badge ? (
+                                        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                                            <span className="bg-purple-600 text-white text-xs font-semibold px-3 py-1 rounded-full">
+                                                {plan.badge}
+                                            </span>
+                                        </div>
+                                    ) : null}
+
+                                    <h2 className="text-xl font-bold text-gray-900 mb-1">
+                                        {plan.name}
+                                    </h2>
+                                    <p className="text-gray-500 text-sm mb-4">
+                                        {plan.description}
+                                    </p>
+
+                                    <div className="mb-6">
+                                        <span className="text-4xl font-bold text-gray-900">
+                                            {formatPrice(
+                                                displayAmount,
+                                                currency,
+                                            )}
+                                        </span>
+                                        <span className="text-gray-500">
+                                            /month
+                                        </span>
+                                        {billingMode === "yearly" &&
+                                            yearlyTotal > 0 ? (
+                                            <p className="text-sm text-green-600 mt-1">
+                                                Billed{" "}
+                                                {getCurrencySymbol(currency)}
+                                                {yearlyTotal}/year
+                                            </p>
+                                        ) : null}
+                                    </div>
+
+                                    <ul className="space-y-3 mb-8 flex-grow">
+                                        {plan.features.map((feature) => (
+                                            <li
+                                                key={feature}
+                                                className="flex items-center gap-2 text-gray-600 text-sm"
+                                            >
+                                                <svg
+                                                    className="w-5 h-5 text-purple-600 flex-shrink-0"
+                                                    fill="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                                                </svg>
+                                                {feature}
+                                            </li>
+                                        ))}
+                                    </ul>
+
+                                    <Link
+                                        href={`/checkout?plan=${encodeURIComponent(
+                                            planNameForUrl,
+                                        )}&billing=${billingMode}&source=${encodeURIComponent(
+                                            payload.source ?? "checkout",
+                                        )}`}
+                                        onClick={() => {
+                                            void emitAnalyticsEvent(
+                                                {
+                                                    event_name:
+                                                        ANALYTICS_EVENT_NAMES.ctaClick,
+                                                    metadata: {
+                                                        location: "checkout",
+                                                        plan: plan.name,
+                                                    },
+                                                },
+                                                {
+                                                    useBeacon: true,
+                                                    beaconOnly: true,
+                                                },
+                                            );
+                                        }}
+                                        className={`block text-center w-full py-3 rounded-lg font-semibold transition-all mt-auto ${plan.highlighted
+                                                ? "bg-purple-600 hover:bg-purple-700 text-white"
+                                                : "bg-gray-100 hover:bg-gray-200 text-gray-900"
+                                            }`}
+                                    >
+                                        Get {planNameForUrl}
+                                    </Link>
+                                </div>
+                            );
+                        })}
                     </div>
                 </section>
             </main>
         );
     }
 
-    // Render Embedded Checkout
-    const selectedPlan = plans.find(p => p.name === payload.plan);
-    const price =
+    // Find selected plan
+    const selectedPlan = plans.find((p) => {
+        const cleanName = p.name.replace(/ Plan$/i, "").trim();
+        return (
+            cleanName.toLowerCase() === payload.plan?.toLowerCase() ||
+            p.name.toLowerCase() === payload.plan?.toLowerCase()
+        );
+    });
+
+    const priceData =
         payload.billing === "yearly"
             ? selectedPlan?.yearlyPrice
             : selectedPlan?.monthlyPrice;
+    const currency = priceData?.currency || "usd";
+    const displayAmount =
+        payload.billing === "yearly" && priceData
+            ? getMonthlyEquivalent(priceData.amount)
+            : priceData?.amount || 0;
 
+    // Render Embedded Checkout
     return (
         <main className="min-h-screen bg-white flex flex-col md:flex-row">
             {/* Left Side: Plan Details & Branding */}
@@ -367,7 +495,7 @@ function CheckoutContent() {
                             {payload.billing} Subscription
                         </p>
                         <h1 className="text-5xl font-extrabold text-gray-900 tracking-tight">
-                            ${price}
+                            {formatPrice(displayAmount, currency)}
                             <span className="text-2xl font-normal text-gray-400 ml-1">
                                 /mo
                             </span>
@@ -393,7 +521,7 @@ function CheckoutContent() {
                             </div>
                             <div>
                                 <h3 className="font-bold text-gray-900 text-lg">
-                                    {selectedPlan?.name} Plan
+                                    {selectedPlan?.name}
                                 </h3>
                                 <p className="text-sm text-gray-500">
                                     {selectedPlan?.description}
@@ -402,7 +530,7 @@ function CheckoutContent() {
                         </div>
 
                         <ul className="space-y-4">
-                            {selectedPlan?.features.map(feature => (
+                            {selectedPlan?.features.map((feature) => (
                                 <li
                                     key={feature}
                                     className="flex items-center gap-3 text-gray-600 text-sm"
