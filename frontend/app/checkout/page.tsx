@@ -190,22 +190,20 @@ function CheckoutContent() {
                                 <button
                                     type="button"
                                     onClick={() => setBillingMode("monthly")}
-                                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                                        billingMode === "monthly"
+                                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${billingMode === "monthly"
                                             ? "bg-purple-600 text-white"
                                             : "text-gray-600 hover:text-gray-900"
-                                    }`}
+                                        }`}
                                 >
                                     Monthly
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setBillingMode("yearly")}
-                                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                                        billingMode === "yearly"
+                                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${billingMode === "yearly"
                                             ? "bg-purple-600 text-white"
                                             : "text-gray-600 hover:text-gray-900"
-                                    }`}
+                                        }`}
                                 >
                                     Yearly
                                     <span className="ml-1 text-xs text-green-500 font-semibold">
@@ -220,11 +218,10 @@ function CheckoutContent() {
                         {plans.map(plan => (
                             <div
                                 key={plan.name}
-                                className={`relative rounded-2xl p-8 transition-all flex flex-col h-full ${
-                                    plan.highlighted
+                                className={`relative rounded-2xl p-8 transition-all flex flex-col h-full ${plan.highlighted
                                         ? "bg-white border-2 border-purple-500 shadow-xl scale-105 z-10"
                                         : "bg-white border border-gray-200 shadow-sm"
-                                }`}
+                                    }`}
                             >
                                 {plan.badge ? (
                                     <div className="absolute -top-3 left-1/2 -translate-x-1/2">
@@ -298,11 +295,10 @@ function CheckoutContent() {
                                             },
                                         );
                                     }}
-                                    className={`block text-center w-full py-3 rounded-lg font-semibold transition-all mt-auto ${
-                                        plan.highlighted
+                                    className={`block text-center w-full py-3 rounded-lg font-semibold transition-all mt-auto ${plan.highlighted
                                             ? "bg-purple-600 hover:bg-purple-700 text-white"
                                             : "bg-gray-100 hover:bg-gray-200 text-gray-900"
-                                    }`}
+                                        }`}
                                 >
                                     {plan.cta}
                                 </Link>
@@ -332,16 +328,14 @@ function CheckoutContent() {
                             href="/"
                             className="flex items-center gap-2 group w-fit"
                         >
-                            <div className="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-200 group-hover:scale-105 transition-transform">
-                                <svg
-                                    className="w-6 h-6 text-white"
-                                    viewBox="0 0 24 24"
-                                    fill="currentColor"
-                                >
-                                    <path d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm0 2v12h16V6H4zm4 3l6 3-6 3V9z" />
-                                </svg>
-                            </div>
-                            <span className="text-xl font-bold text-gray-900 tracking-tight">
+                            <svg
+                                className="w-8 h-8 text-purple-600 group-hover:scale-105 transition-transform"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                            >
+                                <path d="M4 4h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2zm0 2v12h16V6H4zm4 3l6 3-6 3V9z" />
+                            </svg>
+                            <span className="text-2xl font-semibold text-gray-900">
                                 AutopilotReels
                             </span>
                         </Link>
